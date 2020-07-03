@@ -2,10 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/constants.dart';
+import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/helpers/dialog_helper.dart';
+import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:loading_overlay/loading_overlay.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -13,61 +17,62 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  static const int NOT_LOGGED_IN = 1;
+  static const int SHOWING_VIEW = 1;
   static const int IN_FIREBASE_LOGIN_PROCESS = 2;
-  static const int WAITING_SERVER_CONFIRMED = 3;
-  static const int LOGGED_IN_SUCESSFULLY = 4;
-  int _state = NOT_LOGGED_IN;
+  int _state = SHOWING_VIEW;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  LoginContext _loginContext;
 
   @override
   Widget build(BuildContext context) {
-    var safeArea = SafeArea(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            child: Image.asset("assets/fpt-logo.png"),
-          ),
-          Text('Instant booking for your need',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          Container(
-            margin: EdgeInsets.only(top: 20),
-            child: _signInButton(),
-          )
-        ],
-      ),
-    );
+    _loginContext = Provider.of<LoginContext>(context, listen: false);
+    if (_isInFirebaseLoginProcess()) {
+      _handleInFirebaseLoginProcess(context);
+      return _buildInFirebaseLoginProcess(context);
+    }
+    _handleShowingView(context);
+    return _buildShowingViewWidget(context);
+  }
 
-    var finalBody = LoadingOverlay(
-      child: safeArea,
-      isLoading: isLoading(),
-      opacity: 0,
-      progressIndicator: CircularProgressIndicator(
-        valueColor: new AlwaysStoppedAnimation<Color>(Colors.deepOrange),
-      ),
-    );
+  //isShowingView
+  void _handleShowingView(BuildContext context) {}
 
-    // Material is a conceptual piece of paper on which the UI appears.
-    return Material(
-      child: finalBody,
+  Widget _buildShowingViewWidget(BuildContext context) {
+    return _loginView();
+  }
+
+  //isInFirebaseLoginProcess
+  bool _isInFirebaseLoginProcess() => _state == IN_FIREBASE_LOGIN_PROCESS;
+
+  void _handleInFirebaseLoginProcess(BuildContext context) {}
+
+  Widget _buildInFirebaseLoginProcess(BuildContext context) {
+    return LoadingModal(
+      isLoading: true,
+      child: _loginView(),
     );
   }
 
-  bool isLoading() {
-    return _state == IN_FIREBASE_LOGIN_PROCESS ||
-        _state == WAITING_SERVER_CONFIRMED;
-  }
-
-  Future<void> _onSignInSuccessfully(FirebaseUser user) async {
-    setState(() {
-      _state = WAITING_SERVER_CONFIRMED;
-    });
+  //handle methods
+  Future<void> _onSignInFinished(FirebaseUser user) async {
+    if (user == null) return;
     IdTokenResult fbTokenResult = await user.getIdToken(refresh: true);
     String fbToken = fbTokenResult.token;
     print(fbToken);
+    _signInServer(fbToken).then((success) {
+      if (success) {
+        _loginContext.loggedIn();
+        return;
+      }
+      setState(() {
+        _state = SHOWING_VIEW;
+      });
+    }).catchError(_onSignInError);
+  }
+
+  Future<bool> _signInServer(String fbToken) async {
     var url = Constants.API_URL + '/api/users/login';
     var response = await http.post(url,
         headers: <String, String>{
@@ -80,29 +85,38 @@ class _LoginViewState extends State<LoginView> {
         }));
     if (response.statusCode == 200) {
       print('Response body: ${response.body}');
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString(Constants.TOKEN_DATA_KEY, response.body);
+      return true;
     } else if (response.statusCode != 500) {
       var result = jsonDecode(response.body);
       print(result);
       var validationData = result["data"];
       var mess = <String>[];
       for (dynamic o in validationData) mess.add(o["message"] as String);
-      _showDialog("Sorry", mess);
-    } else {
-      var result = jsonDecode(response.body);
-      print(result);
-      _showDialog("Sorry", ["Something's wrong"]);
+      DialogHelper.showMessage(
+          context: context, title: "Sorry", contents: mess);
+      return false;
     }
-    setState(() {
-      _state = LOGGED_IN_SUCESSFULLY;
-    });
+    var result = jsonDecode(response.body);
+    print(result);
+    DialogHelper.showUnknownError(context: this.context);
+    return false;
   }
 
   void _onSignInError(Object e) {
     print(e);
+    DialogHelper.showUnknownError(context: this.context);
   }
 
   Future<FirebaseUser> _handleSignIn() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      setState(() {
+        _state = SHOWING_VIEW;
+      });
+      return null;
+    }
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 
@@ -118,13 +132,14 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _onSignInPressed() {
-    if (_state == IN_FIREBASE_LOGIN_PROCESS) return;
+    if (_isInFirebaseLoginProcess()) return;
     setState(() {
       _state = IN_FIREBASE_LOGIN_PROCESS;
     });
-    _handleSignIn().then(_onSignInSuccessfully).catchError(_onSignInError);
+    _handleSignIn().then(_onSignInFinished).catchError(_onSignInError);
   }
 
+  //widgets
   Widget _signInButton() {
     return FlatButton(
       padding: EdgeInsets.zero,
@@ -159,26 +174,24 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Future<void> _showDialog(String title, List<String> contents) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ListBody(children: contents.map((e) => Text(e)).toList()),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Ok'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+  Widget _loginView() {
+    return Material(
+      child: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+              child: Image.asset("assets/fpt-logo.png"),
             ),
+            Text('Instant booking for your need',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            Container(
+              margin: EdgeInsets.only(top: 20),
+              child: _signInButton(),
+            )
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }
