@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:fptbooking_app/constants.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:loading_overlay/loading_overlay.dart';
+import 'package:http/http.dart' as http;
 
 class LoginView extends StatefulWidget {
   @override
@@ -19,33 +24,77 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_state == WAITING_SERVER_CONFIRMED) {
-      //send token to server
-    }
+    var safeArea = SafeArea(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Center(
+            child: Image.asset("assets/fpt-logo.png"),
+          ),
+          Text('Instant booking for your need',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: _signInButton(),
+          )
+        ],
+      ),
+    );
+
+    var finalBody = LoadingOverlay(
+      child: safeArea,
+      isLoading: isLoading(),
+      opacity: 0,
+      progressIndicator: CircularProgressIndicator(
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.deepOrange),
+      ),
+    );
 
     // Material is a conceptual piece of paper on which the UI appears.
     return Material(
-      child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Image.asset("assets/fpt-logo.png"),
-            ),
-            Text('Instant booking for your need',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            Container(
-              margin: EdgeInsets.only(top: 20),
-              child: _signInButton(),
-            )
-          ],
-        ),
-      ),
+      child: finalBody,
     );
   }
 
-  void _onSignInSuccessfully(FirebaseUser user) {
-    print(user);
+  bool isLoading() {
+    return _state == IN_FIREBASE_LOGIN_PROCESS ||
+        _state == WAITING_SERVER_CONFIRMED;
+  }
+
+  Future<void> _onSignInSuccessfully(FirebaseUser user) async {
+    setState(() {
+      _state = WAITING_SERVER_CONFIRMED;
+    });
+    IdTokenResult fbTokenResult = await user.getIdToken(refresh: true);
+    String fbToken = fbTokenResult.token;
+    print(fbToken);
+    var url = Constants.API_URL + '/api/users/login';
+    var response = await http.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "grant_type": "firebase_token",
+          "firebase_token": fbToken,
+          "scope": "roles"
+        }));
+    if (response.statusCode == 200) {
+      print('Response body: ${response.body}');
+    } else if (response.statusCode != 500) {
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      _showDialog("Sorry", mess);
+    } else {
+      var result = jsonDecode(response.body);
+      print(result);
+      _showDialog("Sorry", ["Something's wrong"]);
+    }
+    setState(() {
+      _state = LOGGED_IN_SUCESSFULLY;
+    });
   }
 
   void _onSignInError(Object e) {
@@ -70,7 +119,9 @@ class _LoginViewState extends State<LoginView> {
 
   void _onSignInPressed() {
     if (_state == IN_FIREBASE_LOGIN_PROCESS) return;
-    _state = IN_FIREBASE_LOGIN_PROCESS;
+    setState(() {
+      _state = IN_FIREBASE_LOGIN_PROCESS;
+    });
     _handleSignIn().then(_onSignInSuccessfully).catchError(_onSignInError);
   }
 
@@ -105,6 +156,29 @@ class _LoginViewState extends State<LoginView> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _showDialog(String title, List<String> contents) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: ListBody(children: contents.map((e) => Text(e)).toList()),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
