@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
+import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_table.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -83,6 +84,15 @@ class _CalendarViewState extends State<CalendarView> {
 
   void showError() {
     DialogHelper.showUnknownError(context: this.context);
+  }
+
+  void navigateToBookingDetail(int id) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookingDetailView(id: id),
+      ),
+    );
   }
 
   //widgets
@@ -183,6 +193,8 @@ class _CalendarViewPresenter {
   }
 
   void onRowTab(dynamic data) {
-    print(data["id"]);
+    int id = data["id"];
+    print(id);
+    view.navigateToBookingDetail(id);
   }
 }

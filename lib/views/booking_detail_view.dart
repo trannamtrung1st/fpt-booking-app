@@ -3,15 +3,20 @@ import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 
 class BookingDetailView extends StatefulWidget {
-  BookingDetailView({key}) : super(key: key);
+  final int id;
+
+  BookingDetailView({key, this.id}) : super(key: key);
 
   @override
-  _BookingDetailViewState createState() => _BookingDetailViewState();
+  _BookingDetailViewState createState() => _BookingDetailViewState(id: id);
 }
 
 class _BookingDetailViewState extends State<BookingDetailView> {
   static const int SHOWING_VIEW = 1;
   int _state = SHOWING_VIEW;
+  int id;
+
+  _BookingDetailViewState({@required this.id});
 
   _BookingDetailViewPresenter _presenter;
 
@@ -27,9 +32,20 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return LoadingModal(
-      isLoading: false,
-      child: Container(),
+    return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(),
+        backgroundColor: Colors.orange,
+        title: Text('Calendar detail'),
+      ),
+      body: LoadingModal(
+        isLoading: false,
+        child: Container(
+          child: Center(
+            child: Text(id.toString()),
+          ),
+        ),
+      ),
     );
   }
 
