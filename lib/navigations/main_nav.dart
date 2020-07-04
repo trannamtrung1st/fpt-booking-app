@@ -4,7 +4,7 @@ import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
 import 'package:provider/provider.dart';
 
-List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
+final List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
   BottomNavigationBarItem(
     icon: Icon(Icons.perm_contact_calendar),
     title: Text('Calendar'),
@@ -18,13 +18,14 @@ List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
     title: Text('Room'),
   ),
 ];
-List<BottomNavigationBarItem> managerTabs = normalTabs.toList(growable: true);
+final List<BottomNavigationBarItem> managerTabs =
+    normalTabs.toList(growable: true);
 bool initTabs = false;
-List<Function> _widgets = <Function>[
-  () => CalendarView(),
-  () => MainView(),
-  () => MainView(),
-  () => MainView(),
+final List<Widget> pages = <Widget>[
+  CalendarView(),
+  MainView(),
+  MainView(),
+  MainView(),
 ];
 
 class MainNav extends StatefulWidget {
@@ -66,7 +67,10 @@ class _MainNavState extends State<MainNav> {
     loginContext = Provider.of<LoginContext>(context);
     _presenter = _MainNavPresenter(view: this);
     return Scaffold(
-      body: Center(child: _widgets[_state]()),
+      body: IndexedStack(
+        index: _state,
+        children: pages,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: loginContext.isManager() ? managerTabs : normalTabs,
         currentIndex: _presenter.getIndexFromTab(_state),

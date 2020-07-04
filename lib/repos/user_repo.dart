@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserRepo {
   static Future<void> login(
       {@required String fbToken,
-      Function(List<dynamic>) success,
+      Function(Map<String, dynamic> tokenData) success,
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await UserApi.login(fbToken: fbToken);

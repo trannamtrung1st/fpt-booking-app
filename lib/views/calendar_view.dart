@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
@@ -12,6 +11,8 @@ import 'package:fptbooking_app/widgets/tab_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarView extends StatefulWidget {
+  CalendarView({key}) : super(key: key);
+
   @override
   _CalendarViewState createState() => _CalendarViewState();
 }

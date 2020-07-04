@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 class LoginView extends StatefulWidget {
+  LoginView({key}) : super(key: key);
+
   @override
   _LoginViewState createState() => _LoginViewState();
 }
