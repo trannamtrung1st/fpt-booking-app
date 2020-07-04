@@ -8,6 +8,7 @@ class DialogHelper {
     String title = "Message",
     bool barrierDismissible = false,
     String okBtnText = "Ok",
+    bool Function() onOk,
   }) async {
     return showDialog<void>(
       context: context,
@@ -22,6 +23,7 @@ class DialogHelper {
             FlatButton(
               child: Text(okBtnText),
               onPressed: () {
+                if (onOk != null && !onOk()) return;
                 Navigator.of(context).pop();
               },
             ),
@@ -31,8 +33,12 @@ class DialogHelper {
     );
   }
 
-  static Future<void> showUnknownError({@required BuildContext context}) {
+  static Future<void> showUnknownError(
+      {@required BuildContext context, bool Function() onOk}) {
     return showMessage(
-        context: context, title: "Sorry", contents: ["Something's wrong"]);
+        context: context,
+        title: "Sorry",
+        contents: ["Something's wrong"],
+        onOk: onOk);
   }
 }

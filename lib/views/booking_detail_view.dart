@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
+import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -22,24 +23,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
   int id;
-  dynamic data = <String, dynamic>{
-    'room': <String, dynamic>{'code': 'R9124'},
-    'status': 'Processing',
-    'booked_date': '18/04/1999',
-    'from_time': '13:00',
-    'to_time': '14:00',
-    'num_of_people': 10,
-    'attached_services': [
-      <String, dynamic>{'code': 'TB', 'name': 'Tea break'},
-      <String, dynamic>{'code': 'PRJ', 'name': 'Projector'},
-    ],
-    'book_person': 'trungtnse13@fpt.edu.vn',
-    'using_person': ['trungtnse13@fpt.edu.vn', 'abc@fpt.edu.vn'],
-    'note':
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec cursus urna, quis accumsan eros. Proin et neque dignissim nulla elementum sodales nec quis magna. In eu malesuada nulla. Fusce pulvinar sem non neque imperdiet maximus. Sed eu ornare nisi, sit amet mattis leo. Etiam consequat arcu sed efficitur faucibus',
-    'feedback': null,
-    'manager_message': 'This is the manager message'
-  };
+  dynamic _data;
 
   _BookingDetailViewState({@required this.id});
 
@@ -49,7 +33,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   void initState() {
     super.initState();
     _presenter = _BookingDetailViewPresenter(view: this);
-    _presenter.handleLoadingData(context);
+    _presenter.handleInitState(context);
   }
 
   @override
@@ -61,12 +45,19 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   //isShowingView
+  void loadBookingData(dynamic data) {
+    setState(() {
+      _state = SHOWING_VIEW;
+      _data = data;
+    });
+  }
+
   void setShowingViewState() => setState(() {
         _state = SHOWING_VIEW;
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return _bookingInfo();
+    return _mainContent(body: _data != null ? _bookingInfoCard() : Container());
   }
 
   //isLoadingData
@@ -77,7 +68,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       });
 
   Widget _buildLoadingDataWidget(BuildContext context) {
-    return _bookingInfo(loading: true);
+    return _mainContent(
+        body: LoadingModal(
+      child: Container(),
+      isLoading: true,
+    ));
   }
 
   void showInvalidMessages(List<String> mess) {
@@ -85,131 +80,139 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   void showError() {
-    DialogHelper.showUnknownError(context: this.context);
+    DialogHelper.showUnknownError(
+        context: this.context,
+        onOk: () {
+          Navigator.of(context).pop();
+          return true;
+        });
   }
 
   //widgets
-  Widget _bookingInfo({bool loading = false}) {
+  Widget _mainContent({@required Widget body}) {
     return Scaffold(
         appBar: ViewHelper.getDefaultAppBar(title: "Calendar detail"),
-        body: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: LoadingModal(
-              isLoading: loading,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(15),
-                child: AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        "BOOKING INFORMATION",
-                        style: TextStyle(
-                            fontSize: 17, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                      ),
-                      SimpleInfo(
-                        labelText: 'Room',
-                        child: Text(
-                          data["room"]["code"],
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                      SimpleInfo(
-                        labelText: 'Status',
-                        child: ViewHelper.getTextByBookingStatus(
-                            status: data["status"]),
-                      ),
-                      _getTimeStr(),
-                      SimpleInfo(
-                        labelText: 'Number of people',
-                        child: Text(data["num_of_people"].toString()),
-                      ),
-                      _getAttachedServicesTags(),
-                      SimpleInfo(
-                        labelText: 'Booking person',
-                        child: Text(
-                          data["book_person"],
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                      SimpleInfo(
-                        labelText: 'Using person(s)',
-                        child: Text(
-                          (data["using_person"] as List<String>).join(', '),
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                      SimpleInfo(
-                        labelText: 'Note',
-                        child: Text(data["note"]),
-                      ),
-                      SimpleInfo(
-                        labelText: 'Feedback',
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(color: "#DDDDDD".toColor())),
-                          padding: EdgeInsets.all(8.0),
-                          child: TextField(
-                            maxLines: 7,
-                            onChanged: (value) => data["feedback"] = value,
-                            controller: new TextEditingController.fromValue(
-                                new TextEditingValue(
-                                    text: data["feedback"] ?? "",
-                                    selection: new TextSelection.collapsed(
-                                        offset:
-                                            (data["feedback"] ?? "").length))),
-                            style: TextStyle(fontSize: 14),
-                            decoration: InputDecoration.collapsed(
-                                hintText: "Enter your text here"),
-                          ),
-                        ),
-                      ),
-                      SimpleInfo(
-                        labelText: 'Manager message',
-                        child: Text(data["manager_message"]),
-                      ),
-                      Divider(),
-                      Row(
-                        children: <Widget>[
-                          AppButton(
-                            type: "danger",
-                            child: Text('ABORT'),
-                            onPressed: () {},
-                          ),
-                          Spacer(),
-                          AppButton(
-                            type: "success",
-                            child: Text('FEEDBACK'),
-                            onPressed: () {},
-                          ),
-                        ],
-                      )
-                    ],
+        body: body);
+  }
+
+  Widget _bookingInfoCard() {
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(15),
+          child: AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  "BOOKING INFORMATION",
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                SimpleInfo(
+                  labelText: 'Room',
+                  child: Text(
+                    _data["room"]["code"],
+                    style: TextStyle(color: Colors.blue),
                   ),
                 ),
-              ),
-            )));
+                SimpleInfo(
+                  labelText: 'Status',
+                  child: ViewHelper.getTextByBookingStatus(
+                      status: _data["status"]),
+                ),
+                _getTimeStr(),
+                SimpleInfo(
+                  labelText: 'Number of people',
+                  child: Text(_data["num_of_people"].toString()),
+                ),
+                _getAttachedServicesTags(),
+                SimpleInfo(
+                  labelText: 'Booking person',
+                  child: Text(
+                    _data["book_person"],
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+                SimpleInfo(
+                  labelText: 'Using person(s)',
+                  child: Text(
+                    (_data["using_person"] as List<dynamic>).join(', '),
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+                SimpleInfo(
+                  labelText: 'Note',
+                  child: Text(_data["note"] ?? ""),
+                ),
+                SimpleInfo(
+                  labelText: 'Feedback',
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(color: "#DDDDDD".toColor())),
+                    padding: EdgeInsets.all(8.0),
+                    child: TextField(
+                      maxLines: 7,
+                      onChanged: (value) => _data["feedback"] = value,
+                      controller: new TextEditingController.fromValue(
+                          new TextEditingValue(
+                              text: _data["feedback"] ?? "",
+                              selection: new TextSelection.collapsed(
+                                  offset: (_data["feedback"] ?? "").length))),
+                      style: TextStyle(fontSize: 14),
+                      decoration: InputDecoration.collapsed(
+                          hintText: "Enter your text here"),
+                    ),
+                  ),
+                ),
+                SimpleInfo(
+                  labelText: 'Manager message',
+                  child: Text(_data["manager_message"] ?? ""),
+                ),
+                Divider(),
+                Row(
+                  children: <Widget>[
+                    AppButton(
+                      type: "danger",
+                      child: Text('ABORT'),
+                      onPressed: () {},
+                    ),
+                    Spacer(),
+                    AppButton(
+                      type: "success",
+                      child: Text('FEEDBACK'),
+                      onPressed: () {},
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ));
   }
 
   Widget _getAttachedServicesTags() {
-    var services = data["attached_services"] as List<dynamic>;
-    var tags = services.map((e) => Text(e["name"])).toList();
+    var services = _data["attached_services"] as List<dynamic>;
+    Widget widget = Text("Nothing");
+    if (services != null) {
+      var tags = services.map((e) => Text(e["name"])).toList();
+      widget = TagsContainer(tags: tags);
+    }
     return SimpleInfo(
       labelText: 'Attached services',
-      child: TagsContainer(tags: tags),
+      child: widget,
     );
   }
 
   Widget _getTimeStr() {
     return SimpleInfo(
         labelText: 'Status',
-        child: Text(data["booked_date"] +
+        child: Text(_data["booked_date"] +
             ", " +
-            data["from_time"] +
+            _data["from_time"] +
             " - " +
-            data["to_time"]));
+            _data["to_time"]));
   }
 }
 
@@ -218,7 +221,19 @@ class _BookingDetailViewPresenter {
 
   _BookingDetailViewPresenter({this.view});
 
-  void handleLoadingData(BuildContext context) {
-    view.setShowingViewState();
+  void handleInitState(BuildContext context) {
+    _getBookingDetail(view.id);
+  }
+
+  void _getBookingDetail(int id) {
+    var success = false;
+    BookingRepo.getDetail(
+        id: id,
+        error: view.showError,
+        invalid: view.showInvalidMessages,
+        success: (data) {
+          success = true;
+          view.loadBookingData(data);
+        }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 }
