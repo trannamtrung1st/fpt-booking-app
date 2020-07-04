@@ -56,14 +56,14 @@ class _CalendarViewState extends State<CalendarView> {
     return Container(
       margin: EdgeInsets.only(top: 20),
       child: AppTable(
-        data: <List<dynamic>>[
-          <dynamic>["Time", "Room", "Type", "Status"],
-          <dynamic>["Time", "Room", "Type", "Status"],
-          <dynamic>["Time", "Room", "Type", "Status"],
-          <dynamic>["Time", "Room", "Type", "Status"],
-          <dynamic>["Time", "Room", "Type", "Status"],
-          <dynamic>["Time", "Room", "Type", "Status"],
-          <dynamic>["Time", "Room", "Type", "Status"],
+        data: <AppTableRow>[
+          AppTableRow(data: <dynamic>["Time", "Room", "Type", "Status"]),
+          AppTableRow(
+              data: <dynamic>["Time", "Room", "Type", "Status"],
+              onTap: () => _presenter.onRowTab()),
+          AppTableRow(data: <dynamic>["Time", "Room", "Type", "Status"]),
+          AppTableRow(data: <dynamic>["Time", "Room", "Type", "Status"]),
+          AppTableRow(data: <dynamic>["Time", "Room", "Type", "Status"]),
         ],
       ),
     );
@@ -78,5 +78,9 @@ class _CalendarViewPresenter {
   onDaySelected(DateTime selected, List<dynamic> list) {
     print(selected);
     view.setSelectedDate(selected);
+  }
+
+  onRowTab() {
+    print("tabbed");
   }
 }

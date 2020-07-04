@@ -4,7 +4,7 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 
 class AppTable extends StatelessWidget {
   final Map<int, TableColumnWidth> columnWidths;
-  final List<List<dynamic>> data;
+  final List<AppTableRow> data;
 
   AppTable({@required this.data, this.columnWidths});
 
@@ -13,13 +13,15 @@ class AppTable extends StatelessWidget {
     List<TableRow> rows = <TableRow>[];
     var headers = <Widget>[];
     var headerRow = data[0];
-    for (dynamic o in headerRow) headers.add(_headerCell(content: o));
+    for (dynamic o in headerRow.data)
+      headers.add(_headerCell(content: o, onTap: headerRow.onTap));
     rows.add(TableRow(children: headers));
 
     for (int i = 1; i < data.length; i++) {
       var rowData = data[i];
       var cells = <Widget>[];
-      for (dynamic o in rowData) cells.add(_tableCell(content: o, rowIdx: i));
+      for (dynamic o in rowData.data)
+        cells.add(_tableCell(content: o, rowIdx: i, onTap: rowData.onTap));
       rows.add(TableRow(children: cells));
     }
 
@@ -30,7 +32,7 @@ class AppTable extends StatelessWidget {
     );
   }
 
-  Widget _headerCell({@required dynamic content}) {
+  Widget _headerCell({@required dynamic content, Function onTap}) {
     Widget child;
     if (content is String)
       child = Text(
@@ -39,22 +41,35 @@ class AppTable extends StatelessWidget {
       );
     else
       child = content;
-    return Container(
-        color: Colors.orange, padding: EdgeInsets.all(7), child: child);
+    return GestureDetector(
+        onTap: onTap,
+        child: Container(
+            color: Colors.orange, padding: EdgeInsets.all(7), child: child));
   }
 
-  Widget _tableCell({@required dynamic content, @required int rowIdx}) {
+  Widget _tableCell(
+      {@required dynamic content, @required int rowIdx, Function onTap}) {
     Widget child;
     if (content is String)
       child = Text(
         content,
-        style: TextStyle(color: Colors.black),
+        style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
       );
     else
       child = content;
-    return Container(
-        color: rowIdx % 2 == 0 ? "#EEEEEE".toColor() : Colors.white,
-        padding: EdgeInsets.fromLTRB(7, 10, 7, 10),
-        child: child);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+          color: rowIdx % 2 == 0 ? "#EEEEEE".toColor() : Colors.white,
+          padding: EdgeInsets.fromLTRB(7, 10, 7, 10),
+          child: child),
+    );
   }
+}
+
+class AppTableRow {
+  List<dynamic> data;
+  Function onTap;
+
+  AppTableRow({this.data, this.onTap});
 }
