@@ -133,6 +133,7 @@ class _BookingViewState extends State<BookingView> {
                         labelText: "Number of people",
                         marginBottom: 14,
                         child: TextField(
+                          autofocus: false,
                           keyboardType: TextInputType.number,
                           style: TextStyle(fontSize: 14),
                           decoration: InputDecoration(
