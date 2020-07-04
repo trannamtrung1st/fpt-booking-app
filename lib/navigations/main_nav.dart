@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
+import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ bool initTabs = false;
 final List<Widget> pages = <Widget>[
   CalendarView(),
   MainView(),
-  MainView(),
+  BookingView(),
   MainView(),
 ];
 

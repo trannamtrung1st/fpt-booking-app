@@ -25,11 +25,11 @@ class _CalendarViewState extends State<CalendarView> {
 
   DateTime _selectedDate = DateTime.now();
   _CalendarViewPresenter _presenter;
-  List<dynamic> _data;
+  List<dynamic> _bookings;
 
   void changeSelectedDate(DateTime dateTime) {
     setState(() {
-      _data = null;
+      _bookings = null;
       _selectedDate = dateTime;
       _state = LOADING_DATA;
     });
@@ -58,7 +58,7 @@ class _CalendarViewState extends State<CalendarView> {
   void refreshCalendarData(List<dynamic> data) {
     setState(() {
       _state = SHOWING_VIEW;
-      _data = data;
+      _bookings = data;
     });
   }
 
@@ -128,8 +128,8 @@ class _CalendarViewState extends State<CalendarView> {
     var rows = <AppTableRow>[
       AppTableRow(data: <dynamic>["Time", "Room", "Type", "Status"]),
     ];
-    if (_data != null)
-      for (dynamic o in _data) {
+    if (_bookings != null)
+      for (dynamic o in _bookings) {
         var time = o["from_time"] + " - " + o["to_time"];
         var room = o["room"]["code"];
         var type = o["type"] as String;
