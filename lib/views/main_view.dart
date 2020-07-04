@@ -4,7 +4,6 @@ import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
-import 'package:fptbooking_app/widgets/tab_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,15 +37,14 @@ class _MainViewState extends State<MainView> {
 
   Widget _buildShowingViewWidget(BuildContext context) {
     return LoadingModal(
-        isLoading: false,
-        child: TabView(
-          child: Center(
-            child: RaisedButton(
-              onPressed: _presenter.onLogOutPressed,
-              child: Text("Logout"),
-            ),
-          ),
-        ));
+      isLoading: false,
+      child: Center(
+        child: RaisedButton(
+          onPressed: _presenter.onLogOutPressed,
+          child: Text("Logout"),
+        ),
+      ),
+    );
   }
 
   void showInvalidMessages(List<String> mess) {

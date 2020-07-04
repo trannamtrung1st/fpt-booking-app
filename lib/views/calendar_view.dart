@@ -8,7 +8,6 @@ import 'package:fptbooking_app/widgets/app_table.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
-import 'package:fptbooking_app/widgets/tab_view.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarView extends StatefulWidget {
@@ -29,6 +28,7 @@ class _CalendarViewState extends State<CalendarView> {
 
   void changeSelectedDate(DateTime dateTime) {
     setState(() {
+      _data = null;
       _selectedDate = dateTime;
       _state = LOADING_DATA;
     });
@@ -62,20 +62,14 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return LoadingModal(
-      isLoading: false,
-      child: _tabView(),
-    );
+    return _mainView();
   }
 
   //isLoadingData
   bool isLoadingData() => _state == LOADING_DATA;
 
   Widget _buildLoadingDataWidget(BuildContext context) {
-    return LoadingModal(
-      isLoading: true,
-      child: _tabView(),
-    );
+    return _mainView(loading: true);
   }
 
   void showInvalidMessages(List<String> mess) {
@@ -96,22 +90,28 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   //widgets
-  Widget _tabView() {
-    return TabView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Calendar(
-              initFormat: CalendarFormat.week,
-              onDaySelected: _presenter.onDaySelected),
-          Container(
-            margin: EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[_currentSelectedDateInfo(), _scheduleTable()],
+  Widget _mainView({bool loading = false}) {
+    return LoadingModal(
+      isLoading: loading,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Calendar(
+                initFormat: CalendarFormat.week,
+                onDaySelected: _presenter.onDaySelected),
+            Container(
+              margin: EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _currentSelectedDateInfo(),
+                  _scheduleTable()
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
 import 'package:provider/provider.dart';
@@ -67,6 +68,7 @@ class _MainNavState extends State<MainNav> {
     loginContext = Provider.of<LoginContext>(context);
     _presenter = _MainNavPresenter(view: this);
     return Scaffold(
+      backgroundColor: "#F5F5F5".toColor(),
       body: IndexedStack(
         index: _state,
         children: pages,
