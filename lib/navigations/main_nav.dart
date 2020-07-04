@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
 import 'package:provider/provider.dart';
 
@@ -17,9 +18,14 @@ List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
     title: Text('Room'),
   ),
 ];
-
 List<BottomNavigationBarItem> managerTabs = normalTabs.toList(growable: true);
 bool initTabs = false;
+List<Function> _widgets = <Function>[
+  () => CalendarView(),
+  () => MainView(),
+  () => MainView(),
+  () => MainView(),
+];
 
 class MainNav extends StatefulWidget {
   MainNav() {
@@ -54,13 +60,6 @@ class _MainNavState extends State<MainNav> {
       _state = tab;
     });
   }
-
-  static List<Function> _widgets = <Function>[
-    () => MainView(),
-    () => MainView(),
-    () => MainView(),
-    () => MainView(),
-  ];
 
   @override
   Widget build(BuildContext context) {

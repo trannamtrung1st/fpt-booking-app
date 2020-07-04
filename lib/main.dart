@@ -5,7 +5,6 @@ import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/views/login_view.dart';
-import 'package:fptbooking_app/views/main_view.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,7 +23,9 @@ void main() {
 Widget _materialApp() {
   return MaterialApp(
     title: 'FPT Booking', // used by the OS task switcher
-    home: App(),
+    home: SafeArea(
+      child: App(),
+    ),
   );
 }
 

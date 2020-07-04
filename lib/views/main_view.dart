@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/widgets/tab_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,7 +21,7 @@ class _MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     _loginContext = Provider.of<LoginContext>(context, listen: false);
-    return Material(
+    return TabView(
       child: Center(
         child: RaisedButton(
           onPressed: () async {

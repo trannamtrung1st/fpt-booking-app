@@ -98,21 +98,19 @@ class _LoginViewState extends State<LoginView> {
 
   Widget _loginView() {
     return Material(
-      child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Image.asset("assets/fpt-logo.png"),
-            ),
-            Text('Instant booking for your need',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            Container(
-              margin: EdgeInsets.only(top: 20),
-              child: _signInButton(),
-            )
-          ],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Center(
+            child: Image.asset("assets/fpt-logo.png"),
+          ),
+          Text('Instant booking for your need',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: _signInButton(),
+          )
+        ],
       ),
     );
   }
