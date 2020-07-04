@@ -17,8 +17,8 @@ class UserRepo {
       print('Response body: ${response.body}');
       final prefs = await SharedPreferences.getInstance();
       prefs.setString(Constants.TOKEN_DATA_KEY, response.body);
-      App.accessToken = jsonDecode(response.body)["access_token"] as String;
-      if (success != null) success();
+      var tokenData = jsonDecode(response.body);
+      if (success != null) success(tokenData);
       return true;
     } else if (response.statusCode != 500) {
       var result = jsonDecode(response.body);

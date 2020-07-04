@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/views/login_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -26,8 +29,6 @@ Widget _materialApp() {
 }
 
 class App extends StatefulWidget {
-  static String accessToken;
-
   @override
   _AppState createState() => _AppState();
 }
@@ -75,7 +76,7 @@ class _AppState extends State<App> {
 
   //isLoggedIn
   Widget _buildLoggedInWidget(BuildContext context) {
-    return MainView();
+    return MainNav();
   }
 
   //isNotLoggedIn
@@ -96,7 +97,8 @@ class _AppPresenter {
     SharedPreferences.getInstance().then((prefs) {
       var tokenDataStr = prefs.getString(Constants.TOKEN_DATA_KEY);
       if (tokenDataStr != null) {
-        _loginContext.loggedIn();
+        var tokenData = jsonDecode(tokenDataStr);
+        _loginContext.loggedIn(tokenData);
         return;
       }
       view.setShowingViewState();

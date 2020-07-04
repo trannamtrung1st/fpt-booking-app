@@ -136,12 +136,11 @@ class _LoginViewPresenter {
     var success = false;
     _signInServer(
             fbToken: fbToken,
-            success: () {},
+            success: (tokenData) => _loginContext.loggedIn(tokenData),
             invalid: view.showInvalidMessages,
             error: view.showError)
         .then((result) {
       success = result;
-      if (success) _loginContext.loggedIn();
     }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 
