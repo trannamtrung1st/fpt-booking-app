@@ -9,6 +9,6 @@ class TabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(child: this.child, color: "#EEEEEE".toColor());
+    return Material(child: this.child, color: "#F5F5F5".toColor());
   }
 }

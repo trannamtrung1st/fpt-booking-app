@@ -26,7 +26,7 @@ class _LoadingModalState extends State<LoadingModal> {
       isLoading: this.isLoading,
       opacity: 0,
       progressIndicator: CircularProgressIndicator(
-        valueColor: new AlwaysStoppedAnimation<Color>(Colors.deepOrange),
+        valueColor: new AlwaysStoppedAnimation<Color>(Colors.orange),
       ),
     );
   }

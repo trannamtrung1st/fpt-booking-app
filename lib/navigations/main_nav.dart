@@ -70,7 +70,7 @@ class _MainNavState extends State<MainNav> {
       bottomNavigationBar: BottomNavigationBar(
         items: loginContext.isManager() ? managerTabs : normalTabs,
         currentIndex: _presenter.getIndexFromTab(_state),
-        selectedItemColor: Colors.deepOrange,
+        selectedItemColor: Colors.orange,
         onTap: _presenter.onItemTapped,
       ),
     );

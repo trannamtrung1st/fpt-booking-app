@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/widgets/app_table.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:fptbooking_app/widgets/tab_view.dart';
@@ -32,7 +35,10 @@ class _CalendarViewState extends State<CalendarView> {
               onDaySelected: _presenter.onDaySelected),
           Container(
             margin: EdgeInsets.all(15),
-            child: _currentSelectedDateInfo(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[_currentSelectedDateInfo(), _scheduleTable()],
+            ),
           ),
         ],
       ),
@@ -44,6 +50,23 @@ class _CalendarViewState extends State<CalendarView> {
         ? Text("Not selected")
         : Text(IntlHelper.format(_selectedDate, "dd/MM/yyyy"));
     return SimpleInfo(labelText: "Selected date", child: text);
+  }
+
+  Widget _scheduleTable() {
+    return Container(
+      margin: EdgeInsets.only(top: 20),
+      child: AppTable(
+        data: <List<dynamic>>[
+          <dynamic>["Time", "Room", "Type", "Status"],
+          <dynamic>["Time", "Room", "Type", "Status"],
+          <dynamic>["Time", "Room", "Type", "Status"],
+          <dynamic>["Time", "Room", "Type", "Status"],
+          <dynamic>["Time", "Room", "Type", "Status"],
+          <dynamic>["Time", "Room", "Type", "Status"],
+          <dynamic>["Time", "Room", "Type", "Status"],
+        ],
+      ),
+    );
   }
 }
 
