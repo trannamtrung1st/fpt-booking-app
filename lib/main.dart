@@ -26,6 +26,8 @@ Widget _materialApp() {
 }
 
 class App extends StatefulWidget {
+  static String accessToken;
+
   @override
   _AppState createState() => _AppState();
 }
@@ -34,22 +36,22 @@ class _AppState extends State<App> {
   static const int PRE_PROCESSING = 1;
   static const int SHOWING_VIEW = 2;
   int _state = PRE_PROCESSING;
-  LoginContext _loginContext;
+  LoginContext loginContext;
+  _AppPresenter _presenter;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginContext>(
       builder: (context, loginContext, child) {
-        _loginContext = loginContext;
+        this.loginContext = loginContext;
+        _presenter = _AppPresenter(view: this);
         if (loginContext.isLoggedIn()) {
-          _handleLoggedIn(context);
           return _buildLoggedInWidget(context);
         }
         if (_isPreProcessing()) {
-          _handlePreProcessing(context);
+          _presenter.handlePreProcessing(context);
           return _buildPreProcessingWidget(context);
         }
-        _handleNotLoggedIn(context);
         return _buildNotLoggedInWidget(context);
       },
     );
@@ -58,18 +60,9 @@ class _AppState extends State<App> {
   //isPreProcessing
   bool _isPreProcessing() => _state == PRE_PROCESSING;
 
-  void _handlePreProcessing(BuildContext context) {
-    SharedPreferences.getInstance().then((prefs) {
-      var tokenDataStr = prefs.getString(Constants.TOKEN_DATA_KEY);
-      if (tokenDataStr != null) {
-        _loginContext.loggedIn();
-        return;
-      }
-      setState(() {
+  void setShowingViewState() => setState(() {
         _state = SHOWING_VIEW;
       });
-    });
-  }
 
   Widget _buildPreProcessingWidget(BuildContext context) {
     return LoadingModal(
@@ -81,16 +74,32 @@ class _AppState extends State<App> {
   }
 
   //isLoggedIn
-  void _handleLoggedIn(BuildContext context) {}
-
   Widget _buildLoggedInWidget(BuildContext context) {
     return MainView();
   }
 
   //isNotLoggedIn
-  void _handleNotLoggedIn(BuildContext context) {}
-
   Widget _buildNotLoggedInWidget(BuildContext context) {
     return LoginView();
+  }
+}
+
+class _AppPresenter {
+  _AppState view;
+  LoginContext _loginContext;
+
+  _AppPresenter({this.view}) {
+    _loginContext = view.loginContext;
+  }
+
+  void handlePreProcessing(BuildContext context) {
+    SharedPreferences.getInstance().then((prefs) {
+      var tokenDataStr = prefs.getString(Constants.TOKEN_DATA_KEY);
+      if (tokenDataStr != null) {
+        _loginContext.loggedIn();
+        return;
+      }
+      view.setShowingViewState();
+    });
   }
 }
