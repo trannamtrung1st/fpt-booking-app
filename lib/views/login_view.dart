@@ -36,15 +36,25 @@ class _LoginViewState extends State<LoginView> {
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return _loginView();
+    return LoadingModal(
+      isLoading: false,
+      child: _loginView(),
+    );
   }
 
   //isInFirebaseLoginProcess
   bool isInFirebaseLoginProcess() => _state == IN_FIREBASE_LOGIN_PROCESS;
 
-  void setIsInFirebaseLoginProcessState() => setState(() {
+  void setInFirebaseLoginProcessState() => setState(() {
         _state = IN_FIREBASE_LOGIN_PROCESS;
       });
+
+  Widget _buildInFirebaseLoginProcess(BuildContext context) {
+    return LoadingModal(
+      isLoading: true,
+      child: _loginView(),
+    );
+  }
 
   void showInvalidMessages(List<String> mess) {
     DialogHelper.showMessage(context: context, title: "Sorry", contents: mess);
@@ -52,13 +62,6 @@ class _LoginViewState extends State<LoginView> {
 
   void showError() {
     DialogHelper.showUnknownError(context: this.context);
-  }
-
-  Widget _buildInFirebaseLoginProcess(BuildContext context) {
-    return LoadingModal(
-      isLoading: true,
-      child: _loginView(),
-    );
   }
 
   //widgets
@@ -134,15 +137,16 @@ class _LoginViewPresenter {
     var success = false;
     _signInServer(
             fbToken: fbToken,
-            success: (tokenData) => _loginContext.loggedIn(tokenData),
+            success: (tokenData) {
+              success = true;
+              _loginContext.loggedIn(tokenData);
+            },
             invalid: view.showInvalidMessages,
             error: view.showError)
-        .then((result) {
-      success = result;
-    }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        .whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 
-  Future<bool> _signInServer(
+  Future<void> _signInServer(
       {@required String fbToken,
       Function success,
       Function invalid,
@@ -175,7 +179,7 @@ class _LoginViewPresenter {
 
   void onSignInPressed() {
     if (view.isInFirebaseLoginProcess()) return;
-    view.setIsInFirebaseLoginProcessState();
+    view.setInFirebaseLoginProcessState();
     _handleSignIn()
         .then(this._onSignInFinished)
         .catchError(this._onSignInError);

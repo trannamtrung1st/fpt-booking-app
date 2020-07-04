@@ -1,13 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/helpers/http_helper.dart';
 import 'package:http/http.dart' as http;
 
 class UserApi {
-  static Future<http.Response> login(String fbToken) async {
-    var url = Constants.API_URL + '/api/users/login';
-    var response = await http.post(url,
+  static Future<http.Response> login({@required String fbToken}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/users/login');
+    var response = await http.post(uri,
         headers: HttpHelper.commonHeaders(hasBody: true),
         body: jsonEncode({
           "grant_type": "firebase_token",

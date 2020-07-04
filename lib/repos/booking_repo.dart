@@ -1,23 +1,22 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
-import 'package:fptbooking_app/apis/user_api.dart';
-import 'package:fptbooking_app/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fptbooking_app/apis/booking_api.dart';
 
-class UserRepo {
-  static Future<void> login(
-      {@required String fbToken,
+class BookingRepo {
+  static Future<void> get(
+      {String fields = "info",
+      String dateStr,
+      String dateFormat = "dd/MM/yyyy",
       Function(List<dynamic>) success,
       Function(List<String> mess) invalid,
       Function error}) async {
-    var response = await UserApi.login(fbToken: fbToken);
+    var response = await BookingApi.get(
+        fields: fields, dateFormat: dateFormat, dateStr: dateStr);
     if (response.statusCode == 200) {
       print('Response body: ${response.body}');
-      final prefs = await SharedPreferences.getInstance();
-      prefs.setString(Constants.TOKEN_DATA_KEY, response.body);
-      var tokenData = jsonDecode(response.body);
-      if (success != null) success(tokenData);
+      var result = jsonDecode(response.body);
+      if (success != null) success(result["data"]["list"]);
       return;
     } else if (response.statusCode != 500) {
       var result = jsonDecode(response.body);
