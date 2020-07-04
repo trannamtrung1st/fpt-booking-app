@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_table.dart';
@@ -133,13 +134,13 @@ class _CalendarViewState extends State<CalendarView> {
         var room = o["room"]["code"];
         var type = o["type"] as String;
         var status = o["status"] ?? "";
-        var statusText = _getTextByStatus(status);
+        var statusText = ViewHelper.getTextByBookingStatus(status: status);
         rows.add(AppTableRow(
             data: <dynamic>[time, room, type, statusText],
             onTap: type == "Booking" ? () => _presenter.onRowTab(o) : null));
       }
     return Container(
-      margin: EdgeInsets.only(top: 20),
+      margin: EdgeInsets.only(top: 10),
       child: AppTable(
         data: rows,
         columnWidths: {
@@ -148,19 +149,6 @@ class _CalendarViewState extends State<CalendarView> {
         },
       ),
     );
-  }
-
-  Widget _getTextByStatus(String status) {
-    Color color = Colors.grey;
-    switch (status) {
-      case "Finished":
-        color = Colors.green;
-        break;
-      case "Denied":
-        color = Colors.red;
-        break;
-    }
-    return Text(status, style: TextStyle(color: color));
   }
 }
 
