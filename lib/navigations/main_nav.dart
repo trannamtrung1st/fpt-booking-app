@@ -4,6 +4,7 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
+import 'package:fptbooking_app/views/room_list_view.dart';
 import 'package:provider/provider.dart';
 
 final List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
@@ -19,29 +20,30 @@ final List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
     icon: Icon(Icons.home),
     title: Text('Room'),
   ),
+  BottomNavigationBarItem(
+    icon: Icon(Icons.settings),
+    title: Text('Settings'),
+  ),
 ];
 final List<BottomNavigationBarItem> managerTabs =
     normalTabs.toList(growable: true);
-bool initTabs = false;
 final List<Widget> pages = <Widget>[
   CalendarView(),
   MainView(),
   BookingView(),
-  MainView(),
+  RoomListView(),
+  MainView()
 ];
 
 class MainNav extends StatefulWidget {
-  MainNav() {
-    if (!initTabs) {
-      initTabs = true;
-      print("Init tabs");
-      managerTabs.insert(
-          1,
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check),
-            title: Text('Approval'),
-          ));
-    }
+  static void init() {
+    print("Init tabs");
+    managerTabs.insert(
+        1,
+        BottomNavigationBarItem(
+          icon: Icon(Icons.check),
+          title: Text('Approval'),
+        ));
   }
 
   @override
@@ -56,6 +58,7 @@ class _MainNavState extends State<MainNav> {
   static const int TAB_APPROVAL = 1;
   static const int TAB_BOOKING = 2;
   static const int TAB_ROOM = 3;
+  static const int TAB_SETTINGS = 4;
   int _state = TAB_CALENDAR;
 
   void changeTab(int tab) {
@@ -68,17 +71,21 @@ class _MainNavState extends State<MainNav> {
   Widget build(BuildContext context) {
     loginContext = Provider.of<LoginContext>(context);
     _presenter = _MainNavPresenter(view: this);
-    return Scaffold(
-      backgroundColor: "#F5F5F5".toColor(),
-      body: IndexedStack(
-        index: _state,
-        children: pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: loginContext.isManager() ? managerTabs : normalTabs,
-        currentIndex: _presenter.getIndexFromTab(_state),
-        selectedItemColor: Colors.orange,
-        onTap: _presenter.onItemTapped,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: "#F5F5F5".toColor(),
+        body: IndexedStack(
+          index: _state,
+          children: pages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          items: loginContext.isManager() ? managerTabs : normalTabs,
+          currentIndex: _presenter.getIndexFromTab(_state),
+          selectedItemColor: Colors.orange,
+          onTap: _presenter.onItemTapped,
+        ),
       ),
     );
   }

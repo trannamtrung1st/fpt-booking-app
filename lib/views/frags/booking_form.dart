@@ -94,6 +94,13 @@ class _BookingFormState extends State<BookingForm> {
 
   void refresh() => setState(() {});
 
+  Future<String> promptEmail() {
+    return DialogHelper.prompt(
+        inputType: TextInputType.emailAddress,
+        context: context,
+        title: "Enter an email (@fpt.edu.vn)");
+  }
+
   Widget _buildShowingViewWidget(BuildContext context) {
     return AppCard(
       margin: EdgeInsets.only(top: 15),
@@ -268,10 +275,7 @@ class _BookingFormPresenter {
   }
 
   void onAddUsingPersonPressed() async {
-    var email = await DialogHelper.prompt(
-        inputType: TextInputType.emailAddress,
-        context: view.context,
-        title: "Enter an email (@fpt.edu.vn)");
+    var email = view.promptEmail();
     if (email == null) return;
     var personList = view.booking["using_person"] as List<dynamic>;
     personList.add(email);

@@ -154,16 +154,13 @@ class _BookingViewState extends State<BookingView> {
     ];
     if (rooms != null) widgets.add(_getRoomsCard());
     return LoadingModal(
-        isLoading: loading,
-        child: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widgets),
-          ),
-        ));
+      isLoading: loading,
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+      ),
+    );
   }
 
   List<Widget> _filterWidgets() {

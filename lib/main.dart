@@ -25,6 +25,10 @@ void main() async {
     exit(0);
     return;
   }
+
+  //static init
+  MainNav.init();
+
   //run app
   runApp(
     MultiProvider(

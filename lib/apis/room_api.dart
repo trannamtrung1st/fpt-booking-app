@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 class RoomApi {
   static Future<http.Response> get({
     String fields,
+    String search,
     String dateStr,
     String dateFormat,
     String fromTime,
@@ -16,6 +17,7 @@ class RoomApi {
     String roomTypeCode,
   }) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/rooms', {
+      'search': search,
       'fields': fields,
       'date_str': dateStr,
       'date_format': dateFormat,

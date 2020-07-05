@@ -12,7 +12,8 @@ import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
 
 class RoomDetailView extends StatefulWidget {
-  static const int TYPE_BOOKING = 1;
+  static const int TYPE_ROOM_INFO = 1;
+  static const int TYPE_BOOKING = 2;
   final String code;
   final int type;
   final dynamic extraData;
@@ -81,8 +82,6 @@ class _RoomDetailViewState extends State<RoomDetailView> {
           numOfPeople: extraData["numOfPeople"],
         ));
         break;
-      default:
-        throw Exception("Invalid type");
     }
     var body = GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -138,9 +137,8 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     switch (type) {
       case RoomDetailView.TYPE_BOOKING:
         return "Booking room detail";
-      default:
-        throw Exception("Invalid type");
     }
+    return "Room information";
   }
 
   Widget _roomInfoCard() {
