@@ -22,6 +22,7 @@ class BookingView extends StatefulWidget {
 class _BookingViewState extends State<BookingView> {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
+  static const int AFTER_SEARCH = 3;
   int _state = LOADING_DATA;
 
   String _fromTime;
@@ -86,19 +87,27 @@ class _BookingViewState extends State<BookingView> {
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _presenter.handleOnWidgetBuilt(context));
+    if (_isAfterSearch())
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _presenter.handleAfterSearch(context));
     return _buildShowingViewWidget(context);
   }
 
+  //isAfterSearch
+  bool _isAfterSearch() => _state == AFTER_SEARCH;
+
+  void setAfterSearchState() => _state = AFTER_SEARCH;
+
   //isShowingView
-  void setShowingViewState() => setState(() {
-        _state = SHOWING_VIEW;
-      });
+  void setShowingViewState({bool rebuild = true}) => rebuild
+      ? setState(() {
+          _state = SHOWING_VIEW;
+        })
+      : _state = SHOWING_VIEW;
 
   void refreshRoomData(List<dynamic> data) {
     setState(() {
-      _state = SHOWING_VIEW;
+      _state = AFTER_SEARCH;
       rooms = data;
     });
   }
@@ -364,10 +373,11 @@ class _BookingViewPresenter {
     view.setShowingViewState();
   }
 
-  void handleOnWidgetBuilt(BuildContext context) {
+  void handleAfterSearch(BuildContext context) {
     if (view.rooms != null)
       Scrollable.ensureVisible(view.roomCardsKey.currentContext,
           duration: Duration(seconds: 1));
+    view.setShowingViewState(rebuild: false);
   }
 
   void onDaySelected(DateTime selected, List<dynamic> list) {
