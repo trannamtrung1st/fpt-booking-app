@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
+import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
@@ -23,6 +26,7 @@ class _BookingViewState extends State<BookingView> {
   String _fromTime;
   String _toTime;
   String _roomType = "Classroom";
+  int _numOfPeople;
   DateTime _selectedDate = DateTime.now();
   _BookingViewPresenter _presenter;
   List<dynamic> _rooms;
@@ -69,10 +73,17 @@ class _BookingViewState extends State<BookingView> {
         _state = SHOWING_VIEW;
       });
 
-  void refreshBookingData(List<dynamic> data) {
+  void refreshRoomData(List<dynamic> data) {
     setState(() {
       _state = SHOWING_VIEW;
       _rooms = data;
+    });
+  }
+
+  void loadRoomData() {
+    setState(() {
+      _state = LOADING_DATA;
+      _rooms = null;
     });
   }
 
@@ -97,75 +108,184 @@ class _BookingViewState extends State<BookingView> {
 
   //widgets
   Widget _mainView({bool loading = false}) {
+    var widgets = <Widget>[
+      Calendar(
+          initFormat: CalendarFormat.month,
+          onDaySelected: _presenter.onDaySelected),
+      Container(
+        margin: EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _filterWidgets(),
+        ),
+      ),
+    ];
+    if (_rooms != null) widgets.add(_getRoomsCard());
     return LoadingModal(
         isLoading: loading,
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: SingleChildScrollView(
             child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widgets),
+          ),
+        ));
+  }
+
+  List<Widget> _filterWidgets() {
+    var widgets = <Widget>[
+      SimpleInfo(
+        labelText: "Time filter",
+        marginBetween: 0,
+        marginBottom: 7,
+        child: Row(
+          children: <Widget>[
+            _timeButton(
+                timeStr: _fromTime, onPressed: _presenter.onFromTimePressed),
+            Text('-  '),
+            _timeButton(timeStr: _toTime, onPressed: _presenter.onToTimePressed)
+          ],
+        ),
+      ),
+      SimpleInfo(
+        labelText: "Number of people",
+        marginBottom: 14,
+        child: TextField(
+          autofocus: false,
+          keyboardType: TextInputType.number,
+          style: TextStyle(fontSize: 14),
+          onChanged: (value) =>
+              _numOfPeople = value.isNotEmpty ? int.parse(value) : null,
+          decoration: InputDecoration(
+              hintText: "Input a number",
+              contentPadding: EdgeInsets.only(bottom: 7),
+              isDense: true),
+        ),
+      ),
+      _roomTypeSelect(),
+      Row(
+        children: <Widget>[
+          Spacer(),
+          ButtonTheme(
+            minWidth: 0,
+            height: 40,
+            buttonColor: Colors.orange,
+            child: RaisedButton(
+                onPressed: _presenter.onSearchPressed,
+                child: Icon(
+                  Icons.search,
+                  color: Colors.white,
+                )),
+          )
+        ],
+      ),
+    ];
+    return widgets;
+  }
+
+  Widget _getRoomsCard() {
+    var dateStr = IntlHelper.format(_selectedDate);
+    var cardWidgets = <Widget>[
+      Text("Available rooms on $dateStr from $_fromTime - $_toTime")
+    ];
+    var card = AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: cardWidgets,
+      ),
+    );
+
+    for (dynamic o in _rooms) {
+      cardWidgets.add(AppCard(
+        onTap: () {},
+        margin: EdgeInsets.only(top: 10),
+        child: Column(
+          children: <Widget>[
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Calendar(
-                    initFormat: CalendarFormat.month,
-                    onDaySelected: _presenter.onDaySelected),
                 Container(
-                  margin: EdgeInsets.all(15),
+                  padding: EdgeInsets.only(right: 20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      SimpleInfo(
-                        labelText: "Time filter",
-                        marginBetween: 0,
-                        marginBottom: 7,
-                        child: Row(
-                          children: <Widget>[
-                            _timeButton(
-                                timeStr: _fromTime,
-                                onPressed: _presenter.onFromTimePressed),
-                            Text('-  '),
-                            _timeButton(
-                                timeStr: _toTime,
-                                onPressed: _presenter.onToTimePressed)
-                          ],
+                      Container(
+                        child: Icon(
+                          Icons.school,
+                          size: 45,
+                          color: Colors.white,
                         ),
+                        padding: EdgeInsets.all(7),
+                        margin: EdgeInsets.only(bottom: 7),
+                        decoration: BoxDecoration(
+                            color: Colors.deepOrangeAccent,
+                            shape: BoxShape.circle),
                       ),
-                      SimpleInfo(
-                        labelText: "Number of people",
-                        marginBottom: 14,
-                        child: TextField(
-                          autofocus: false,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(fontSize: 14),
-                          decoration: InputDecoration(
-                              hintText: "Input a number",
-                              contentPadding: EdgeInsets.only(bottom: 7),
-                              isDense: true),
-                        ),
-                      ),
-                      _roomTypeSelect(),
-                      Row(
-                        children: <Widget>[
-                          Spacer(),
-                          ButtonTheme(
-                            minWidth: 0,
-                            height: 40,
-                            buttonColor: Colors.orange,
-                            child: RaisedButton(
-                                onPressed: () {},
-                                child: Icon(
-                                  Icons.search,
-                                  color: Colors.white,
-                                )),
-                          )
-                        ],
-                      ),
+                      Text(
+                        "EMPTY",
+                        style: TextStyle(
+                            color: Colors.green, fontWeight: FontWeight.bold),
+                      )
                     ],
                   ),
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    RichText(
+                      text: TextSpan(
+                        text: o["code"],
+                        style: TextStyle(fontSize: 17, color: Colors.black),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: "   " + o["room_type"]["name"],
+                              style: TextStyle(
+                                  color: Colors.orange, fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Icon(
+                          Icons.fullscreen,
+                          color: Colors.grey,
+                          size: 22,
+                        ),
+                        Text(
+                          " " + o["area_size"].toString() + " m2",
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Icon(
+                          Icons.people,
+                          color: Colors.grey,
+                          size: 22,
+                        ),
+                        Text(
+                          " " + o["people_capacity"].toString(),
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
-        ));
+            Row(
+              children: <Widget>[
+                Spacer(),
+              ],
+            )
+          ],
+        ),
+      ));
+    }
+    return card;
   }
 
   Widget _timeButton({@required String timeStr, Function onPressed}) {
@@ -243,5 +363,32 @@ class _BookingViewPresenter {
 
   void onRoomTypeChanged(String val) {
     view.changeRoomType(val);
+  }
+
+  void onSearchPressed() {
+    if (view._selectedDate == null ||
+        view._fromTime == null ||
+        view._toTime == null ||
+        view._numOfPeople == null)
+      return view.showInvalidMessages(["Please fill all the required fields"]);
+    view.loadRoomData();
+    _getAvailableRooms();
+  }
+
+  void _getAvailableRooms() {
+    var success = false;
+    var dateStr = IntlHelper.format(view._selectedDate);
+    RoomRepo.getAvailableRooms(
+        dateStr: dateStr,
+        fromTime: view._fromTime,
+        toTime: view._toTime,
+        numOfPeople: view._numOfPeople,
+        roomTypeCode: view._roomType,
+        invalid: view.showInvalidMessages,
+        error: view.showError,
+        success: (data) {
+          success = true;
+          view.refreshRoomData(data);
+        }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 }
