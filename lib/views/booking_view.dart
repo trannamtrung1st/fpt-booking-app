@@ -5,6 +5,7 @@ import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
+import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -53,6 +54,16 @@ class _BookingViewState extends State<BookingView> {
   void changeRoomType(dynamic value) => setState(() {
         _roomType = value;
       });
+
+  void navigateToRoomDetail(String code) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            RoomDetailView(code: code, type: RoomDetailView.TYPE_BOOKING),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -199,9 +210,10 @@ class _BookingViewState extends State<BookingView> {
 
     for (dynamic o in _rooms) {
       cardWidgets.add(AppCard(
-        onTap: () {},
+        onTap: () => _presenter.onRoomPressed(o),
         margin: EdgeInsets.only(top: 10),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +280,7 @@ class _BookingViewState extends State<BookingView> {
                           size: 22,
                         ),
                         Text(
-                          " " + o["people_capacity"].toString(),
+                          " At most " + o["people_capacity"].toString(),
                           style: TextStyle(color: Colors.grey),
                         )
                       ],
@@ -277,11 +289,6 @@ class _BookingViewState extends State<BookingView> {
                 ),
               ],
             ),
-            Row(
-              children: <Widget>[
-                Spacer(),
-              ],
-            )
           ],
         ),
       ));
@@ -326,8 +333,10 @@ class _BookingViewState extends State<BookingView> {
           title: "Room type",
           value: _roomType,
           onChange: _presenter.onRoomTypeChanged,
-          options: MemoryStorage.roomTypes.map(
-              (o) => SmartSelectOption<dynamic>(value: o, title: o["name"])).toList(),
+          options: MemoryStorage.roomTypes
+              .map(
+                  (o) => SmartSelectOption<dynamic>(value: o, title: o["name"]))
+              .toList(),
           modalType: SmartSelectModalType.bottomSheet,
         ));
   }
@@ -345,6 +354,12 @@ class _BookingViewPresenter {
   void onDaySelected(DateTime selected, List<dynamic> list) {
     print(selected);
     view.changeSelectedDate(selected);
+  }
+
+  void onRoomPressed(dynamic data) {
+    String code = data["code"];
+    print(code);
+    view.navigateToRoomDetail(code);
   }
 
   void onFromTimePressed() {

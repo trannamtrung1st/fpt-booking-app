@@ -27,4 +27,11 @@ class RoomApi {
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
     return response;
   }
+
+  static Future<http.Response> getDetail(
+      {@required String code}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code');
+    var response = await http.get(uri, headers: HttpHelper.commonHeaders());
+    return response;
+  }
 }
