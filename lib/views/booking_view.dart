@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
@@ -62,8 +60,16 @@ class _BookingViewState extends State<BookingView> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            RoomDetailView(code: code, type: RoomDetailView.TYPE_BOOKING),
+        builder: (context) => RoomDetailView(
+          code: code,
+          type: RoomDetailView.TYPE_BOOKING,
+          extraData: {
+            'fromTime': _fromTime,
+            'toTime': _toTime,
+            'bookedDate': _selectedDate,
+            'numOfPeople': _numOfPeople,
+          },
+        ),
       ),
     );
   }

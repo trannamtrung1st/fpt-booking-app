@@ -7,6 +7,7 @@ import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
 
 class BookingDetailView extends StatefulWidget {
@@ -196,7 +197,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     var services = _data["attached_services"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
-      var tags = services.map((e) => Text(e["name"])).toList();
+      var tags = services
+          .map((e) => Tag(
+                child: Text(e["name"]),
+              ))
+          .toList();
       widget = TagsContainer(tags: tags);
     }
     return SimpleInfo(

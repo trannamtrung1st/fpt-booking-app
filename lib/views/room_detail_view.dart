@@ -3,23 +3,27 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/views/frags/booking_form.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
 
 class RoomDetailView extends StatefulWidget {
   static const int TYPE_BOOKING = 1;
   final String code;
   final int type;
+  final dynamic extraData;
 
-  RoomDetailView({key, @required this.code, @required this.type})
+  RoomDetailView(
+      {key, @required this.code, @required this.type, this.extraData})
       : super(key: key);
 
   @override
-  _RoomDetailViewState createState() =>
-      _RoomDetailViewState(code: this.code, type: this.type);
+  _RoomDetailViewState createState() => _RoomDetailViewState(
+      code: this.code, type: this.type, extraData: this.extraData);
 }
 
 class _RoomDetailViewState extends State<RoomDetailView> {
@@ -28,10 +32,12 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   int _state = LOADING_DATA;
   String code;
   dynamic _data;
+  dynamic extraData;
 
   int type;
 
-  _RoomDetailViewState({@required this.code, @required this.type});
+  _RoomDetailViewState(
+      {@required this.code, @required this.type, this.extraData});
 
   _RoomDetailViewPresenter _presenter;
 
@@ -63,13 +69,34 @@ class _RoomDetailViewState extends State<RoomDetailView> {
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    var body = SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(15),
-        child: _roomInfoCard(),
+    if (_data == null) return _mainContent(body: Container());
+    var widgets = <Widget>[_roomInfoCard()];
+    switch (type) {
+      case RoomDetailView.TYPE_BOOKING:
+        widgets.add(BookingForm(
+          room: _data,
+          bookedDate: extraData["bookedDate"],
+          fromTime: extraData["fromTime"],
+          toTime: extraData["toTime"],
+          numOfPeople: extraData["numOfPeople"],
+        ));
+        break;
+      default:
+        throw Exception("Invalid type");
+    }
+    var body = GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(15),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: widgets,
+          ),
+        ),
       ),
     );
-    return _mainContent(body: _data != null ? body : Container());
+    return _mainContent(body: body);
   }
 
   //isLoadingData
@@ -235,7 +262,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     var services = _data["resources"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
-      var tags = services.map((e) => Text(e["name"])).toList();
+      var tags = services.map((e) => Tag(child: Text(e["name"]))).toList();
       widget = TagsContainer(tags: tags);
     }
     return SimpleInfo(

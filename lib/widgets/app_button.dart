@@ -12,6 +12,10 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     Color btnColor = Colors.transparent, textColor = Colors.black;
     switch (type) {
+      case "primary":
+        btnColor = Colors.orange;
+        textColor = Colors.white;
+        break;
       case "danger":
         btnColor = Colors.redAccent;
         textColor = Colors.white;

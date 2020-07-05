@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/widgets/tag.dart';
 
 class TagsContainer extends StatelessWidget {
-  final List<Widget> tags;
+  final List<Tag> tags;
 
   TagsContainer({this.tags});
 
@@ -11,7 +11,7 @@ class TagsContainer extends StatelessWidget {
     return Wrap(
       spacing: 5,
       runSpacing: 7,
-      children: tags.map((e) => Tag(child: e)).toList(),
+      children: tags,
     );
   }
 }
