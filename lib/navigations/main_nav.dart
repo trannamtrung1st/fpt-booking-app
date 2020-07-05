@@ -27,13 +27,13 @@ final List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
 ];
 final List<BottomNavigationBarItem> managerTabs =
     normalTabs.toList(growable: true);
-final List<Widget> pages = <Widget>[
+final List<Widget> normalPages = <Widget>[
   CalendarView(),
-  MainView(),
   BookingView(),
   RoomListView(),
   MainView()
 ];
+final List<Widget> managerPages = normalPages.toList(growable: true);
 
 class MainNav extends StatefulWidget {
   static void init() {
@@ -44,6 +44,7 @@ class MainNav extends StatefulWidget {
           icon: Icon(Icons.check),
           title: Text('Approval'),
         ));
+    managerPages.insert(1, MainView());
   }
 
   @override
@@ -56,10 +57,11 @@ class _MainNavState extends State<MainNav> {
   PageController pageController = PageController(keepPage: true);
 
   static const int TAB_CALENDAR = 0;
-  static const int TAB_APPROVAL = 1;
-  static const int TAB_BOOKING = 2;
-  static const int TAB_ROOM = 3;
-  static const int TAB_SETTINGS = 4;
+
+//  static const int TAB_APPROVAL = 1;
+//  static const int TAB_BOOKING = 2;
+//  static const int TAB_ROOM = 3;
+//  static const int TAB_SETTINGS = 4;
   int _state = TAB_CALENDAR;
 
   void changeTab(int tab) {
@@ -77,14 +79,15 @@ class _MainNavState extends State<MainNav> {
       child: Scaffold(
         backgroundColor: "#F5F5F5".toColor(),
         body: PageView(
+          physics: NeverScrollableScrollPhysics(),
           controller: pageController,
-          children: pages,
+          children: loginContext.isManager() ? managerPages : normalPages,
           onPageChanged: _presenter.onPageChanged,
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           items: loginContext.isManager() ? managerTabs : normalTabs,
-          currentIndex: _presenter.getIndexFromTab(_state),
+          currentIndex: _state,
           selectedItemColor: Colors.orange,
           onTap: _presenter.onItemTapped,
         ),
@@ -95,28 +98,14 @@ class _MainNavState extends State<MainNav> {
 
 class _MainNavPresenter {
   _MainNavState view;
-  LoginContext _loginContext;
 
-  _MainNavPresenter({this.view}) {
-    _loginContext = view.loginContext;
-  }
+  _MainNavPresenter({this.view});
 
   void onItemTapped(int index) {
-    int tabState = _getTabFromIndex(index);
-    view.pageController.jumpToPage(tabState);
+    view.pageController.jumpToPage(index);
   }
 
-  void onPageChanged(int tab){
+  void onPageChanged(int tab) {
     view.changeTab(tab);
-  }
-
-  int _getTabFromIndex(int index) {
-    if (!_loginContext.isManager()) return index != 0 ? index + 1 : index;
-    return index;
-  }
-
-  int getIndexFromTab(int index) {
-    if (!_loginContext.isManager()) return index != 0 ? index - 1 : index;
-    return index;
   }
 }
