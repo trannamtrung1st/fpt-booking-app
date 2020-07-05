@@ -1,15 +1,31 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
+import 'package:fptbooking_app/repos/room_type_repo.dart';
+import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/login_view.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  //prepare
+  var success = false;
+  await RoomTypeRepo.getAll(success: (list) {
+    MemoryStorage.roomTypes = list;
+    success = true;
+  }).catchError((e) => {print(e)});
+  if (!success) {
+//    SystemNavigator.pop();
+    exit(0);
+    return;
+  }
+  //run app
   runApp(
     MultiProvider(
       providers: [

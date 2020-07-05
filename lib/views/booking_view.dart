@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -25,7 +26,7 @@ class _BookingViewState extends State<BookingView> {
 
   String _fromTime;
   String _toTime;
-  String _roomType = "Classroom";
+  dynamic _roomType = MemoryStorage.roomTypes[0];
   int _numOfPeople;
   DateTime _selectedDate = DateTime.now();
   _BookingViewPresenter _presenter;
@@ -49,7 +50,7 @@ class _BookingViewState extends State<BookingView> {
     });
   }
 
-  void changeRoomType(String value) => setState(() {
+  void changeRoomType(dynamic value) => setState(() {
         _roomType = value;
       });
 
@@ -306,7 +307,7 @@ class _BookingViewState extends State<BookingView> {
     return SimpleInfo(
         labelText: "Room type",
         marginBottom: 14,
-        child: SmartSelect<String>.single(
+        child: SmartSelect<dynamic>.single(
           builder: (context, state, showChoices) => MaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             minWidth: double.infinity,
@@ -314,7 +315,7 @@ class _BookingViewState extends State<BookingView> {
             child: Container(
               width: double.infinity,
               child: Text(
-                _roomType,
+                _roomType["name"],
                 style: TextStyle(fontWeight: FontWeight.normal),
               ),
             ),
@@ -325,11 +326,8 @@ class _BookingViewState extends State<BookingView> {
           title: "Room type",
           value: _roomType,
           onChange: _presenter.onRoomTypeChanged,
-          options: [
-            SmartSelectOption(value: "Classroom", title: "Classroom"),
-            SmartSelectOption(value: "Studio", title: "Studio"),
-            SmartSelectOption(value: "Library", title: "Library"),
-          ],
+          options: MemoryStorage.roomTypes.map(
+              (o) => SmartSelectOption<dynamic>(value: o, title: o["name"])).toList(),
           modalType: SmartSelectModalType.bottomSheet,
         ));
   }
@@ -361,7 +359,7 @@ class _BookingViewPresenter {
         .then((time) => view.changeToTime(time));
   }
 
-  void onRoomTypeChanged(String val) {
+  void onRoomTypeChanged(dynamic val) {
     view.changeRoomType(val);
   }
 
@@ -383,7 +381,7 @@ class _BookingViewPresenter {
         fromTime: view._fromTime,
         toTime: view._toTime,
         numOfPeople: view._numOfPeople,
-        roomTypeCode: view._roomType,
+        roomTypeCode: view._roomType["code"],
         invalid: view.showInvalidMessages,
         error: view.showError,
         success: (data) {
