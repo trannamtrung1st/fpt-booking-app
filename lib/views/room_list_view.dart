@@ -47,6 +47,7 @@ class _RoomListViewState extends State<RoomListView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }

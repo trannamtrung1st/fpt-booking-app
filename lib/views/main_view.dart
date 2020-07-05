@@ -26,6 +26,7 @@ class _MainViewState extends State<MainView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     loginContext = Provider.of<LoginContext>(context);
     _presenter = _MainViewPresenter(view: this);
     return _buildShowingViewWidget(context);

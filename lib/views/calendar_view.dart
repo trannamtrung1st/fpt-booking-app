@@ -45,6 +45,7 @@ class _CalendarViewState extends State<CalendarView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
