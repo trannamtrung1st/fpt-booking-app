@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
@@ -31,7 +32,9 @@ class _BookingViewState extends State<BookingView> {
   int _numOfPeople;
   DateTime _selectedDate = DateTime.now();
   _BookingViewPresenter _presenter;
-  List<dynamic> _rooms;
+  List<dynamic> rooms;
+  final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
+  ScrollController _scrollController = ScrollController(keepScrollOffset: true);
 
   void changeSelectedDate(DateTime date) {
     setState(() {
@@ -77,6 +80,8 @@ class _BookingViewState extends State<BookingView> {
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _presenter.handleOnWidgetBuilt(context));
     return _buildShowingViewWidget(context);
   }
 
@@ -88,14 +93,14 @@ class _BookingViewState extends State<BookingView> {
   void refreshRoomData(List<dynamic> data) {
     setState(() {
       _state = SHOWING_VIEW;
-      _rooms = data;
+      rooms = data;
     });
   }
 
   void loadRoomData() {
     setState(() {
       _state = LOADING_DATA;
-      _rooms = null;
+      rooms = null;
     });
   }
 
@@ -132,12 +137,13 @@ class _BookingViewState extends State<BookingView> {
         ),
       ),
     ];
-    if (_rooms != null) widgets.add(_getRoomsCard());
+    if (rooms != null) widgets.add(_getRoomsCard());
     return LoadingModal(
         isLoading: loading,
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: SingleChildScrollView(
+            controller: _scrollController,
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: widgets),
@@ -202,13 +208,14 @@ class _BookingViewState extends State<BookingView> {
       Text("Available rooms on $dateStr from $_fromTime - $_toTime")
     ];
     var card = AppCard(
+      key: roomCardsKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: cardWidgets,
       ),
     );
 
-    for (dynamic o in _rooms) {
+    for (dynamic o in rooms) {
       cardWidgets.add(AppCard(
         onTap: () => _presenter.onRoomPressed(o),
         margin: EdgeInsets.only(top: 10),
@@ -349,6 +356,12 @@ class _BookingViewPresenter {
 
   void handleInitState(BuildContext context) {
     view.setShowingViewState();
+  }
+
+  void handleOnWidgetBuilt(BuildContext context) {
+    if (view.rooms != null)
+      Scrollable.ensureVisible(view.roomCardsKey.currentContext,
+          duration: Duration(seconds: 1));
   }
 
   void onDaySelected(DateTime selected, List<dynamic> list) {

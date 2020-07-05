@@ -5,7 +5,8 @@ class AppCard extends StatelessWidget {
   final EdgeInsets margin;
   final Function onTap;
 
-  AppCard({this.child, this.onTap, this.margin = EdgeInsets.zero});
+  AppCard({this.child, this.onTap, this.margin = EdgeInsets.zero, Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
