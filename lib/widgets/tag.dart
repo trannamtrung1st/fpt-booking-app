@@ -22,7 +22,7 @@ class Tag extends StatelessWidget {
             child: Icon(
               Icons.cancel,
               size: 20,
-              color: "#CCCCCC".toColor(),
+              color: Colors.grey,
             ),
           )));
     Widget row = Row(
