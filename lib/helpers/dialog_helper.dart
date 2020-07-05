@@ -13,7 +13,14 @@ class DialogHelper {
     bool Function(String text) onCancel,
     bool Function(String text) onOk,
   }) async {
-    var editController = TextEditingController();
+    var textField = TextFormField(
+        autofocus: false,
+        keyboardType: inputType,
+        maxLines: inputType == TextInputType.multiline ? 7 : 1,
+        decoration: InputDecoration(
+            hintText: hintText,
+            contentPadding: EdgeInsets.only(bottom: 7),
+            isDense: true));
     return showDialog<String>(
       context: context,
       barrierDismissible: barrierDismissible, // user must tap button!
@@ -23,22 +30,13 @@ class DialogHelper {
           child: AlertDialog(
             title: Text(title),
             content: SingleChildScrollView(
-              child: TextField(
-                autofocus: false,
-                keyboardType: inputType,
-                maxLines: inputType == TextInputType.multiline ? 7 : 1,
-                controller: editController,
-                decoration: InputDecoration(
-                    hintText: hintText,
-                    contentPadding: EdgeInsets.only(bottom: 7),
-                    isDense: true),
-              ),
+              child: textField,
             ),
             actions: <Widget>[
               FlatButton(
                 child: Text(cancelBtnText),
                 onPressed: () {
-                  if (onCancel != null && !onCancel(editController.text))
+                  if (onCancel != null && !onCancel(textField.controller.text))
                     return;
                   Navigator.of(context).pop(null);
                 },
@@ -46,8 +44,8 @@ class DialogHelper {
               FlatButton(
                 child: Text(okBtnText),
                 onPressed: () {
-                  if (onOk != null && !onOk(editController.text)) return;
-                  Navigator.of(context).pop(editController.text);
+                  if (onOk != null && !onOk(textField.controller.text)) return;
+                  Navigator.of(context).pop(textField.controller.text);
                 },
               ),
             ],

@@ -24,7 +24,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
   int id;
-  dynamic _data;
+  dynamic data;
 
   _BookingDetailViewState({@required this.id});
 
@@ -46,10 +46,10 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   //isShowingView
-  void loadBookingData(dynamic data) {
+  void loadBookingData(dynamic val) {
     setState(() {
       _state = SHOWING_VIEW;
-      _data = data;
+      data = val;
     });
   }
 
@@ -58,7 +58,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return _mainContent(body: _data != null ? _bookingInfoCard() : Container());
+    return _mainContent(body: data != null ? _bookingInfoCard() : Container());
   }
 
   //isLoadingData
@@ -114,38 +114,38 @@ class _BookingDetailViewState extends State<BookingDetailView> {
                 SimpleInfo(
                   labelText: 'Room',
                   child: Text(
-                    _data["room"]["code"],
+                    data["room"]["code"],
                     style: TextStyle(color: Colors.blue),
                   ),
                 ),
                 SimpleInfo(
                   labelText: 'Status',
-                  child: ViewHelper.getTextByBookingStatus(
-                      status: _data["status"]),
+                  child:
+                      ViewHelper.getTextByBookingStatus(status: data["status"]),
                 ),
                 _getTimeStr(),
                 SimpleInfo(
                   labelText: 'Number of people',
-                  child: Text(_data["num_of_people"].toString()),
+                  child: Text(data["num_of_people"].toString()),
                 ),
                 _getAttachedServicesTags(),
                 SimpleInfo(
                   labelText: 'Booking person',
                   child: Text(
-                    _data["book_person"],
+                    data["book_person"],
                     style: TextStyle(color: Colors.blue),
                   ),
                 ),
                 SimpleInfo(
                   labelText: 'Using person(s)',
                   child: Text(
-                    (_data["using_person"] as List<dynamic>).join(', '),
+                    (data["using_person"] as List<dynamic>).join(', '),
                     style: TextStyle(color: Colors.blue),
                   ),
                 ),
                 SimpleInfo(
                   labelText: 'Note',
-                  child: Text(_data["note"] ?? ""),
+                  child: Text(data["note"] ?? ""),
                 ),
                 SimpleInfo(
                   labelText: 'Feedback',
@@ -153,14 +153,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
                     decoration: BoxDecoration(
                         border: Border.all(color: "#DDDDDD".toColor())),
                     padding: EdgeInsets.all(8.0),
-                    child: TextField(
+                    //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
+                    child: TextFormField(
                       maxLines: 7,
-                      onChanged: (value) => _data["feedback"] = value,
-                      controller: new TextEditingController.fromValue(
-                          new TextEditingValue(
-                              text: _data["feedback"] ?? "",
-                              selection: new TextSelection.collapsed(
-                                  offset: (_data["feedback"] ?? "").length))),
+                      onChanged: _presenter.onFeedbackChanged,
+                      initialValue: data["feedback"] ?? "",
                       style: TextStyle(fontSize: 14),
                       decoration: InputDecoration.collapsed(
                           hintText: "Enter your text here"),
@@ -169,7 +166,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
                 ),
                 SimpleInfo(
                   labelText: 'Manager message',
-                  child: Text(_data["manager_message"] ?? ""),
+                  child: Text(data["manager_message"] ?? ""),
                 ),
                 Divider(),
                 Row(
@@ -194,7 +191,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   Widget _getAttachedServicesTags() {
-    var services = _data["attached_services"] as List<dynamic>;
+    var services = data["attached_services"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
       var tags = services
@@ -213,11 +210,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   Widget _getTimeStr() {
     return SimpleInfo(
         labelText: 'Status',
-        child: Text(_data["booked_date"] +
+        child: Text(data["booked_date"] +
             ", " +
-            _data["from_time"] +
+            data["from_time"] +
             " - " +
-            _data["to_time"]));
+            data["to_time"]));
   }
 }
 
@@ -230,15 +227,19 @@ class _BookingDetailViewPresenter {
     _getBookingDetail(view.id);
   }
 
+  void onFeedbackChanged(String value) {
+    view.data["feedback"] = value;
+  }
+
   void _getBookingDetail(int id) {
     var success = false;
     BookingRepo.getDetail(
         id: id,
         error: view.showError,
         invalid: view.showInvalidMessages,
-        success: (data) {
+        success: (val) {
           success = true;
-          view.loadBookingData(data);
+          view.loadBookingData(val);
         }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 }

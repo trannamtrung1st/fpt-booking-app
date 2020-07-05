@@ -123,7 +123,7 @@ class _RoomListViewState extends State<RoomListView>
         child: Row(
           children: <Widget>[
             Expanded(
-              child: TextField(
+              child: TextFormField(
                 autofocus: false,
                 keyboardType: TextInputType.text,
                 style: TextStyle(fontSize: 14),

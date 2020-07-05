@@ -125,14 +125,10 @@ class _BookingFormState extends State<BookingForm> {
               decoration:
                   BoxDecoration(border: Border.all(color: "#DDDDDD".toColor())),
               padding: EdgeInsets.all(8.0),
-              child: TextField(
+              child: TextFormField(
                 maxLines: 7,
                 onChanged: (value) => booking["note"] = value,
-                controller: new TextEditingController.fromValue(
-                    new TextEditingValue(
-                        text: booking["note"] ?? "",
-                        selection: new TextSelection.collapsed(
-                            offset: (booking["note"] ?? "").length))),
+                initialValue: booking["note"] ?? "",
                 style: TextStyle(fontSize: 14),
                 decoration: InputDecoration.collapsed(
                     hintText: "If you have any notice"),

@@ -184,7 +184,7 @@ class _BookingViewState extends State<BookingView>
       SimpleInfo(
         labelText: "Number of people",
         marginBottom: 14,
-        child: TextField(
+        child: TextFormField(
           autofocus: false,
           keyboardType: TextInputType.number,
           style: TextStyle(fontSize: 14),
