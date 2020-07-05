@@ -18,7 +18,8 @@ class CalendarView extends StatefulWidget {
   _CalendarViewState createState() => _CalendarViewState();
 }
 
-class _CalendarViewState extends State<CalendarView> {
+class _CalendarViewState extends State<CalendarView>
+    with AutomaticKeepAliveClientMixin {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
@@ -150,6 +151,12 @@ class _CalendarViewState extends State<CalendarView> {
       ),
     );
   }
+
+  bool _keepAlive = true;
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => _keepAlive;
 }
 
 class _CalendarViewPresenter {

@@ -15,7 +15,8 @@ class MainView extends StatefulWidget {
   _MainViewState createState() => _MainViewState();
 }
 
-class _MainViewState extends State<MainView> {
+class _MainViewState extends State<MainView>
+    with AutomaticKeepAliveClientMixin {
   LoginContext loginContext;
 
   static const int SHOWING_VIEW = 1;
@@ -54,6 +55,12 @@ class _MainViewState extends State<MainView> {
   void showError() {
     DialogHelper.showUnknownError(context: this.context);
   }
+
+  bool _keepAlive = true;
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => _keepAlive;
 }
 
 class _MainViewPresenter {

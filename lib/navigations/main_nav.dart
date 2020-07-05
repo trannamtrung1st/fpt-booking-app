@@ -53,6 +53,7 @@ class MainNav extends StatefulWidget {
 class _MainNavState extends State<MainNav> {
   LoginContext loginContext;
   _MainNavPresenter _presenter;
+  PageController pageController = PageController(keepPage: true);
 
   static const int TAB_CALENDAR = 0;
   static const int TAB_APPROVAL = 1;
@@ -75,9 +76,10 @@ class _MainNavState extends State<MainNav> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: "#F5F5F5".toColor(),
-        body: IndexedStack(
-          index: _state,
+        body: PageView(
+          controller: pageController,
           children: pages,
+          onPageChanged: _presenter.onPageChanged,
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
@@ -101,7 +103,11 @@ class _MainNavPresenter {
 
   void onItemTapped(int index) {
     int tabState = _getTabFromIndex(index);
-    view.changeTab(tabState);
+    view.pageController.jumpToPage(tabState);
+  }
+
+  void onPageChanged(int tab){
+    view.changeTab(tab);
   }
 
   int _getTabFromIndex(int index) {

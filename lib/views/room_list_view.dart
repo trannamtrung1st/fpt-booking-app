@@ -14,7 +14,8 @@ class RoomListView extends StatefulWidget {
   _RoomListViewState createState() => _RoomListViewState();
 }
 
-class _RoomListViewState extends State<RoomListView> {
+class _RoomListViewState extends State<RoomListView>
+    with AutomaticKeepAliveClientMixin {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
@@ -250,6 +251,12 @@ class _RoomListViewState extends State<RoomListView> {
     }
     return card;
   }
+
+  bool _keepAlive = true;
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => _keepAlive;
 }
 
 class _RoomListViewPresenter {

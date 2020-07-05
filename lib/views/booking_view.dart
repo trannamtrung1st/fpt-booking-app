@@ -19,7 +19,8 @@ class BookingView extends StatefulWidget {
   _BookingViewState createState() => _BookingViewState();
 }
 
-class _BookingViewState extends State<BookingView> {
+class _BookingViewState extends State<BookingView>
+    with AutomaticKeepAliveClientMixin {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   static const int AFTER_SEARCH = 3;
@@ -80,10 +81,12 @@ class _BookingViewState extends State<BookingView> {
     super.initState();
     _presenter = _BookingViewPresenter(view: this);
     _presenter.handleInitState(context);
+//    this.updateKeepAlive();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -359,6 +362,12 @@ class _BookingViewState extends State<BookingView> {
           modalType: SmartSelectModalType.bottomSheet,
         ));
   }
+
+  bool _keepAlive = true;
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => _keepAlive;
 }
 
 class _BookingViewPresenter {
