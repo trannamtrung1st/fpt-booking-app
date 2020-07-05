@@ -139,7 +139,7 @@ class _CalendarViewState extends State<CalendarView>
         var statusText = ViewHelper.getTextByBookingStatus(status: status);
         rows.add(AppTableRow(
             data: <dynamic>[time, room, type, statusText],
-            onTap: type == "Booking" ? () => _presenter.onRowTab(o) : null));
+            onTap: type == "Booking" ? () => _presenter.onRowTap(o) : null));
       }
     return Container(
       margin: EdgeInsets.only(top: 10),
@@ -188,7 +188,7 @@ class _CalendarViewPresenter {
         }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 
-  void onRowTab(dynamic data) {
+  void onRowTap(dynamic data) {
     int id = data["id"];
     print(id);
     view.navigateToBookingDetail(id);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/repos/user_repo.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -70,7 +71,7 @@ class _LoginViewState extends State<LoginView> {
   Widget _signInButton() {
     return FlatButton(
       padding: EdgeInsets.zero,
-      splashColor: Colors.grey,
+      splashColor: "#CCCCCC".toColor(),
       onPressed: _presenter.onSignInPressed,
       color: Colors.blue,
       child: Container(

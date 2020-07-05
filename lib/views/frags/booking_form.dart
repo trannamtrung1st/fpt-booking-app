@@ -123,7 +123,7 @@ class _BookingFormState extends State<BookingForm> {
             labelText: 'Note',
             child: Container(
               decoration:
-                  BoxDecoration(border: Border.all(color: "#DDDDDD".toColor())),
+                  BoxDecoration(border: Border.all(color: "#CCCCCC".toColor())),
               padding: EdgeInsets.all(8.0),
               child: TextFormField(
                 maxLines: 7,
@@ -210,7 +210,7 @@ class _BookingFormState extends State<BookingForm> {
                 minWidth: 30,
                 child: FlatButton(
                   padding: EdgeInsets.zero,
-                  color: "#DDDDDD".toColor(),
+                  color: "#CCCCCC".toColor(),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   shape: CircleBorder(),
                   onPressed: _presenter.onAddUsingPersonPressed,
@@ -226,7 +226,7 @@ class _BookingFormState extends State<BookingForm> {
               minWidth: 30,
               child: FlatButton(
                 padding: EdgeInsets.zero,
-                color: "#DDDDDD".toColor(),
+                color: "#CCCCCC".toColor(),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: CircleBorder(),
                 onPressed: () => showChoices(context),
@@ -271,7 +271,7 @@ class _BookingFormPresenter {
   }
 
   void onAddUsingPersonPressed() async {
-    var email = view.promptEmail();
+    var email = await view.promptEmail();
     if (email == null) return;
     var personList = view.booking["using_person"] as List<dynamic>;
     personList.add(email);

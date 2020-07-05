@@ -9,11 +9,15 @@ import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
 
 class BookingDetailForm extends StatelessWidget {
-  static const int FEEDBACK_IDX = 8;
+  static const int FEEDBACK_IDX = 9;
   final dynamic data;
   final Widget Function() feedbackWidgetBuilder;
+  final bool isApproval;
 
-  BookingDetailForm({@required this.data, @required this.feedbackWidgetBuilder});
+  BookingDetailForm(
+      {@required this.data,
+      @required this.feedbackWidgetBuilder,
+      this.isApproval = false});
 
   @override
   Widget build(BuildContext context) {
@@ -63,23 +67,26 @@ class BookingDetailForm extends StatelessWidget {
         labelText: 'Manager message',
         child: Text(data["manager_message"] ?? ""),
       ),
-      Divider(),
-      Row(
-        children: <Widget>[
-          AppButton(
-            type: "danger",
-            child: Text('ABORT'),
-            onPressed: () {},
-          ),
-          Spacer(),
-          AppButton(
-            type: "success",
-            child: Text('FEEDBACK'),
-            onPressed: () {},
-          ),
-        ],
-      )
     ];
+    if (!isApproval)
+      widgets.addAll(<Widget>[
+        Divider(),
+        Row(
+          children: <Widget>[
+            AppButton(
+              type: "danger",
+              child: Text('ABORT'),
+              onPressed: () {},
+            ),
+            Spacer(),
+            AppButton(
+              type: "success",
+              child: Text('FEEDBACK'),
+              onPressed: () {},
+            ),
+          ],
+        )
+      ]);
     var fbWidget = feedbackWidgetBuilder();
     widgets.insert(FEEDBACK_IDX, fbWidget);
 

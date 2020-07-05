@@ -14,8 +14,24 @@ class BookingApi {
     return response;
   }
 
-  static Future<http.Response> getDetail(
-      {@required int id}) async {
+  static Future<http.Response> getManagedRequest(
+      {String fields,
+      String fromDateStr,
+      String toDateStr,
+      String dateFormat,
+      String sorts}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/managed', {
+      'fields': fields,
+      'from_date_str': fromDateStr,
+      'to_date_str': toDateStr,
+      'sorts': sorts,
+      'date_format': dateFormat
+    });
+    var response = await http.get(uri, headers: HttpHelper.commonHeaders());
+    return response;
+  }
+
+  static Future<http.Response> getDetail({@required int id}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings/$id');
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
     return response;

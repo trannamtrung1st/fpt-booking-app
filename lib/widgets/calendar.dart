@@ -40,7 +40,7 @@ class _CalendarState extends State<Calendar> {
       initialCalendarFormat: calendarFormat,
       onDaySelected: onDaySelected,
       calendarStyle: CalendarStyle(
-          selectedColor: Colors.orange, todayColor: "#DDDDDD".toColor()),
+          selectedColor: Colors.orange, todayColor: "#CCCCCC".toColor()),
     );
   }
 }

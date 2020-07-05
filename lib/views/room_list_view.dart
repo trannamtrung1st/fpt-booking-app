@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/views/frags/single_room_card.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -129,6 +131,8 @@ class _RoomListViewState extends State<RoomListView>
                 style: TextStyle(fontSize: 14),
                 onChanged: (value) => searchValue = value,
                 decoration: InputDecoration(
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: "#CCCCCC".toColor())),
                     hintText: "Input something: room's code, name ...",
                     contentPadding: EdgeInsets.only(bottom: 7),
                     isDense: true),
@@ -171,83 +175,10 @@ class _RoomListViewState extends State<RoomListView>
     );
 
     for (dynamic o in rooms) {
-      cardWidgets.add(AppCard(
-        onTap: () => _presenter.onRoomPressed(o),
-        margin: EdgeInsets.only(top: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.only(right: 20),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        child: Icon(
-                          Icons.school,
-                          size: 45,
-                          color: Colors.white,
-                        ),
-                        padding: EdgeInsets.all(7),
-                        margin: EdgeInsets.only(bottom: 7),
-                        decoration: BoxDecoration(
-                            color: Colors.deepOrangeAccent,
-                            shape: BoxShape.circle),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    RichText(
-                      text: TextSpan(
-                        text: o["code"],
-                        style: TextStyle(fontSize: 17, color: Colors.black),
-                        children: <TextSpan>[
-                          TextSpan(
-                              text: "   " + o["room_type"]["name"],
-                              style: TextStyle(
-                                  color: Colors.orange, fontSize: 14)),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Icon(
-                          Icons.fullscreen,
-                          color: Colors.grey,
-                          size: 22,
-                        ),
-                        Text(
-                          " " + o["area_size"].toString() + " m2",
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Icon(
-                          Icons.people,
-                          color: Colors.grey,
-                          size: 22,
-                        ),
-                        Text(
-                          " At most " + o["people_capacity"].toString(),
-                          style: TextStyle(color: Colors.grey),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
+      cardWidgets.add(SingleRoomCard(
+        onRoomPressed: (val) => _presenter.onRoomPressed(val),
+        room: o,
+        showStatus: false,
       ));
     }
     return card;

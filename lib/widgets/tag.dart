@@ -22,7 +22,7 @@ class Tag extends StatelessWidget {
             child: Icon(
               Icons.cancel,
               size: 20,
-              color: Colors.grey,
+              color: "#CCCCCC".toColor(),
             ),
           )));
     Widget row = Row(
@@ -32,7 +32,7 @@ class Tag extends StatelessWidget {
     Widget finalTag = Container(
         padding: EdgeInsets.fromLTRB(10, 7, 10, 7),
         decoration: BoxDecoration(
-            color: "#DDDDDD".toColor(),
+            color: "#CCCCCC".toColor(),
             borderRadius: BorderRadius.all(Radius.circular(40))),
         child: row);
     if (onTap != null)

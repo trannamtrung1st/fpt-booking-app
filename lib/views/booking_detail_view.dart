@@ -3,12 +3,9 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
-import 'package:fptbooking_app/widgets/app_button.dart';
-import 'package:fptbooking_app/widgets/app_card.dart';
+import 'package:fptbooking_app/views/frags/booking_detail_form.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
-import 'package:fptbooking_app/widgets/tag.dart';
-import 'package:fptbooking_app/widgets/tags_container.dart';
 
 class BookingDetailView extends StatefulWidget {
   final int id;
@@ -101,120 +98,27 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
           padding: EdgeInsets.all(15),
-          child: AppCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  "BOOKING INFORMATION",
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+          child: BookingDetailForm(
+            data: this.data,
+            feedbackWidgetBuilder: () => SimpleInfo(
+              labelText: 'Feedback',
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(color: "#CCCCCC".toColor())),
+                padding: EdgeInsets.all(8.0),
+                //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
+                child: TextFormField(
+                  maxLines: 7,
+                  onChanged: _presenter.onFeedbackChanged,
+                  initialValue: data["feedback"] ?? "",
+                  style: TextStyle(fontSize: 14),
+                  decoration: InputDecoration.collapsed(
+                      hintText: "Enter your text here"),
                 ),
-                SimpleInfo(
-                  labelText: 'Room',
-                  child: Text(
-                    data["room"]["code"],
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ),
-                SimpleInfo(
-                  labelText: 'Status',
-                  child:
-                      ViewHelper.getTextByBookingStatus(status: data["status"]),
-                ),
-                _getTimeStr(),
-                SimpleInfo(
-                  labelText: 'Number of people',
-                  child: Text(data["num_of_people"].toString()),
-                ),
-                _getAttachedServicesTags(),
-                SimpleInfo(
-                  labelText: 'Booking person',
-                  child: Text(
-                    data["book_person"],
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ),
-                SimpleInfo(
-                  labelText: 'Using person(s)',
-                  child: Text(
-                    (data["using_person"] as List<dynamic>).join(', '),
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                ),
-                SimpleInfo(
-                  labelText: 'Note',
-                  child: Text(data["note"] ?? ""),
-                ),
-                SimpleInfo(
-                  labelText: 'Feedback',
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(color: "#DDDDDD".toColor())),
-                    padding: EdgeInsets.all(8.0),
-                    //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
-                    child: TextFormField(
-                      maxLines: 7,
-                      onChanged: _presenter.onFeedbackChanged,
-                      initialValue: data["feedback"] ?? "",
-                      style: TextStyle(fontSize: 14),
-                      decoration: InputDecoration.collapsed(
-                          hintText: "Enter your text here"),
-                    ),
-                  ),
-                ),
-                SimpleInfo(
-                  labelText: 'Manager message',
-                  child: Text(data["manager_message"] ?? ""),
-                ),
-                Divider(),
-                Row(
-                  children: <Widget>[
-                    AppButton(
-                      type: "danger",
-                      child: Text('ABORT'),
-                      onPressed: () {},
-                    ),
-                    Spacer(),
-                    AppButton(
-                      type: "success",
-                      child: Text('FEEDBACK'),
-                      onPressed: () {},
-                    ),
-                  ],
-                )
-              ],
+              ),
             ),
           ),
         ));
-  }
-
-  Widget _getAttachedServicesTags() {
-    var services = data["attached_services"] as List<dynamic>;
-    Widget widget = Text("Nothing");
-    if (services != null) {
-      var tags = services
-          .map((e) => Tag(
-                child: Text(e["name"]),
-              ))
-          .toList();
-      widget = TagsContainer(tags: tags);
-    }
-    return SimpleInfo(
-      labelText: 'Attached services',
-      child: widget,
-    );
-  }
-
-  Widget _getTimeStr() {
-    return SimpleInfo(
-        labelText: 'Status',
-        child: Text(data["booked_date"] +
-            ", " +
-            data["from_time"] +
-            " - " +
-            data["to_time"]));
   }
 }
 

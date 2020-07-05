@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
+import 'package:fptbooking_app/views/approval_list_view.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/main_view.dart';
@@ -44,7 +45,7 @@ class MainNav extends StatefulWidget {
           icon: Icon(Icons.check),
           title: Text('Approval'),
         ));
-    managerPages.insert(1, MainView());
+    managerPages.insert(1, ApprovalListView());
   }
 
   @override
