@@ -88,37 +88,37 @@ class _BookingDetailViewState extends State<BookingDetailView> {
 
   //widgets
   Widget _mainContent({@required Widget body}) {
-    return Scaffold(
-        appBar: ViewHelper.getDefaultAppBar(title: "Calendar detail"),
-        body: body);
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+            appBar: ViewHelper.getDefaultAppBar(title: "Calendar detail"),
+            body: body));
   }
 
   Widget _bookingInfoCard() {
-    return GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(15),
-          child: BookingDetailForm(
-            data: this.data,
-            feedbackWidgetBuilder: () => SimpleInfo(
-              labelText: 'Feedback',
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(color: "#CCCCCC".toColor())),
-                padding: EdgeInsets.all(8.0),
-                //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
-                child: TextFormField(
-                  maxLines: 7,
-                  onChanged: _presenter.onFeedbackChanged,
-                  initialValue: data["feedback"] ?? "",
-                  style: TextStyle(fontSize: 14),
-                  decoration: InputDecoration.collapsed(
-                      hintText: "Enter your text here"),
-                ),
-              ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(15),
+      child: BookingDetailForm(
+        data: this.data,
+        feedbackWidgetBuilder: () => SimpleInfo(
+          labelText: 'Feedback',
+          child: Container(
+            decoration:
+                BoxDecoration(border: Border.all(color: "#CCCCCC".toColor())),
+            padding: EdgeInsets.all(8.0),
+            //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
+            child: TextFormField(
+              maxLines: 7,
+              onChanged: _presenter.onFeedbackChanged,
+              initialValue: data["feedback"] ?? "",
+              style: TextStyle(fontSize: 14),
+              decoration:
+                  InputDecoration.collapsed(hintText: "Enter your text here"),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
