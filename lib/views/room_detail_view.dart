@@ -200,12 +200,12 @@ class _RoomDetailViewState extends State<RoomDetailView> {
               children: <Widget>[
                 Icon(
                   Icons.fullscreen,
-                  color: "#CCCCCC".toColor(),
+                  color: Colors.grey,
                   size: 22,
                 ),
                 Text(
                   " " + _data["area_size"].toString() + " m2",
-                  style: TextStyle(color: "#CCCCCC".toColor()),
+                  style: TextStyle(color: Colors.grey),
                 )
               ],
             ),
@@ -214,12 +214,12 @@ class _RoomDetailViewState extends State<RoomDetailView> {
               children: <Widget>[
                 Icon(
                   Icons.people,
-                  color: "#CCCCCC".toColor(),
+                  color: Colors.grey,
                   size: 22,
                 ),
                 Text(
                   " At most " + _data["people_capacity"].toString(),
-                  style: TextStyle(color: "#CCCCCC".toColor()),
+                  style: TextStyle(color: Colors.grey),
                 )
               ],
             ),
