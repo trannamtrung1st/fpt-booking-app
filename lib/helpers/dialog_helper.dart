@@ -13,10 +13,12 @@ class DialogHelper {
     bool Function(String text) onCancel,
     bool Function(String text) onOk,
   }) async {
+    var controller = TextEditingController();
     var textField = TextFormField(
         autofocus: false,
         keyboardType: inputType,
         maxLines: inputType == TextInputType.multiline ? 7 : 1,
+        controller: controller,
         decoration: InputDecoration(
             hintText: hintText,
             contentPadding: EdgeInsets.only(bottom: 7),
@@ -36,7 +38,7 @@ class DialogHelper {
               FlatButton(
                 child: Text(cancelBtnText),
                 onPressed: () {
-                  if (onCancel != null && !onCancel(textField.controller.text))
+                  if (onCancel != null && !onCancel(controller.text))
                     return;
                   Navigator.of(context).pop(null);
                 },
@@ -44,8 +46,8 @@ class DialogHelper {
               FlatButton(
                 child: Text(okBtnText),
                 onPressed: () {
-                  if (onOk != null && !onOk(textField.controller.text)) return;
-                  Navigator.of(context).pop(textField.controller.text);
+                  if (onOk != null && !onOk(controller.text)) return;
+                  Navigator.of(context).pop(controller.text);
                 },
               ),
             ],
