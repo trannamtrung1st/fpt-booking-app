@@ -4,8 +4,8 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/views/approval_list_view.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
-import 'package:fptbooking_app/views/main_view.dart';
 import 'package:fptbooking_app/views/room_list_view.dart';
+import 'package:fptbooking_app/views/settings_view.dart';
 import 'package:provider/provider.dart';
 
 final List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
@@ -32,7 +32,7 @@ final List<Widget> normalPages = <Widget>[
   CalendarView(),
   BookingView(),
   RoomListView(),
-  MainView()
+  SettingsView()
 ];
 final List<Widget> managerPages = normalPages.toList(growable: true);
 
