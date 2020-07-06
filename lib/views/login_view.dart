@@ -25,7 +25,7 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    this.loginContext = Provider.of<LoginContext>(context, listen: false);
+    loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _LoginViewPresenter(view: this);
     if (isInFirebaseLoginProcess()) {
       return _buildInFirebaseLoginProcess(context);
@@ -165,7 +165,10 @@ class _LoginViewPresenter {
 
   Future<FirebaseUser> _handleSignIn() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return null;
+    if (googleUser == null) {
+      view.setShowingViewState();
+      return null;
+    }
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:fptbooking_app/constants.dart';
 
 class LoginContext extends ChangeNotifier {
   static const int NOT_LOGGED_IN = 1;
@@ -29,6 +30,10 @@ class LoginContext extends ChangeNotifier {
   }
 
   bool isManager() {
-    return role == "Manager";
+    return role == Constants.ROLE_MANAGER;
+  }
+
+  bool isRoomChecker() {
+    return role == Constants.ROLE_ROOM_CHECKER;
   }
 }

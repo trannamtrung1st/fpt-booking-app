@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
-import 'package:fptbooking_app/views/frags/single_room_card.dart';
+import 'package:fptbooking_app/views/frags/room_info_card.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -175,10 +175,9 @@ class _RoomListViewState extends State<RoomListView>
     );
 
     for (dynamic o in rooms) {
-      cardWidgets.add(SingleRoomCard(
+      cardWidgets.add(RoomInfoCard(
         onRoomPressed: (val) => _presenter.onRoomPressed(val),
         room: o,
-        showStatus: false,
       ));
     }
     return card;

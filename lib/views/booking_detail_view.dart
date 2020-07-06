@@ -209,7 +209,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   Widget _calendarDetail() {
     return BookingDetailForm(
       data: data,
-      feedbackWidgetBuilder: () => SimpleInfo(
+      feedbackWidget: SimpleInfo(
         labelText: 'Feedback',
         child: Container(
           decoration:
@@ -226,11 +226,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
           ),
         ),
       ),
-      managerMessageBuilder: () => SimpleInfo(
+      managerMessage: SimpleInfo(
         labelText: 'Manager message',
         child: Text(data["manager_message"] ?? ""),
       ),
-      opsBuilder: () => <Widget>[
+      operations: <Widget>[
         Divider(),
         Row(
           children: <Widget>[
@@ -253,12 +253,12 @@ class _BookingDetailViewState extends State<BookingDetailView> {
 
   Widget _requestDetail() {
     return BookingDetailForm(
-      feedbackWidgetBuilder: () => SimpleInfo(
+      feedbackWidget: SimpleInfo(
         labelText: "Feedback",
         child: Text(data["feedback"] ?? ""),
       ),
       data: data,
-      changeRoomBtnBuilder: () => GestureDetector(
+      changeRoomBtn: GestureDetector(
         onTap: _presenter.onChangeRoomPressed,
         child: Container(
           margin: EdgeInsets.only(left: 10),
@@ -270,21 +270,21 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         ),
       ),
       onRemoveService: _presenter.onRemoveService,
-      opsBuilder: !_dataUpdated
+      operations: !_dataUpdated
           ? null
-          : () => <Widget>[
-                Divider(),
-                Row(
-                  children: <Widget>[
-                    Spacer(),
-                    AppButton(
-                      child: (Text("UPDATE")),
-                      onPressed: _presenter.onManagerUpdateRequestPressed,
-                      type: "success",
-                    )
-                  ],
-                )
-              ],
+          : <Widget>[
+              Divider(),
+              Row(
+                children: <Widget>[
+                  Spacer(),
+                  AppButton(
+                    child: (Text("UPDATE")),
+                    onPressed: _presenter.onManagerUpdateRequestPressed,
+                    type: "success",
+                  )
+                ],
+              )
+            ],
     );
   }
 }

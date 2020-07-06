@@ -9,19 +9,19 @@ import 'package:fptbooking_app/widgets/tags_container.dart';
 class BookingDetailForm extends StatelessWidget {
   static const int FEEDBACK_IDX = 9;
   final dynamic data;
-  final Widget Function() feedbackWidgetBuilder;
-  final Widget Function() managerMessageBuilder;
-  final List<Widget> Function() opsBuilder;
-  final Widget Function() changeRoomBtnBuilder;
+  final Widget feedbackWidget;
+  final Widget managerMessage;
+  final List<Widget> operations;
+  final Widget changeRoomBtn;
   final Function(dynamic data) onRemoveService;
 
   BookingDetailForm(
       {@required this.data,
-      @required this.feedbackWidgetBuilder,
+      @required this.feedbackWidget,
       this.onRemoveService,
-      this.managerMessageBuilder,
-      this.changeRoomBtnBuilder,
-      this.opsBuilder});
+      this.managerMessage,
+      this.changeRoomBtn,
+      this.operations});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +31,7 @@ class BookingDetailForm extends StatelessWidget {
         style: TextStyle(color: Colors.blue),
       )
     ];
-    if (changeRoomBtnBuilder != null)
-      roomCodeWidgets.add(changeRoomBtnBuilder());
+    if (changeRoomBtn != null) roomCodeWidgets.add(changeRoomBtn);
     var widgets = <Widget>[
       Text(
         "BOOKING INFORMATION",
@@ -74,10 +73,9 @@ class BookingDetailForm extends StatelessWidget {
         child: Text(data["note"] ?? ""),
       ),
     ];
-    if (managerMessageBuilder != null) widgets.add(managerMessageBuilder());
-    if (opsBuilder != null) widgets.addAll(opsBuilder());
-    var fbWidget = feedbackWidgetBuilder();
-    widgets.insert(FEEDBACK_IDX, fbWidget);
+    if (managerMessage != null) widgets.add(managerMessage);
+    if (operations != null) widgets.addAll(operations);
+    widgets.insert(FEEDBACK_IDX, feedbackWidget);
 
     return AppCard(
       child: Column(

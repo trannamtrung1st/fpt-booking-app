@@ -127,7 +127,7 @@ class _BookingFormState extends State<BookingForm> {
               padding: EdgeInsets.all(8.0),
               child: TextFormField(
                 maxLines: 7,
-                onChanged: (value) => booking["note"] = value,
+                onChanged: _presenter.onNoteChanged,
                 initialValue: booking["note"] ?? "",
                 style: TextStyle(fontSize: 14),
                 decoration: InputDecoration.collapsed(
@@ -262,6 +262,10 @@ class _BookingFormPresenter {
 
   void onSubmit() {
     print(view.booking);
+  }
+
+  void onNoteChanged(String val) {
+    view.booking["note"] = val;
   }
 
   void onRemovePerson(String person) {

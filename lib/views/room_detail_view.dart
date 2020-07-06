@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:fptbooking_app/helpers/color_helper.dart';
+import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/views/frags/booking_form.dart';
-import 'package:fptbooking_app/widgets/app_button.dart';
-import 'package:fptbooking_app/widgets/app_card.dart';
+import 'package:fptbooking_app/views/frags/role_checking_form.dart';
+import 'package:fptbooking_app/views/frags/room_info_card.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
+import 'package:provider/provider.dart';
 
 class RoomDetailView extends StatefulWidget {
   static const int TYPE_ROOM_INFO = 1;
@@ -32,8 +33,9 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
   String code;
-  dynamic _data;
+  dynamic data;
   dynamic extraData;
+  LoginContext _loginContext;
 
   int type;
 
@@ -45,6 +47,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   @override
   void initState() {
     super.initState();
+    _loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _RoomDetailViewPresenter(view: this);
     _presenter.handleInitState(context);
   }
@@ -58,10 +61,10 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   }
 
   //isShowingView
-  void loadRoomData(dynamic data) {
+  void loadRoomData(dynamic val) {
     setState(() {
       _state = SHOWING_VIEW;
-      _data = data;
+      data = val;
     });
   }
 
@@ -70,12 +73,19 @@ class _RoomDetailViewState extends State<RoomDetailView> {
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    if (_data == null) return _mainContent(body: Container());
-    var widgets = <Widget>[_roomInfoCard()];
+    if (data == null) return _mainContent(body: Container());
+    var widgets = <Widget>[
+      RoomInfoCard(
+        margin: EdgeInsets.zero,
+        showStatus: true,
+        room: data,
+        details: [Divider(), _detailInfo()],
+      )
+    ];
     switch (type) {
       case RoomDetailView.TYPE_BOOKING:
         widgets.add(BookingForm(
-          room: _data,
+          room: data,
           bookedDate: extraData["bookedDate"],
           fromTime: extraData["fromTime"],
           toTime: extraData["toTime"],
@@ -83,6 +93,12 @@ class _RoomDetailViewState extends State<RoomDetailView> {
         ));
         break;
     }
+
+    if (_loginContext.isRoomChecker())
+      widgets.add(RoomCheckingForm(
+        room: data,
+      ));
+
     var body = GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: SingleChildScrollView(
@@ -141,102 +157,14 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     return "Room information";
   }
 
-  Widget _roomInfoCard() {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _generalInfo(),
-          Divider(),
-          _detailInfo(),
-        ],
-      ),
-    );
-  }
-
-  Widget _generalInfo() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.only(right: 20),
-          child: Column(
-            children: <Widget>[
-              Container(
-                child: Icon(
-                  Icons.school,
-                  size: 45,
-                  color: Colors.white,
-                ),
-                padding: EdgeInsets.all(7),
-                margin: EdgeInsets.only(bottom: 7),
-                decoration: BoxDecoration(
-                    color: Colors.deepOrangeAccent, shape: BoxShape.circle),
-              ),
-              Text(
-                "EMPTY",
-                style:
-                    TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-              )
-            ],
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            RichText(
-              text: TextSpan(
-                text: _data["code"],
-                style: TextStyle(fontSize: 17, color: Colors.black),
-                children: <TextSpan>[
-                  TextSpan(
-                      text: "   " + _data["room_type"]["name"],
-                      style: TextStyle(color: Colors.orange, fontSize: 14)),
-                ],
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Icon(
-                  Icons.fullscreen,
-                  color: Colors.grey,
-                  size: 22,
-                ),
-                Text(
-                  " " + _data["area_size"].toString() + " m2",
-                  style: TextStyle(color: Colors.grey),
-                )
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Icon(
-                  Icons.people,
-                  color: Colors.grey,
-                  size: 22,
-                ),
-                Text(
-                  " At most " + _data["people_capacity"].toString(),
-                  style: TextStyle(color: Colors.grey),
-                )
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _detailInfo() {
-    var location = _data["block"]["name"] + " - " + _data["level"]["name"];
+    var location = data["block"]["name"] + " - " + data["level"]["name"];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         SimpleInfo(
           labelText: "Description",
-          child: Text(_data["description"] ?? "Nothing"),
+          child: Text(data["description"] ?? "Nothing"),
         ),
         SimpleInfo(
           labelText: "Location",
@@ -247,7 +175,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
           marginBetween: 0,
           labelText: "Area: ",
           child: Text(
-            _data["area"]["name"],
+            data["area"]["name"],
             style: TextStyle(color: Colors.blue),
           ),
         ),
@@ -257,7 +185,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   }
 
   Widget _getResourcesTags() {
-    var services = _data["resources"] as List<dynamic>;
+    var services = data["resources"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
       var tags = services.map((e) => Tag(child: Text(e["name"]))).toList();
@@ -285,9 +213,9 @@ class _RoomDetailViewPresenter {
         code: code,
         error: view.showError,
         invalid: view.showInvalidMessages,
-        success: (data) {
+        success: (val) {
           success = true;
-          view.loadRoomData(data);
+          view.loadRoomData(val);
         }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 }

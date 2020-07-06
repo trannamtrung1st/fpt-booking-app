@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
-import 'package:fptbooking_app/views/frags/single_room_card.dart';
+import 'package:fptbooking_app/views/frags/room_info_card.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 
 class AvailableRoomList extends StatefulWidget {
@@ -57,7 +57,7 @@ class _AvailableRoomListState extends State<AvailableRoomList> {
     );
 
     for (dynamic o in rooms) {
-      cardWidgets.add(SingleRoomCard(
+      cardWidgets.add(RoomInfoCard(
         room: o,
         onRoomPressed: (val) => onRoomPressed(val),
       ));

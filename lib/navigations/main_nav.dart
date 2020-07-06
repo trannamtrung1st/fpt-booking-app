@@ -73,7 +73,7 @@ class _MainNavState extends State<MainNav> {
 
   @override
   Widget build(BuildContext context) {
-    loginContext = Provider.of<LoginContext>(context);
+    loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _MainNavPresenter(view: this);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
