@@ -31,7 +31,7 @@ class RoomRepo {
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
       print(result);
-      var validationData = result["data"];
+      var validationData = result["data"]["results"];
       var mess = <String>[];
       for (dynamic o in validationData) mess.add(o["message"] as String);
       if (invalid != null) invalid(mess);
@@ -57,7 +57,7 @@ class RoomRepo {
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
       print(result);
-      var validationData = result["data"];
+      var validationData = result["data"]["results"];
       var mess = <String>[];
       for (dynamic o in validationData) mess.add(o["message"] as String);
       if (invalid != null) invalid(mess);
@@ -77,12 +77,12 @@ class RoomRepo {
     if (response.statusCode == 200) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
-      if (success != null) success(result["data"]);
+      if (success != null) success(result["data"]["single"]);
       return;
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
       print(result);
-      var validationData = result["data"];
+      var validationData = result["data"]["results"];
       var mess = <String>[];
       for (dynamic o in validationData) mess.add(o["message"] as String);
       if (invalid != null) invalid(mess);

@@ -16,7 +16,7 @@ class RoomTypeRepo {
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
       print(result);
-      var validationData = result["data"];
+      var validationData = result["data"]["results"];
       var mess = <String>[];
       for (dynamic o in validationData) mess.add(o["message"] as String);
       if (invalid != null) invalid(mess);
