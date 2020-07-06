@@ -1,12 +1,9 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
-import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_type_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
@@ -16,17 +13,17 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-//  //prepare
-//  var success = false;
-//  await RoomTypeRepo.getAll(success: (list) {
-//    MemoryStorage.roomTypes = list;
-//    success = true;
-//  }).catchError((e) => {print(e)});
-//  if (!success) {
-////    SystemNavigator.pop();
-//    exit(0);
-//    return;
-//  }
+  //prepare
+  var success = false;
+  await RoomTypeRepo.getAll(success: (list) {
+    MemoryStorage.roomTypes = list;
+    success = true;
+  }).catchError((e) => {print(e)});
+  if (!success) {
+//    SystemNavigator.pop();
+    exit(0);
+    return;
+  }
 
   //static init
   MainNav.init();
@@ -48,6 +45,10 @@ Widget _materialApp() {
     home: SafeArea(
       child: App(),
     ),
+    theme: ThemeData(
+      //for scroll-overflowed color
+      accentColor: Colors.orange,
+    ),
   );
 }
 
@@ -59,42 +60,12 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   static const int PRE_PROCESSING = 1;
   static const int SHOWING_VIEW = 2;
-
-  //temp
-  static const int INPUT_API_URL = 3;
-  static const int TEMP_PREPARE = 4;
-
-//  int _state = PRE_PROCESSING;
-  int _state = INPUT_API_URL;
+  int _state = PRE_PROCESSING;
   LoginContext loginContext;
   _AppPresenter _presenter;
 
   @override
   Widget build(BuildContext context) {
-    if (_state == INPUT_API_URL) {
-      Timer(Duration(seconds: 1), () {
-        DialogHelper.prompt(context: context, title: "Input api authority")
-            .then((value) {
-          if (value != null && value.isNotEmpty) Constants.API_AUTH = value;
-          setState(() {
-            _state = TEMP_PREPARE;
-          });
-        });
-      });
-      return Container();
-    }
-    if (_state == TEMP_PREPARE) {
-      //prepare
-      var success = false;
-      RoomTypeRepo.getAll(success: (list) {
-        MemoryStorage.roomTypes = list;
-        success = true;
-        setState(() {
-          _state = PRE_PROCESSING;
-        });
-      }).catchError((e) => {print(e)});
-      return Container();
-    }
     return Consumer<LoginContext>(
       builder: (context, loginContext, child) {
         this.loginContext = loginContext;

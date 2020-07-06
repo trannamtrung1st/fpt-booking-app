@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
-import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:fptbooking_app/widgets/tag.dart';
@@ -12,15 +10,29 @@ class BookingDetailForm extends StatelessWidget {
   static const int FEEDBACK_IDX = 9;
   final dynamic data;
   final Widget Function() feedbackWidgetBuilder;
-  final bool isApproval;
+  final Widget Function() managerMessageBuilder;
+  final List<Widget> Function() opsBuilder;
+  final Widget Function() changeRoomBtnBuilder;
+  final Function(dynamic data) onRemoveService;
 
   BookingDetailForm(
       {@required this.data,
       @required this.feedbackWidgetBuilder,
-      this.isApproval = false});
+      this.onRemoveService,
+      this.managerMessageBuilder,
+      this.changeRoomBtnBuilder,
+      this.opsBuilder});
 
   @override
   Widget build(BuildContext context) {
+    var roomCodeWidgets = <Widget>[
+      Text(
+        data["room"]["code"],
+        style: TextStyle(color: Colors.blue),
+      )
+    ];
+    if (changeRoomBtnBuilder != null)
+      roomCodeWidgets.add(changeRoomBtnBuilder());
     var widgets = <Widget>[
       Text(
         "BOOKING INFORMATION",
@@ -29,9 +41,8 @@ class BookingDetailForm extends StatelessWidget {
       ),
       SimpleInfo(
         labelText: 'Room',
-        child: Text(
-          data["room"]["code"],
-          style: TextStyle(color: Colors.blue),
+        child: Row(
+          children: roomCodeWidgets,
         ),
       ),
       SimpleInfo(
@@ -54,7 +65,7 @@ class BookingDetailForm extends StatelessWidget {
       SimpleInfo(
         labelText: 'Using person(s)',
         child: Text(
-          (data["using_person"] as List<dynamic>).join(', '),
+          (data["using_person"] as List<dynamic>).join('\n'),
           style: TextStyle(color: Colors.blue),
         ),
       ),
@@ -62,31 +73,9 @@ class BookingDetailForm extends StatelessWidget {
         labelText: 'Note',
         child: Text(data["note"] ?? ""),
       ),
-      //Feedback widget
-      SimpleInfo(
-        labelText: 'Manager message',
-        child: Text(data["manager_message"] ?? ""),
-      ),
     ];
-    if (!isApproval)
-      widgets.addAll(<Widget>[
-        Divider(),
-        Row(
-          children: <Widget>[
-            AppButton(
-              type: "danger",
-              child: Text('ABORT'),
-              onPressed: () {},
-            ),
-            Spacer(),
-            AppButton(
-              type: "success",
-              child: Text('FEEDBACK'),
-              onPressed: () {},
-            ),
-          ],
-        )
-      ]);
+    if (managerMessageBuilder != null) widgets.add(managerMessageBuilder());
+    if (opsBuilder != null) widgets.addAll(opsBuilder());
     var fbWidget = feedbackWidgetBuilder();
     widgets.insert(FEEDBACK_IDX, fbWidget);
 
@@ -106,8 +95,10 @@ class BookingDetailForm extends StatelessWidget {
       var tags = services
           .map((e) => Tag(
                 child: Text(e["name"]),
+                onRemove:
+                    onRemoveService != null ? () => onRemoveService(e) : null,
               ))
-          .toList();
+          .toList(growable: true);
       widget = TagsContainer(tags: tags);
     }
     return SimpleInfo(

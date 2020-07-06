@@ -87,7 +87,10 @@ class _CalendarViewState extends State<CalendarView>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BookingDetailView(id: id),
+        builder: (context) => BookingDetailView(
+          id: id,
+          type: BookingDetailView.TYPE_CALENDAR_DETAIL,
+        ),
       ),
     );
   }

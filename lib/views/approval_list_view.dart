@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
@@ -130,7 +131,10 @@ class _ApprovalListViewState extends State<ApprovalListView>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BookingDetailView(id: id),
+        builder: (context) => BookingDetailView(
+          id: id,
+          type: BookingDetailView.TYPE_REQUEST_DETAIL,
+        ),
       ),
     );
   }

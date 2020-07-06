@@ -2,6 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class DialogHelper {
+  static Future<T> showCustomModalBottomSheet<T>({
+    @required BuildContext context,
+    bool isDismissible = true,
+    bool enableDrag = true,
+    bool isScrollControlled = true,
+    @required Widget Function(BuildContext context) builder,
+  }) async {
+    return showModalBottomSheet<T>(
+        context: context,
+        builder: builder,
+        isDismissible: isDismissible,
+        enableDrag: enableDrag,
+        isScrollControlled: isScrollControlled);
+  }
+
   static Future<String> prompt({
     @required BuildContext context,
     @required String title,
