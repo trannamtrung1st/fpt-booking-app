@@ -7,6 +7,7 @@ import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/views/frags/approval_request_table.dart';
 import 'package:fptbooking_app/widgets/app_dropdown_button.dart';
+import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -198,7 +199,8 @@ class _ApprovalListViewState extends State<ApprovalListView>
 
     return LoadingModal(
       isLoading: loading,
-      child: SingleChildScrollView(
+      child: AppScroll(
+        onRefresh: _presenter.onRefresh,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -246,6 +248,10 @@ class _ApprovalListViewPresenter {
     _getRequests();
   }
 
+  Future<void> onRefresh() {
+    return _getRequests();
+  }
+
   void onStatusChanged(String status) {
     view.changeStatus(status);
   }
@@ -259,9 +265,9 @@ class _ApprovalListViewPresenter {
     view.changeOrderBy(orderBy);
   }
 
-  void _getRequests() {
+  Future<void> _getRequests() {
     var success = false;
-    BookingRepo.getManagedRequest(
+    return BookingRepo.getManagedRequest(
         fields: "info,room",
         fromDateStr: IntlHelper.format(view.fromDate),
         toDateStr: IntlHelper.format(view.toDate),

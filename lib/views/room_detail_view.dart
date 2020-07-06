@@ -6,6 +6,7 @@ import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/views/frags/booking_form.dart';
 import 'package:fptbooking_app/views/frags/role_checking_form.dart';
 import 'package:fptbooking_app/views/frags/room_info_card.dart';
+import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:fptbooking_app/widgets/tag.dart';
@@ -101,7 +102,8 @@ class _RoomDetailViewState extends State<RoomDetailView> {
 
     var body = GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: SingleChildScrollView(
+      child: AppScroll(
+        onRefresh: _presenter.onRefresh,
         child: Container(
           padding: EdgeInsets.all(15),
           child: Column(
@@ -207,9 +209,13 @@ class _RoomDetailViewPresenter {
     _getRoomDetail(view.code);
   }
 
-  void _getRoomDetail(String code) {
+  Future<void> onRefresh() {
+    return _getRoomDetail(view.code);
+  }
+
+  Future<void> _getRoomDetail(String code) {
     var success = false;
-    RoomRepo.getDetail(
+    return RoomRepo.getDetail(
         code: code,
         error: view.showError,
         invalid: view.showInvalidMessages,

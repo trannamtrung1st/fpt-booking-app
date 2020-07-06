@@ -5,6 +5,7 @@ import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/views/booking_detail_view.dart';
+import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/app_table.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -24,14 +25,14 @@ class _CalendarViewState extends State<CalendarView>
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
 
-  DateTime _selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now();
   _CalendarViewPresenter _presenter;
   List<dynamic> _bookings;
 
   void changeSelectedDate(DateTime dateTime) {
     setState(() {
       _bookings = null;
-      _selectedDate = dateTime;
+      selectedDate = dateTime;
       _state = LOADING_DATA;
     });
   }
@@ -99,7 +100,8 @@ class _CalendarViewState extends State<CalendarView>
   Widget _mainView({bool loading = false}) {
     return LoadingModal(
       isLoading: loading,
-      child: SingleChildScrollView(
+      child: AppScroll(
+        onRefresh: _presenter.onRefresh,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -123,9 +125,9 @@ class _CalendarViewState extends State<CalendarView>
   }
 
   Widget _currentSelectedDateInfo() {
-    Widget text = _selectedDate == null
+    Widget text = selectedDate == null
         ? Text("Not selected")
-        : Text(IntlHelper.format(_selectedDate));
+        : Text(IntlHelper.format(selectedDate));
     return SimpleInfo(labelText: "Selected date", child: text);
   }
 
@@ -172,15 +174,19 @@ class _CalendarViewPresenter {
     _getBookings(DateTime.now());
   }
 
+  Future<void> onRefresh() {
+    return _getBookings(view.selectedDate);
+  }
+
   void onDaySelected(DateTime selected, List<dynamic> list) {
     print(selected);
     view.changeSelectedDate(selected);
     _getBookings(selected);
   }
 
-  void _getBookings(DateTime date) {
+  Future<void> _getBookings(DateTime date) {
     var success = false;
-    BookingRepo.get(
+    return BookingRepo.get(
         fields: "info,room",
         dateStr: IntlHelper.format(date),
         error: view.showError,

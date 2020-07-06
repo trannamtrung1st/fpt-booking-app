@@ -6,6 +6,7 @@ import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/views/frags/room_info_card.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
+import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 
@@ -25,7 +26,6 @@ class _RoomListViewState extends State<RoomListView>
   _RoomListViewPresenter _presenter;
   List<dynamic> rooms;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
-  ScrollController _scrollController = ScrollController(keepScrollOffset: true);
   String searchValue = '';
 
   void navigateToRoomDetail(String code) {
@@ -110,8 +110,8 @@ class _RoomListViewState extends State<RoomListView>
     if (rooms != null) widgets.add(_getRoomsCard());
     return LoadingModal(
         isLoading: loading,
-        child: SingleChildScrollView(
-          controller: _scrollController,
+        child: AppScroll(
+          onRefresh: _presenter.onRefresh,
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
         ));
@@ -199,20 +199,24 @@ class _RoomListViewPresenter {
     _getRooms(null);
   }
 
+  Future<void> onRefresh() {
+    return onSearchPressed();
+  }
+
   void onRoomPressed(dynamic data) {
     String code = data["code"];
     print(code);
     view.navigateToRoomDetail(code);
   }
 
-  void onSearchPressed() {
+  Future<void> onSearchPressed() {
     view.loadRoomData();
-    _getRooms(view.searchValue);
+    return _getRooms(view.searchValue);
   }
 
-  void _getRooms(String searchVal) {
+  Future<void> _getRooms(String searchVal) {
     var success = false;
-    RoomRepo.getRooms(
+    return RoomRepo.getRooms(
         search: searchVal,
         invalid: view.showInvalidMessages,
         error: view.showError,

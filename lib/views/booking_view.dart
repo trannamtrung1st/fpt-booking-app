@@ -7,6 +7,7 @@ import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/frags/available_room_list.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
+import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
@@ -35,7 +36,6 @@ class _BookingViewState extends State<BookingView>
   _BookingViewPresenter _presenter;
   List<dynamic> rooms;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
-  ScrollController _scrollController = ScrollController(keepScrollOffset: true);
 
   void changeSelectedDate(DateTime date) {
     setState(() {
@@ -167,8 +167,8 @@ class _BookingViewState extends State<BookingView>
       ));
     return LoadingModal(
       isLoading: loading,
-      child: SingleChildScrollView(
-        controller: _scrollController,
+      child: AppScroll(
+        onRefresh: _presenter.onRefresh,
         child: Column(
             crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
       ),
@@ -289,6 +289,10 @@ class _BookingViewPresenter {
     view.setShowingViewState();
   }
 
+  Future<void> onRefresh() {
+    return onSearchPressed();
+  }
+
   void handleAfterSearch(BuildContext context) {
     if (view.rooms != null)
       Scrollable.ensureVisible(view.roomCardsKey.currentContext,
@@ -323,20 +327,22 @@ class _BookingViewPresenter {
     view.changeRoomType(val);
   }
 
-  void onSearchPressed() {
+  Future<void> onSearchPressed() async {
     if (view._selectedDate == null ||
         view._fromTime == null ||
         view._toTime == null ||
-        view._numOfPeople == null)
-      return view.showInvalidMessages(["Please fill all the required fields"]);
+        view._numOfPeople == null) {
+      view.showInvalidMessages(["Please fill all the required fields"]);
+      return;
+    }
     view.loadRoomData();
-    _getAvailableRooms();
+    return _getAvailableRooms();
   }
 
-  void _getAvailableRooms() {
+  Future<void> _getAvailableRooms() {
     var success = false;
     var dateStr = IntlHelper.format(view._selectedDate);
-    RoomRepo.getAvailableRooms(
+    return RoomRepo.getAvailableRooms(
         dateStr: dateStr,
         fromTime: view._fromTime,
         toTime: view._toTime,

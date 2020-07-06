@@ -8,6 +8,7 @@ import 'package:fptbooking_app/views/dialogs/change_room_dialog.dart';
 import 'package:fptbooking_app/views/frags/booking_detail_form.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
+import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 
@@ -102,7 +103,8 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         break;
     }
     return _mainContent(
-        body: SingleChildScrollView(
+        body: AppScroll(
+      onRefresh: _presenter.onRefresh,
       padding: EdgeInsets.all(15),
       child: Column(
         children: widgets,
@@ -298,6 +300,10 @@ class _BookingDetailViewPresenter {
     _getBookingDetail(view.id);
   }
 
+  Future<void> onRefresh() {
+    return _getBookingDetail(view.id);
+  }
+
   void onManagerUpdateRequestPressed() {}
 
   void onRemoveService(dynamic data) {
@@ -336,9 +342,9 @@ class _BookingDetailViewPresenter {
     view.updateData();
   }
 
-  void _getBookingDetail(int id) {
+  Future<void> _getBookingDetail(int id) {
     var success = false;
-    BookingRepo.getDetail(
+    return BookingRepo.getDetail(
         id: id,
         error: view.showError,
         invalid: view.showInvalidMessages,
