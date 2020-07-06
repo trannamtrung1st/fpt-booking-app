@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
@@ -124,6 +125,7 @@ class _LoginViewState extends State<LoginView> {
 
 class _LoginViewPresenter {
   _LoginViewState view;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   LoginContext _loginContext;
@@ -141,12 +143,30 @@ class _LoginViewPresenter {
     _signInServer(
             fbToken: fbToken,
             success: (tokenData) {
-              success = true;
-              _loginContext.loggedIn(tokenData);
+              _firebaseMessaging
+                  .subscribeToTopic(tokenData["user_id"])
+                  .catchError((e) => _loginError(err: e))
+                  .then((value) {
+                success = true;
+                _loginContext.loggedIn(tokenData);
+              }).catchError((e) => _loginError(err: e));
             },
             invalid: view.showInvalidMessages,
-            error: view.showError)
+            error: _loginError)
         .whenComplete(() => {if (!success) view.setShowingViewState()});
+  }
+
+  Future<void> _loginError({Object err}) async {
+    print(err);
+    view.showError();
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+    var tokenData = _loginContext.tokenData ?? (await UserRepo.getTokenData());
+    if (tokenData != null) {
+      await UserRepo.clearTokenData();
+      await _firebaseMessaging.unsubscribeFromTopic(tokenData["user_id"]);
+      _loginContext.signOut();
+    }
   }
 
   Future<void> _signInServer(
@@ -155,12 +175,17 @@ class _LoginViewPresenter {
       Function invalid,
       Function error}) async {
     return await UserRepo.login(
-        success: success, fbToken: fbToken, invalid: invalid, error: error);
+        invalidEmail: _handleInvalidEmail,
+        success: success,
+        fbToken: fbToken,
+        invalid: invalid,
+        error: error);
   }
 
-  void _onSignInError(Object e) {
-    print(e);
-    view.showError();
+  Future<void> _handleInvalidEmail() async {
+    await _googleSignIn.signOut();
+    await _auth.signOut();
+    view.showInvalidMessages(["Only @fpt.edu.vn is allowed"]);
   }
 
   Future<FirebaseUser> _handleSignIn() async {
@@ -188,6 +213,6 @@ class _LoginViewPresenter {
     view.setInFirebaseLoginProcessState();
     _handleSignIn()
         .then(this._onSignInFinished)
-        .catchError(this._onSignInError);
+        .catchError((e) => this._loginError(err: e));
   }
 }

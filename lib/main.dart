@@ -1,16 +1,32 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/helpers/noti_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_type_repo.dart';
+import 'package:fptbooking_app/repos/user_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/login_view.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+//Update launcher image
+//flutter pub pub run flutter_launcher_icons:main
+
+Future<dynamic> handleBackgroundFirebaseMessage(Map<String, dynamic> message) {
+  if (message.containsKey('data')) {
+    // Handle data message
+    final dynamic data = message['data'];
+  }
+  if (message.containsKey('notification')) {
+    // Handle notification message
+    final dynamic notification = message['notification'];
+    NotiHelper.show(title: notification["title"], body: notification["body"]);
+  }
+  return null;
+}
 
 void main() async {
   //prepare
@@ -58,6 +74,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   static const int PRE_PROCESSING = 1;
   static const int SHOWING_VIEW = 2;
   int _state = PRE_PROCESSING;
@@ -65,7 +82,37 @@ class _AppState extends State<App> {
   _AppPresenter _presenter;
 
   @override
+  void initState() {
+    super.initState();
+    _presenter = _AppPresenter(view: this);
+    NotiHelper.init(_presenter.onDidReceiveLocalNotification,
+        _presenter.onSelectNotification);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        final dynamic notification = message['notification'];
+        NotiHelper.show(
+            title: notification["title"], body: notification["body"]);
+      },
+      onBackgroundMessage: handleBackgroundFirebaseMessage,
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        final dynamic notification = message['notification'];
+        NotiHelper.show(
+            title: notification["title"], body: notification["body"]);
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+        final dynamic notification = message['notification'];
+        NotiHelper.show(
+            title: notification["title"], body: notification["body"]);
+      },
+    );
+
     return Consumer<LoginContext>(
       builder: (context, loginContext, child) {
         this.loginContext = loginContext;
@@ -118,14 +165,22 @@ class _AppPresenter {
   }
 
   void handlePreProcessing(BuildContext context) {
-    SharedPreferences.getInstance().then((prefs) {
-      var tokenDataStr = prefs.getString(Constants.TOKEN_DATA_KEY);
-      if (tokenDataStr != null) {
-        var tokenData = jsonDecode(tokenDataStr);
+    UserRepo.getTokenData().then((tokenData) {
+      if (tokenData != null) {
         _loginContext.loggedIn(tokenData);
-        return;
       }
       view.setShowingViewState();
     });
+  }
+
+  Future onDidReceiveLocalNotification(
+      int id, String title, String body, String payload) async {
+    print("$id - $title - $body - $payload");
+  }
+
+  Future onSelectNotification(String payload) async {
+    if (payload != null) {
+      print('notification payload: ' + payload);
+    }
   }
 }

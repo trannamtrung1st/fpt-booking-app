@@ -13,7 +13,7 @@ class RoomTypeRepo {
       var result = jsonDecode(response.body);
       if (success != null) success(result["data"]["list"]);
       return;
-    } else if (response.statusCode != 500) {
+    } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
       print(result);
       var validationData = result["data"];

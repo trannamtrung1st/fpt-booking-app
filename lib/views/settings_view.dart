@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
+import 'package:fptbooking_app/repos/user_repo.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsView extends StatefulWidget {
   SettingsView({key}) : super(key: key);
@@ -38,19 +38,25 @@ class _SettingsViewState extends State<SettingsView>
       });
 
   Widget _buildShowingViewWidget(BuildContext context) {
+    var imgSrc = loginContext.tokenData["photo_url"];
     return ListView(children: <Widget>[
       AppCard(
         margin: EdgeInsets.only(bottom: 7),
         child: Column(
           children: <Widget>[
             Container(
-              child: Image.asset(
-                "assets/user.png",
-                width: 100,
-              ),
+              child: imgSrc == null
+                  ? Image.asset(
+                      "assets/user.png",
+                      width: 100,
+                    )
+                  : Image.network(
+                      imgSrc,
+                      width: 100,
+                    ),
               margin: EdgeInsets.only(bottom: 10),
             ),
-            Text(loginContext.tokenData["email"])
+            Text(loginContext.tokenData["email"] ?? "Anonymous")
           ],
         ),
       ),
@@ -92,6 +98,7 @@ class _SettingsViewState extends State<SettingsView>
 class _SettingsViewPresenter {
   _SettingsViewState view;
   LoginContext _loginContext;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   _SettingsViewPresenter({this.view}) {
     _loginContext = view.loginContext;
@@ -103,8 +110,9 @@ class _SettingsViewPresenter {
   void onLogOutPressed() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove(Constants.TOKEN_DATA_KEY);
+    var tokenData = _loginContext.tokenData;
+    await UserRepo.clearTokenData();
+    await _firebaseMessaging.unsubscribeFromTopic(tokenData["user_id"]);
     _loginContext.signOut();
   }
 }
