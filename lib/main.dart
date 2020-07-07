@@ -32,7 +32,7 @@ void main() async {
   //prepare
   var success = false;
   await RoomTypeRepo.getAll(success: (list) {
-    MemoryStorage.roomTypes = list;
+    RoomTypeRepo.saveToMemoryStorage(list);
     success = true;
   }).catchError((e) => {print(e)});
   if (!success) {

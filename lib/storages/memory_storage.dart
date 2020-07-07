@@ -9,5 +9,5 @@ class MemoryStorage {
     _data[key] = val;
   }
 
-  static List<dynamic> roomTypes;
+  static Map<String, dynamic> roomTypesMap;
 }

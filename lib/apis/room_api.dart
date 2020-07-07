@@ -14,16 +14,20 @@ class RoomApi {
     String fromTime,
     String toTime,
     int numOfPeople,
+    bool empty,
+    bool isAvailable,
     String roomTypeCode,
   }) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/rooms', {
       'search': search,
       'fields': fields,
-      'date_str': dateStr,
+      'date': dateStr,
       'date_format': dateFormat,
       'from_time': fromTime,
       'to_time': toTime,
-      'num_of_people': numOfPeople.toString(),
+      'empty': empty?.toString(),
+      'is_available': isAvailable?.toString(),
+      'num_of_people': numOfPeople?.toString(),
       'room_type': roomTypeCode,
     });
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());

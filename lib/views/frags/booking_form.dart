@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
@@ -68,10 +69,15 @@ class _BookingFormState extends State<BookingForm> {
       'to_time': toTime,
       'room_code': room["code"],
       'num_of_people': numOfPeople,
-      'service_codes':
-          room["available_services"].map((e) => e["code"]).toList(),
-      'book_person': ["trungtnse13@fpt.edu.vn"],
-      'using_person': ["trungtnse13@fpt.edu.vn"],
+      'service_codes': MemoryStorage.roomTypesMap[room["room_type_code"]]
+              ["services"]
+          .map((e) => e["code"])
+          .toList(),
+      'book_member': {
+        "user_id": "user1",
+        "email": "trungtnse13@fpt.edu.vn"
+      },
+      'using_emails': ["trungtnse13@fpt.edu.vn"],
       'note': ''
     };
     _servicesMap = {
@@ -185,7 +191,7 @@ class _BookingFormState extends State<BookingForm> {
   }
 
   Widget _getUsingPersonTag() {
-    var person = booking["using_person"] as List<dynamic>;
+    var person = booking["using_emails"] as List<dynamic>;
     Widget widget = Text("Nobody");
     if (person != null) {
       var tags = person
@@ -269,7 +275,7 @@ class _BookingFormPresenter {
   }
 
   void onRemovePerson(String person) {
-    var personList = view.booking["using_person"] as List<dynamic>;
+    var personList = view.booking["using_emails"] as List<dynamic>;
     personList.remove(person);
     view.refresh();
   }
@@ -277,7 +283,7 @@ class _BookingFormPresenter {
   void onAddUsingPersonPressed() async {
     var email = await view.promptEmail();
     if (email == null) return;
-    var personList = view.booking["using_person"] as List<dynamic>;
+    var personList = view.booking["using_emails"] as List<dynamic>;
     personList.add(email);
     view.refresh();
   }

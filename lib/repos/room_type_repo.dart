@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:fptbooking_app/apis/room_type_api.dart';
+import 'package:fptbooking_app/storages/memory_storage.dart';
 
 class RoomTypeRepo {
   static Future<void> getAll(
-      {String fields = "info",
+      {String fields = "info,services",
       Function(List<dynamic> list) success,
       Function(List<String> mess) invalid,
       Function error}) async {
@@ -25,5 +26,10 @@ class RoomTypeRepo {
     var result = jsonDecode(response.body);
     print(result);
     if (error != null) error();
+  }
+
+  static void saveToMemoryStorage(List<dynamic> roomTypes) {
+    MemoryStorage.roomTypesMap =
+        Map.fromIterable(roomTypes, key: (e) => e["code"], value: (e) => e);
   }
 }

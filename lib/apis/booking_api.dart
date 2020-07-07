@@ -9,7 +9,7 @@ class BookingApi {
   static Future<http.Response> get(
       {String fields, String dateStr, String dateFormat}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings',
-        {'fields': fields, 'date_str': dateStr, 'date_format': dateFormat});
+        {'fields': fields, 'date': dateStr, 'date_format': dateFormat});
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
     return response;
   }
@@ -22,8 +22,8 @@ class BookingApi {
       String sorts}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings/managed', {
       'fields': fields,
-      'from_date_str': fromDateStr,
-      'to_date_str': toDateStr,
+      'from_date': fromDateStr,
+      'to_date': toDateStr,
       'sorts': sorts,
       'date_format': dateFormat
     });

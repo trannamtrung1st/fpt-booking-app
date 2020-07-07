@@ -22,6 +22,8 @@ class RoomRepo {
         fromTime: fromTime,
         numOfPeople: numOfPeople,
         roomTypeCode: roomTypeCode,
+        empty: true,
+        isAvailable: true,
         toTime: toTime);
     if (response.statusCode == 200) {
       print('Response body: ${response.body}');
@@ -77,7 +79,7 @@ class RoomRepo {
     if (response.statusCode == 200) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
-      if (success != null) success(result["data"]["single"]);
+      if (success != null) success(result["data"]);
       return;
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);

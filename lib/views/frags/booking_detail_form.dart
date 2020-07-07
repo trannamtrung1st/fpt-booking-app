@@ -57,14 +57,14 @@ class BookingDetailForm extends StatelessWidget {
       SimpleInfo(
         labelText: 'Booking person',
         child: Text(
-          data["book_person"],
+          data["book_member"]["email"],
           style: TextStyle(color: Colors.blue),
         ),
       ),
       SimpleInfo(
         labelText: 'Using person(s)',
         child: Text(
-          (data["using_person"] as List<dynamic>).join('\n'),
+          (data["using_emails"] as List<dynamic>).join('\n'),
           style: TextStyle(color: Colors.blue),
         ),
       ),

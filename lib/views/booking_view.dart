@@ -30,7 +30,7 @@ class _BookingViewState extends State<BookingView>
 
   String _fromTime;
   String _toTime;
-  dynamic _roomType = MemoryStorage.roomTypes[0];
+  dynamic _roomType = MemoryStorage.roomTypesMap.values.first;
   int _numOfPeople;
   DateTime _selectedDate = DateTime.now();
   _BookingViewPresenter _presenter;
@@ -265,7 +265,7 @@ class _BookingViewState extends State<BookingView>
           title: "Room type",
           value: _roomType,
           onChange: _presenter.onRoomTypeChanged,
-          options: MemoryStorage.roomTypes
+          options: MemoryStorage.roomTypesMap.values
               .map(
                   (o) => SmartSelectOption<dynamic>(value: o, title: o["name"]))
               .toList(),
