@@ -10,6 +10,7 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     Color btnColor = Colors.transparent, textColor = Colors.black;
     switch (type) {
       case "primary":

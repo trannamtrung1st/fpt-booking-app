@@ -25,6 +25,7 @@ class BookingDetailForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     var roomCodeWidgets = <Widget>[
       Text(
         data["room"]["code"],

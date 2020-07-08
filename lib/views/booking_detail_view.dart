@@ -4,6 +4,7 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
+import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/views/dialogs/change_room_dialog.dart';
 import 'package:fptbooking_app/views/frags/booking_detail_form.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
@@ -73,6 +74,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -131,11 +133,15 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     DialogHelper.showMessage(context: context, title: "Sorry", contents: mess);
   }
 
+  void navigateBack(){
+    Navigator.of(context).pop();
+  }
+
   void showError() {
     DialogHelper.showUnknownError(
         context: this.context,
         onOk: () {
-          Navigator.of(context).pop();
+          navigateBack();
           return true;
         });
   }
@@ -145,7 +151,8 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-            appBar: ViewHelper.getDefaultAppBar(title: _getAppBarTitle()),
+            appBar: ViewHelper.getDefaultAppBar(
+                title: _getAppBarTitle()),
             body: body));
   }
 
@@ -351,6 +358,6 @@ class _BookingDetailViewPresenter {
         success: (val) {
           success = true;
           view.loadBookingData(val);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() => {if (!success) view.navigateBack()});
   }
 }

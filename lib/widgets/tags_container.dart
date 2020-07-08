@@ -8,6 +8,7 @@ class TagsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return Wrap(
       spacing: 5,
       runSpacing: 7,

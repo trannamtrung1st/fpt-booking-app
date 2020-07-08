@@ -18,6 +18,7 @@ class ChangeRoomDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     var text = "";
     return Material(
       child: SingleChildScrollView(

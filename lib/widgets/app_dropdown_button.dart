@@ -13,6 +13,7 @@ class AppDropdownButton<T> extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return DropdownButton<T>(
       isDense: true,
       isExpanded: true,

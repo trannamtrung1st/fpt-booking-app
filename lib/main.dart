@@ -91,6 +91,7 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");

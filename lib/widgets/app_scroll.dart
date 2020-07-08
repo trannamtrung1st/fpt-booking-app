@@ -10,6 +10,7 @@ class AppScroll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return RefreshIndicator(
       onRefresh: this.onRefresh,
       child: SingleChildScrollView(

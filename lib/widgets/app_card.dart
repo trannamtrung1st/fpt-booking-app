@@ -10,6 +10,7 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return Container(
       width: double.infinity,
       margin: this.margin,

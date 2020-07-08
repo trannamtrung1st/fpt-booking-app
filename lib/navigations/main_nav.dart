@@ -48,6 +48,10 @@ class MainNav extends StatefulWidget {
     managerPages.insert(1, ApprovalListView());
   }
 
+  static List<Widget> pages;
+
+  static void Function(Type pageType) navigate;
+
   @override
   _MainNavState createState() => _MainNavState();
 }
@@ -73,7 +77,17 @@ class _MainNavState extends State<MainNav> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     loginContext = Provider.of<LoginContext>(context, listen: false);
+    MainNav.pages = loginContext.isManager() ? managerPages : normalPages;
+    MainNav.navigate = (Type t) {
+      for (var i = 0; i < MainNav.pages.length; i++) {
+        var rt = MainNav.pages[i].runtimeType;
+        if (rt == t) {
+          _presenter.onItemTapped(i);
+        }
+      }
+    };
     _presenter = _MainNavPresenter(view: this);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -82,7 +96,7 @@ class _MainNavState extends State<MainNav> {
         body: PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: pageController,
-          children: loginContext.isManager() ? managerPages : normalPages,
+          children: MainNav.pages,
           onPageChanged: _presenter.onPageChanged,
         ),
         bottomNavigationBar: BottomNavigationBar(

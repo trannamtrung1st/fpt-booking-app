@@ -9,13 +9,16 @@ class AvailableRoomList extends StatefulWidget {
   final String fromTime;
   final String toTime;
   final List<dynamic> rooms;
-  final Function(dynamic room) onRoomPressed;
+  final int numOfPeople;
+  Function(dynamic room, DateTime date, String fromTime, String toTime,
+      int numOfPeople) onRoomPressed;
 
   AvailableRoomList(
       {this.selectedDate,
       this.fromTime,
       this.toTime,
       this.rooms,
+      this.numOfPeople,
       this.onRoomPressed,
       Key key})
       : super(key: key);
@@ -26,6 +29,7 @@ class AvailableRoomList extends StatefulWidget {
       toTime: toTime,
       onRoomPressed: onRoomPressed,
       rooms: rooms,
+      numOfPeople: numOfPeople,
       selectedDate: selectedDate);
 }
 
@@ -34,17 +38,21 @@ class _AvailableRoomListState extends State<AvailableRoomList> {
   String fromTime;
   String toTime;
   List<dynamic> rooms;
-  Function(dynamic room) onRoomPressed;
+  int numOfPeople;
+  Function(dynamic room, DateTime date, String fromTime, String toTime,
+      int numOfPeople) onRoomPressed;
 
   _AvailableRoomListState(
       {this.selectedDate,
       this.fromTime,
       this.toTime,
+      this.numOfPeople,
       this.rooms,
       this.onRoomPressed});
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     var dateStr = IntlHelper.format(selectedDate);
     var cardWidgets = <Widget>[
       Text("Available rooms on $dateStr from $fromTime - $toTime")
@@ -59,7 +67,8 @@ class _AvailableRoomListState extends State<AvailableRoomList> {
     for (dynamic o in rooms) {
       cardWidgets.add(RoomInfoCard(
         room: o,
-        onRoomPressed: (val) => onRoomPressed(val),
+        onRoomPressed: (val) =>
+            onRoomPressed(val, selectedDate, fromTime, toTime, numOfPeople),
       ));
     }
     return card;

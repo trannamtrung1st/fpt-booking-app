@@ -35,6 +35,7 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     var rows = <AppTableRow>[
       AppTableRow(data: <dynamic>["Date", "Time", "Room", "Status"]),
     ];

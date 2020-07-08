@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:fptbooking_app/apis/room_type_api.dart';
+import 'package:fptbooking_app/helpers/http_helper.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 
 class RoomTypeRepo {
@@ -9,7 +10,7 @@ class RoomTypeRepo {
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await RoomTypeApi.get(fields: fields);
-    if (response.statusCode == 200) {
+    if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
       if (success != null) success(result["data"]["list"]);
@@ -23,8 +24,7 @@ class RoomTypeRepo {
       if (invalid != null) invalid(mess);
       return;
     }
-    var result = jsonDecode(response.body);
-    print(result);
+    print(response.body);
     if (error != null) error();
   }
 

@@ -35,6 +35,7 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return TableCalendar(
       calendarController: _calendarController,
       initialCalendarFormat: calendarFormat,

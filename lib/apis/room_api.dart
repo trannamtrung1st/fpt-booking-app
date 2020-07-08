@@ -35,9 +35,19 @@ class RoomApi {
   }
 
   static Future<http.Response> getDetail(
-      {@required String code}) async {
-    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code');
+      {@required String code, bool hanging}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code',
+        {'hanging': hanging?.toString()});
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
+    return response;
+  }
+
+  static Future<http.Response> changeHangingStatus(
+      {@required String code, dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code/hanging');
+    var response = await http.put(uri,
+        headers: HttpHelper.commonHeaders(hasBody: true),
+        body: jsonEncode(model));
     return response;
   }
 }

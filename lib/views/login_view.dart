@@ -26,6 +26,7 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _LoginViewPresenter(view: this);
     if (isInFirebaseLoginProcess()) {

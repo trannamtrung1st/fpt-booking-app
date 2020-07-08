@@ -16,6 +16,7 @@ class SimpleInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     if (this.isHorizontal) return _getHorizontal();
     return _getVertical();
   }

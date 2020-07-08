@@ -33,6 +33,7 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     _presenter = _RoomCheckingFormPresenter(view: this);
     return _buildShowingViewWidget(context);
   }

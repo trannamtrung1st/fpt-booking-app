@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/frags/available_room_list.dart';
@@ -17,6 +18,8 @@ import 'package:table_calendar/table_calendar.dart';
 class BookingView extends StatefulWidget {
   BookingView({key}) : super(key: key);
 
+  static void Function() needRefresh = () {};
+
   @override
   _BookingViewState createState() => _BookingViewState();
 }
@@ -26,7 +29,7 @@ class _BookingViewState extends State<BookingView>
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   static const int AFTER_SEARCH = 3;
-  int _state = LOADING_DATA;
+  int _state = SHOWING_VIEW;
 
   String _fromTime;
   String _toTime;
@@ -59,7 +62,12 @@ class _BookingViewState extends State<BookingView>
         _roomType = value;
       });
 
-  void navigateToRoomDetail(String code) {
+  void refresh() {
+    setState(() {});
+  }
+
+  void navigateToRoomDetail(String code, DateTime date, String fromTime,
+      String toTime, int numOfPeople) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -67,14 +75,14 @@ class _BookingViewState extends State<BookingView>
           code: code,
           type: RoomDetailView.TYPE_BOOKING,
           extraData: {
-            'fromTime': _fromTime,
-            'toTime': _toTime,
-            'bookedDate': _selectedDate,
-            'numOfPeople': _numOfPeople,
+            'fromTime': fromTime,
+            'toTime': toTime,
+            'bookedDate': date,
+            'numOfPeople': numOfPeople,
           },
         ),
       ),
-    );
+    ).then((value) => {if (value != null) MainNav.navigate(value)});
   }
 
   @override
@@ -82,18 +90,28 @@ class _BookingViewState extends State<BookingView>
     super.initState();
     _presenter = _BookingViewPresenter(view: this);
     _presenter.handleInitState(context);
+    BookingView.needRefresh = () {
+      _keepAlive = false;
+      this.updateKeepAlive();
+    };
 //    this.updateKeepAlive();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     super.build(context);
+    if (!_keepAlive) {
+      _keepAlive = true;
+      updateKeepAlive();
+    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
-    if (_isAfterSearch())
+    if (_isAfterSearch()) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _presenter.handleAfterSearch(context));
+    }
     return _buildShowingViewWidget(context);
   }
 
@@ -103,11 +121,9 @@ class _BookingViewState extends State<BookingView>
   void setAfterSearchState() => _state = AFTER_SEARCH;
 
   //isShowingView
-  void setShowingViewState({bool rebuild = true}) => rebuild
-      ? setState(() {
-          _state = SHOWING_VIEW;
-        })
-      : _state = SHOWING_VIEW;
+  void setShowingViewState() => setState(() {
+        _state = SHOWING_VIEW;
+      });
 
   void refreshRoomData(List<dynamic> data) {
     setState(() {
@@ -161,6 +177,7 @@ class _BookingViewState extends State<BookingView>
         key: roomCardsKey,
         toTime: _toTime,
         fromTime: _fromTime,
+        numOfPeople: _numOfPeople,
         onRoomPressed: _presenter.onRoomPressed,
         rooms: rooms,
         selectedDate: _selectedDate,
@@ -197,6 +214,7 @@ class _BookingViewState extends State<BookingView>
           autofocus: false,
           keyboardType: TextInputType.number,
           style: TextStyle(fontSize: 14),
+          initialValue: _numOfPeople?.toString(),
           onChanged: (value) =>
               _numOfPeople = value.isNotEmpty ? int.parse(value) : null,
           decoration: InputDecoration(
@@ -285,19 +303,17 @@ class _BookingViewPresenter {
 
   _BookingViewPresenter({this.view});
 
-  void handleInitState(BuildContext context) {
-    view.setShowingViewState();
-  }
+  void handleInitState(BuildContext context) {}
 
   Future<void> onRefresh() {
     return onSearchPressed();
   }
 
   void handleAfterSearch(BuildContext context) {
+    view.setShowingViewState();
     if (view.rooms != null)
       Scrollable.ensureVisible(view.roomCardsKey.currentContext,
           duration: Duration(seconds: 1));
-    view.setShowingViewState(rebuild: false);
   }
 
   void onDaySelected(DateTime selected, List<dynamic> list) {
@@ -305,10 +321,11 @@ class _BookingViewPresenter {
     view.changeSelectedDate(selected);
   }
 
-  void onRoomPressed(dynamic data) {
+  void onRoomPressed(dynamic data, DateTime date, String fromTime,
+      String toTime, int numOfPeople) {
     String code = data["code"];
     print(code);
-    view.navigateToRoomDetail(code);
+    view.navigateToRoomDetail(code, date, fromTime, toTime, numOfPeople);
   }
 
   void onFromTimePressed() {
@@ -333,6 +350,16 @@ class _BookingViewPresenter {
         view._toTime == null ||
         view._numOfPeople == null) {
       view.showInvalidMessages(["Please fill all the required fields"]);
+      return;
+    }
+    var mess = <String>[];
+    var fromTime = IntlHelper.parseTimeOfDay(view._fromTime);
+    var toTime = IntlHelper.parseTimeOfDay(view._toTime);
+    if (IntlHelper.compareTimeOfDay(fromTime, toTime) >= 0)
+      mess.add("Time range not valid");
+    if (view._numOfPeople <= 0) mess.add("Number of people must be at least 1");
+    if (mess.length > 0) {
+      view.showInvalidMessages(mess);
       return;
     }
     view.loadRoomData();

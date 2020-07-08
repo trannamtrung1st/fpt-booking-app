@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/apis/booking_api.dart';
+import 'package:fptbooking_app/helpers/http_helper.dart';
 
 class BookingRepo {
   static Future<void> get(
@@ -13,7 +14,7 @@ class BookingRepo {
       Function error}) async {
     var response = await BookingApi.get(
         fields: fields, dateFormat: dateFormat, dateStr: dateStr);
-    if (response.statusCode == 200) {
+    if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
       if (success != null) success(result["data"]["list"]);
@@ -27,8 +28,7 @@ class BookingRepo {
       if (invalid != null) invalid(mess);
       return;
     }
-    var result = jsonDecode(response.body);
-    print(result);
+    print(response.body);
     if (error != null) error();
   }
 
@@ -47,7 +47,7 @@ class BookingRepo {
         fromDateStr: fromDateStr,
         toDateStr: toDateStr,
         sorts: sorts);
-    if (response.statusCode == 200) {
+    if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
       if (success != null) success(result["data"]["list"]);
@@ -61,8 +61,7 @@ class BookingRepo {
       if (invalid != null) invalid(mess);
       return;
     }
-    var result = jsonDecode(response.body);
-    print(result);
+    print(response.body);
     if (error != null) error();
   }
 
@@ -72,7 +71,7 @@ class BookingRepo {
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await BookingApi.getDetail(id: id);
-    if (response.statusCode == 200) {
+    if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
       if (success != null) success(result["data"]);
@@ -86,8 +85,32 @@ class BookingRepo {
       if (invalid != null) invalid(mess);
       return;
     }
-    var result = jsonDecode(response.body);
-    print(result);
+    print(response.body);
+    if (error != null) error();
+  }
+
+  static Future<void> createBooking(
+      {@required dynamic data,
+        Function(int id) success,
+        Function(List<String> mess) invalid,
+        Function error}) async {
+    var response = await BookingApi.createBooking(model: data);
+    if (response.isSuccess()) {
+      print('Response body: ${response.body}');
+      var result = jsonDecode(response.body);
+      if (success != null) success(result["data"]);
+      return;
+    } else if (response.statusCode == 400) {
+      print("Invalid");
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
     if (error != null) error();
   }
 }

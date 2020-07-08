@@ -13,6 +13,8 @@ import 'package:fptbooking_app/widgets/simple_info.dart';
 class RoomListView extends StatefulWidget {
   RoomListView({key}) : super(key: key);
 
+  static void Function() needRefresh = () {};
+
   @override
   _RoomListViewState createState() => _RoomListViewState();
 }
@@ -27,6 +29,10 @@ class _RoomListViewState extends State<RoomListView>
   List<dynamic> rooms;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
   String searchValue = '';
+
+  void refresh() {
+    setState(() {});
+  }
 
   void navigateToRoomDetail(String code) {
     Navigator.push(
@@ -45,11 +51,20 @@ class _RoomListViewState extends State<RoomListView>
     super.initState();
     _presenter = _RoomListViewPresenter(view: this);
     _presenter.handleInitState(context);
+    RoomListView.needRefresh = () {
+      _keepAlive = false;
+      this.updateKeepAlive();
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     super.build(context);
+    if (_keepAlive) {
+      _keepAlive = true;
+      this.updateKeepAlive();
+    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -57,11 +72,9 @@ class _RoomListViewState extends State<RoomListView>
   }
 
   //isShowingView
-  void setShowingViewState({bool rebuild = true}) => rebuild
-      ? setState(() {
-          _state = SHOWING_VIEW;
-        })
-      : _state = SHOWING_VIEW;
+  void setShowingViewState() => setState(() {
+        _state = SHOWING_VIEW;
+      });
 
   void refreshRoomData(List<dynamic> data) {
     setState(() {

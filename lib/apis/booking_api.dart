@@ -6,6 +6,16 @@ import 'package:fptbooking_app/helpers/http_helper.dart';
 import 'package:http/http.dart' as http;
 
 class BookingApi {
+
+  static Future<http.Response> createBooking(
+      {@required dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings');
+    var response = await http.post(uri,
+        headers: HttpHelper.commonHeaders(hasBody: true),
+        body: jsonEncode(model));
+    return response;
+  }
+
   static Future<http.Response> get(
       {String fields, String dateStr, String dateFormat}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings',

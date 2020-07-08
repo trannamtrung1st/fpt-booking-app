@@ -10,6 +10,7 @@ class AppTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     List<TableRow> rows = <TableRow>[];
     var headers = <Widget>[];
     var headerRow = data[0];

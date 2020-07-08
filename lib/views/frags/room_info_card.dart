@@ -18,6 +18,7 @@ class RoomInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     var iconWidgets = <Widget>[
       Container(
         child: Icon(

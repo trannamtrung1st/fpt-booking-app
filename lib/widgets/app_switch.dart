@@ -10,6 +10,7 @@ class AppSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return Row(
       children: <Widget>[
         Container(

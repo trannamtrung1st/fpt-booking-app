@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/apis/user_api.dart';
 import 'package:fptbooking_app/constants.dart';
+import 'package:fptbooking_app/helpers/http_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRepo {
@@ -28,7 +29,7 @@ class UserRepo {
       Function() invalidEmail,
       Function error}) async {
     var response = await UserApi.login(fbToken: fbToken);
-    if (response.statusCode == 200) {
+    if (response.isSuccess()) {
       print('Response body: ${response.body}');
       final prefs = await SharedPreferences.getInstance();
       prefs.setString(Constants.TOKEN_DATA_KEY, response.body);
@@ -47,8 +48,7 @@ class UserRepo {
       if (invalidEmail != null) invalidEmail();
       return;
     }
-    var result = jsonDecode(response.body);
-    print(result);
+    print(response.body);
     if (error != null) error();
   }
 }

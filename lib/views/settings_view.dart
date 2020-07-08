@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 class SettingsView extends StatefulWidget {
   SettingsView({key}) : super(key: key);
 
+  static void Function() needRefresh = () {};
+
   @override
   _SettingsViewState createState() => _SettingsViewState();
 }
@@ -25,8 +27,23 @@ class _SettingsViewState extends State<SettingsView>
   _SettingsViewPresenter _presenter;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    SettingsView.needRefresh = () {
+      _keepAlive = false;
+      this.updateKeepAlive();
+    };
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     super.build(context);
+    if (_keepAlive) {
+      _keepAlive = true;
+      updateKeepAlive();
+    }
     loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _SettingsViewPresenter(view: this);
     return _buildShowingViewWidget(context);

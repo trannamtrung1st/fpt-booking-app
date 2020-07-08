@@ -15,6 +15,8 @@ import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 class ApprovalListView extends StatefulWidget {
   ApprovalListView({key}) : super(key: key);
 
+  static void Function() needRefresh = () {};
+
   @override
   _ApprovalListViewState createState() => _ApprovalListViewState();
 }
@@ -86,11 +88,20 @@ class _ApprovalListViewState extends State<ApprovalListView>
     super.initState();
     _presenter = _ApprovalListViewPresenter(view: this);
     _presenter.handleInitState(context);
+    ApprovalListView.needRefresh = () {
+      _keepAlive = false;
+      this.updateKeepAlive();
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     super.build(context);
+    if (!_keepAlive) {
+      _keepAlive = true;
+      updateKeepAlive();
+    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -126,6 +137,10 @@ class _ApprovalListViewState extends State<ApprovalListView>
 
   void showError() {
     DialogHelper.showUnknownError(context: this.context);
+  }
+
+  void refresh() {
+    setState(() {});
   }
 
   void navigateToBookingDetail(int id) {

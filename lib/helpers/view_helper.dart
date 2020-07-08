@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ViewHelper {
-  static AppBar getDefaultAppBar({@required String title}) {
+  static AppBar getDefaultAppBar({@required String title, Function onPressed}) {
     return AppBar(
-      leading: BackButton(),
+      leading: BackButton(
+        onPressed: onPressed,
+      ),
       backgroundColor: Colors.orange,
       title: Text(title),
     );

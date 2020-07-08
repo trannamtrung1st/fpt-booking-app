@@ -12,6 +12,7 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     if (builder != null) return builder.build(context);
     var widgets = <Widget>[child];
     if (onRemove != null)

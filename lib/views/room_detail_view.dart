@@ -32,6 +32,7 @@ class RoomDetailView extends StatefulWidget {
 class _RoomDetailViewState extends State<RoomDetailView> {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
+  static const int CREATING_BOOKING = 3;
   int _state = LOADING_DATA;
   String code;
   dynamic data;
@@ -55,8 +56,12 @@ class _RoomDetailViewState extends State<RoomDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
+    }
+    if (isCreatingBooking()) {
+      return _buildCreatingBookingWidget(context);
     }
     return _buildShowingViewWidget(context);
   }
@@ -73,8 +78,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
         _state = SHOWING_VIEW;
       });
 
-  Widget _buildShowingViewWidget(BuildContext context) {
-    if (data == null) return _mainContent(body: Container());
+  Widget _getShowingViewBody() {
     var widgets = <Widget>[
       RoomInfoCard(
         margin: EdgeInsets.zero,
@@ -86,6 +90,8 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     switch (type) {
       case RoomDetailView.TYPE_BOOKING:
         widgets.add(BookingForm(
+          disableLoading: this.setShowingViewState,
+          enableLoading: this.setCreatingBookingState,
           room: data,
           bookedDate: extraData["bookedDate"],
           fromTime: extraData["fromTime"],
@@ -113,7 +119,16 @@ class _RoomDetailViewState extends State<RoomDetailView> {
         ),
       ),
     );
-    return _mainContent(body: body);
+    return body;
+  }
+
+  Widget _buildShowingViewWidget(BuildContext context) {
+    if (data == null) return _mainContent(body: Container());
+    var body = _getShowingViewBody();
+    return LoadingModal(
+      child: _mainContent(body: body),
+      isLoading: false,
+    );
   }
 
   //isLoadingData
@@ -131,15 +146,33 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     ));
   }
 
+  //isCreatingBooking
+  bool isCreatingBooking() => _state == CREATING_BOOKING;
+
+  void setCreatingBookingState() => setState(() {
+        _state = CREATING_BOOKING;
+      });
+
+  Widget _buildCreatingBookingWidget(BuildContext context) {
+    var body = _getShowingViewBody();
+    return LoadingModal(
+      isLoading: true,
+      child: _mainContent(body: body),
+    );
+  }
+
   void showInvalidMessages(List<String> mess) {
     DialogHelper.showMessage(context: context, title: "Sorry", contents: mess);
+  }
+
+  void navigateBack() {
+    Navigator.of(context).pop();
   }
 
   void showError() {
     DialogHelper.showUnknownError(
         context: this.context,
         onOk: () {
-          Navigator.of(context).pop();
           return true;
         });
   }
@@ -147,7 +180,8 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   //widgets
   Widget _mainContent({@required Widget body}) {
     return Scaffold(
-        appBar: ViewHelper.getDefaultAppBar(title: _getAppBarTitle()),
+        appBar: ViewHelper.getDefaultAppBar(
+            title: _getAppBarTitle(), onPressed: _presenter.onBackPressed),
         body: body);
   }
 
@@ -210,18 +244,28 @@ class _RoomDetailViewPresenter {
   }
 
   Future<void> onRefresh() {
-    return _getRoomDetail(view.code);
+    return _getRoomDetail(view.code, hanging: false);
   }
 
-  Future<void> _getRoomDetail(String code) {
+  void onBackPressed() {
+    RoomRepo.cancelHangingRoom(
+      code: view.code,
+//        error: view.showError,
+//        invalid: view.showInvalidMessages
+    );
+    view.navigateBack();
+  }
+
+  Future<void> _getRoomDetail(String code, {bool hanging}) {
     var success = false;
     return RoomRepo.getDetail(
+        hanging: hanging,
         code: code,
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (val) {
           success = true;
           view.loadRoomData(val);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() => {if (!success) view.navigateBack()});
   }
 }

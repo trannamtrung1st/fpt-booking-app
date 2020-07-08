@@ -10,6 +10,7 @@ class LoadingModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return LoadingOverlay(
       child: this.child,
       isLoading: this.isLoading,

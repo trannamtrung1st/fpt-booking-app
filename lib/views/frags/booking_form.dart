@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
+import 'package:fptbooking_app/views/approval_list_view.dart';
+import 'package:fptbooking_app/views/booking_view.dart';
+import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_select/smart_select.dart';
 
 class BookingForm extends StatefulWidget {
@@ -16,9 +22,13 @@ class BookingForm extends StatefulWidget {
   final String toTime;
   final int numOfPeople;
   final dynamic room;
+  final Function enableLoading;
+  final Function disableLoading;
 
   BookingForm(
       {key,
+      this.enableLoading,
+      this.disableLoading,
       this.bookedDate,
       this.fromTime,
       this.toTime,
@@ -30,8 +40,10 @@ class BookingForm extends StatefulWidget {
   _BookingFormState createState() => _BookingFormState(
       room: this.room,
       toTime: toTime,
+      disableLoading: disableLoading,
       fromTime: fromTime,
       bookedDate: bookedDate,
+      enableLoading: enableLoading,
       numOfPeople: numOfPeople);
 }
 
@@ -44,15 +56,16 @@ class _BookingFormState extends State<BookingForm> {
   int numOfPeople;
   dynamic room;
   Map<String, dynamic> booking;
-  List<dynamic> _services = <dynamic>[
-    {"code": "PRJ", "name": "Projector"},
-    {"code": "MS", "name": "Mentor/Support"},
-    {"code": "TB", "name": "Tea-break"}
-  ];
+  List<dynamic> _services;
   Map<String, dynamic> _servicesMap;
+  LoginContext _loginContext;
+  final Function enableLoading;
+  final Function disableLoading;
 
   _BookingFormState(
       {this.room,
+      this.enableLoading,
+      this.disableLoading,
       this.bookedDate,
       this.fromTime,
       this.toTime,
@@ -63,32 +76,33 @@ class _BookingFormState extends State<BookingForm> {
   @override
   void initState() {
     super.initState();
+    _loginContext = Provider.of<LoginContext>(context, listen: false);
+    var tokenData = _loginContext.tokenData;
     booking = {
-      'booked_date': bookedDate,
+      'booked_date': IntlHelper.format(bookedDate),
       'from_time': fromTime,
       'to_time': toTime,
       'room_code': room["code"],
       'num_of_people': numOfPeople,
-      'service_codes': MemoryStorage.roomTypesMap[room["room_type_code"]]
+      'attached_services': MemoryStorage.roomTypesMap[room["room_type_code"]]
               ["services"]
-          .map((e) => e["code"])
           .toList(),
       'book_member': {
-        "user_id": "user1",
-        "email": "trungtnse13@fpt.edu.vn"
+        "user_id": tokenData["user_id"],
+        "email": tokenData["email"]
       },
-      'using_emails': ["trungtnse13@fpt.edu.vn"],
+      'using_emails': [tokenData["email"]],
       'note': ''
     };
-    _servicesMap = {
-      "PRJ": _services[0],
-      "MS": _services[1],
-      "TB": _services[2],
-    };
+    _services =
+        MemoryStorage.roomTypesMap[room["room_type_code"]]["services"].toList();
+    _servicesMap = <String, dynamic>{};
+    for (dynamic o in _services) _servicesMap[o["code"]] = o;
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     _presenter = _BookingFormPresenter(view: this);
     return _buildShowingViewWidget(context);
   }
@@ -160,6 +174,16 @@ class _BookingFormState extends State<BookingForm> {
     DialogHelper.showUnknownError(context: this.context);
   }
 
+  void navigateToCalendarView() {
+    Navigator.of(context).pop(CalendarView);
+  }
+
+  void showSuccessThenNavigateToCalendarView() async {
+    await DialogHelper.showMessage(
+        context: this.context, title: "Message", contents: ["Successfully"]);
+    navigateToCalendarView();
+  }
+
   //widgets
   Widget _getTimeInfo() {
     var timeStr =
@@ -171,8 +195,7 @@ class _BookingFormState extends State<BookingForm> {
   }
 
   Widget _getAttachedServicesTags() {
-    var services = booking["service_codes"].map((e) => _servicesMap[e]).toList()
-        as List<dynamic>;
+    var services = booking["attached_services"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
       var tags = services
@@ -225,7 +248,7 @@ class _BookingFormState extends State<BookingForm> {
   }
 
   Widget _getAddMoreServicesBtn() {
-    return SmartSelect<String>.multiple(
+    return SmartSelect<dynamic>.multiple(
       builder: (context, state, showChoices) => Tag(
         builder: Builder(
           builder: (context) => ButtonTheme(
@@ -241,14 +264,11 @@ class _BookingFormState extends State<BookingForm> {
         ),
       ),
       title: "Available services",
-      value: (booking["service_codes"] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      value: (booking["attached_services"] as List<dynamic>).toList(),
       selected: false,
       onChange: _presenter.onAddMoreServices,
       options: _services
-          .map((o) =>
-              SmartSelectOption<String>(value: o["code"], title: o["name"]))
+          .map((o) => SmartSelectOption<dynamic>(value: o, title: o["name"]))
           .toList(),
       modalType: SmartSelectModalType.popupDialog,
     ).build(context);
@@ -261,13 +281,28 @@ class _BookingFormPresenter {
   _BookingFormPresenter({this.view});
 
   void onRemoveService(dynamic data) {
-    var services = view.booking["service_codes"] as List<dynamic>;
-    services.remove(data["code"]);
+    var services = view.booking["attached_services"] as List<dynamic>;
+    services.removeWhere((element) => element["code"] == data["code"]);
     view.refresh();
   }
 
   void onSubmit() {
-    print(view.booking);
+    view.enableLoading();
+    var success = false;
+    BookingRepo.createBooking(
+            data: view.booking,
+            error: view.showError,
+            success: (id) {
+              success = true;
+              BookingView.needRefresh();
+              CalendarView.needRefresh();
+              ApprovalListView.needRefresh();
+              view.showSuccessThenNavigateToCalendarView();
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.disableLoading()}
+            });
   }
 
   void onNoteChanged(String val) {
@@ -288,8 +323,8 @@ class _BookingFormPresenter {
     view.refresh();
   }
 
-  void onAddMoreServices(List<String> list) {
-    view.booking["service_codes"] = list;
+  void onAddMoreServices(List<dynamic> list) {
+    view.booking["attached_services"] = list;
     view.refresh();
   }
 }

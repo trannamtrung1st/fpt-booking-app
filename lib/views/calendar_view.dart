@@ -15,6 +15,8 @@ import 'package:table_calendar/table_calendar.dart';
 class CalendarView extends StatefulWidget {
   CalendarView({key}) : super(key: key);
 
+  static void Function() needRefresh = () {};
+
   @override
   _CalendarViewState createState() => _CalendarViewState();
 }
@@ -37,16 +39,29 @@ class _CalendarViewState extends State<CalendarView>
     });
   }
 
+  void refresh() {
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     _presenter = _CalendarViewPresenter(view: this);
     _presenter.handleInitState(context);
+    CalendarView.needRefresh = () {
+      _keepAlive = false;
+      this.updateKeepAlive();
+    };
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     super.build(context);
+    if (!_keepAlive) {
+      _keepAlive = true;
+      updateKeepAlive();
+    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
