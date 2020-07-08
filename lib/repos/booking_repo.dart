@@ -67,10 +67,11 @@ class BookingRepo {
 
   static Future<void> getDetail(
       {@required int id,
+      String dateFormat,
       Function(dynamic) success,
       Function(List<String> mess) invalid,
       Function error}) async {
-    var response = await BookingApi.getDetail(id: id);
+    var response = await BookingApi.getDetail(id: id, dateFormat: dateFormat);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
@@ -91,9 +92,9 @@ class BookingRepo {
 
   static Future<void> createBooking(
       {@required dynamic data,
-        Function(int id) success,
-        Function(List<String> mess) invalid,
-        Function error}) async {
+      Function(int id) success,
+      Function(List<String> mess) invalid,
+      Function error}) async {
     var response = await BookingApi.createBooking(model: data);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');

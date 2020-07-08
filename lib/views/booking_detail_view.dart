@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
+import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
@@ -130,10 +131,17 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   void showInvalidMessages(List<String> mess) {
-    DialogHelper.showMessage(context: context, title: "Sorry", contents: mess);
+    DialogHelper.showMessage(
+        context: context,
+        title: "Sorry",
+        contents: mess,
+        onOk: () {
+          navigateBack();
+          return true;
+        });
   }
 
-  void navigateBack(){
+  void navigateBack() {
     Navigator.of(context).pop();
   }
 
@@ -151,8 +159,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-            appBar: ViewHelper.getDefaultAppBar(
-                title: _getAppBarTitle()),
+            appBar: ViewHelper.getDefaultAppBar(title: _getAppBarTitle()),
             body: body));
   }
 
@@ -216,6 +223,33 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   Widget _calendarDetail() {
+    var ops = <Widget>[
+      Spacer(),
+    ];
+    var now = DateTime.now();
+    var startTime = IntlHelper.parseDateTime(data["start_time"]["display"]);
+    var finishTime = IntlHelper.parseDateTime(data["finish_time"]["display"]);
+    var allowFeedbackTime = finishTime.add(Duration(hours: 4));
+    if (data["status"] == 'Approved' &&
+        now.compareTo(finishTime) >= 0 &&
+        now.compareTo(allowFeedbackTime) < 0)
+      ops.add(
+        AppButton(
+          type: "success",
+          child: Text('FEEDBACK'),
+          onPressed: () {},
+        ),
+      );
+    if (data["status"] == 'Processing' ||
+        data["status"] == 'Valid' && now.compareTo(startTime) < 0)
+      ops.insert(
+        0,
+        AppButton(
+          type: "danger",
+          child: Text('ABORT'),
+          onPressed: () {},
+        ),
+      );
     return BookingDetailForm(
       data: data,
       feedbackWidget: SimpleInfo(
@@ -242,19 +276,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       operations: <Widget>[
         Divider(),
         Row(
-          children: <Widget>[
-            AppButton(
-              type: "danger",
-              child: Text('ABORT'),
-              onPressed: () {},
-            ),
-            Spacer(),
-            AppButton(
-              type: "success",
-              child: Text('FEEDBACK'),
-              onPressed: () {},
-            ),
-          ],
+          children: ops,
         )
       ],
     );
@@ -353,11 +375,12 @@ class _BookingDetailViewPresenter {
     var success = false;
     return BookingRepo.getDetail(
         id: id,
+        dateFormat: "dd/MM/yyyy",
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (val) {
           success = true;
           view.loadBookingData(val);
-        }).whenComplete(() => {if (!success) view.navigateBack()});
+        }).whenComplete(() => {if (!success) view.setShowingViewState()});
   }
 }

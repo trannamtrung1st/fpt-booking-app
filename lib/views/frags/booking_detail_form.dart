@@ -109,7 +109,7 @@ class BookingDetailForm extends StatelessWidget {
   Widget _getTimeStr() {
     return SimpleInfo(
         labelText: 'Status',
-        child: Text(data["booked_date"] +
+        child: Text(data["booked_date"]["display"] +
             ", " +
             data["from_time"] +
             " - " +

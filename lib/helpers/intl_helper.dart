@@ -7,6 +7,10 @@ class IntlHelper {
     return dateStr;
   }
 
+  static DateTime parseDateTime(String s, {String formatStr = "dd/MM/yyyy HH:mm:ss"}){
+    return DateFormat(formatStr).parse(s);
+  }
+
   static TimeOfDay parseTimeOfDay(String s) {
     return TimeOfDay(
         hour: int.parse(s.split(":")[0]), minute: int.parse(s.split(":")[1]));

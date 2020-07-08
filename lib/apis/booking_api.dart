@@ -6,9 +6,7 @@ import 'package:fptbooking_app/helpers/http_helper.dart';
 import 'package:http/http.dart' as http;
 
 class BookingApi {
-
-  static Future<http.Response> createBooking(
-      {@required dynamic model}) async {
+  static Future<http.Response> createBooking({@required dynamic model}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings');
     var response = await http.post(uri,
         headers: HttpHelper.commonHeaders(hasBody: true),
@@ -41,8 +39,10 @@ class BookingApi {
     return response;
   }
 
-  static Future<http.Response> getDetail({@required int id}) async {
-    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/$id');
+  static Future<http.Response> getDetail(
+      {@required int id, String dateFormat}) async {
+    var uri = Uri.http(
+        Constants.API_AUTH, '/api/bookings/$id', {'date_format': dateFormat});
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
     return response;
   }
