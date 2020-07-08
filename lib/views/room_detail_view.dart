@@ -32,12 +32,12 @@ class RoomDetailView extends StatefulWidget {
 class _RoomDetailViewState extends State<RoomDetailView> {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
-  static const int CREATING_BOOKING = 3;
+  static const int PROCESS_DATA = 3;
   int _state = LOADING_DATA;
   String code;
   dynamic data;
   dynamic extraData;
-  LoginContext _loginContext;
+  LoginContext loginContext;
 
   int type;
 
@@ -49,7 +49,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   @override
   void initState() {
     super.initState();
-    _loginContext = Provider.of<LoginContext>(context, listen: false);
+    loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _RoomDetailViewPresenter(view: this);
     _presenter.handleInitState(context);
   }
@@ -60,8 +60,8 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
-    if (isCreatingBooking()) {
-      return _buildCreatingBookingWidget(context);
+    if (isProcessData()) {
+      return _buildProcessDataWidget(context);
     }
     return _buildShowingViewWidget(context);
   }
@@ -91,7 +91,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
       case RoomDetailView.TYPE_BOOKING:
         widgets.add(BookingForm(
           disableLoading: this.setShowingViewState,
-          enableLoading: this.setCreatingBookingState,
+          enableLoading: this.setProcessDataState,
           room: data,
           bookedDate: extraData["bookedDate"],
           fromTime: extraData["fromTime"],
@@ -101,9 +101,13 @@ class _RoomDetailViewState extends State<RoomDetailView> {
         break;
     }
 
-    if (_loginContext.isRoomChecker())
+    if (loginContext.isRoomChecker() &&
+        type == RoomDetailView.TYPE_ROOM_INFO &&
+        data["checker_valid"] == true)
       widgets.add(RoomCheckingForm(
         room: data,
+        enableLoading: this.setProcessDataState,
+        disableLoading: this.setShowingViewState,
       ));
 
     var body = GestureDetector(
@@ -146,14 +150,14 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     ));
   }
 
-  //isCreatingBooking
-  bool isCreatingBooking() => _state == CREATING_BOOKING;
+  //isProcessData
+  bool isProcessData() => _state == PROCESS_DATA;
 
-  void setCreatingBookingState() => setState(() {
-        _state = CREATING_BOOKING;
+  void setProcessDataState() => setState(() {
+        _state = PROCESS_DATA;
       });
 
-  Widget _buildCreatingBookingWidget(BuildContext context) {
+  Widget _buildProcessDataWidget(BuildContext context) {
     var body = _getShowingViewBody();
     return LoadingModal(
       isLoading: true,
@@ -170,8 +174,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   }
 
   void showError() {
-    DialogHelper.showUnknownError(
-        context: this.context);
+    DialogHelper.showUnknownError(context: this.context);
   }
 
   //widgets
@@ -233,11 +236,15 @@ class _RoomDetailViewState extends State<RoomDetailView> {
 
 class _RoomDetailViewPresenter {
   _RoomDetailViewState view;
+  LoginContext _loginContext;
 
-  _RoomDetailViewPresenter({this.view});
+  _RoomDetailViewPresenter({this.view}) {
+    _loginContext = view.loginContext;
+  }
 
   void handleInitState(BuildContext context) {
-    _getRoomDetail(view.code);
+    var hanging = view.type == RoomDetailView.TYPE_BOOKING;
+    _getRoomDetail(view.code, hanging: hanging);
   }
 
   Future<void> onRefresh() {
@@ -257,12 +264,15 @@ class _RoomDetailViewPresenter {
     var success = false;
     return RoomRepo.getDetail(
         hanging: hanging,
+        checkerValid: _loginContext.isRoomChecker(),
         code: code,
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (val) {
           success = true;
           view.loadRoomData(val);
-        }).whenComplete(() => {if (!success) view.navigateBack()});
+        }).whenComplete(() {
+      if (!success) view.navigateBack();
+    });
   }
 }

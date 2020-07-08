@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/views/booking_view.dart';
+import 'package:fptbooking_app/views/room_list_view.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/app_switch.dart';
@@ -9,12 +12,17 @@ import 'package:fptbooking_app/widgets/simple_info.dart';
 
 class RoomCheckingForm extends StatefulWidget {
   final dynamic room;
+  final Function enableLoading;
+  final Function disableLoading;
 
-  RoomCheckingForm({key, this.room}) : super(key: key);
+  RoomCheckingForm({key, this.room, this.enableLoading, this.disableLoading})
+      : super(key: key);
 
   @override
-  _RoomCheckingFormState createState() =>
-      _RoomCheckingFormState(room: this.room);
+  _RoomCheckingFormState createState() => _RoomCheckingFormState(
+      room: this.room,
+      disableLoading: this.disableLoading,
+      enableLoading: this.enableLoading);
 }
 
 class _RoomCheckingFormState extends State<RoomCheckingForm> {
@@ -22,9 +30,16 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
   int _state = SHOWING_VIEW;
   dynamic room;
 
-  _RoomCheckingFormState({this.room});
+  final Function enableLoading;
+  final Function disableLoading;
+
+  _RoomCheckingFormState({this.room, this.enableLoading, this.disableLoading});
 
   _RoomCheckingFormPresenter _presenter;
+
+  Future<bool> showConfirm() {
+    return DialogHelper.showConfirm(context: context);
+  }
 
   @override
   void initState() {
@@ -42,6 +57,11 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
   void setShowingViewState() => setState(() {
         _state = SHOWING_VIEW;
       });
+
+  void showSuccess() async {
+    await DialogHelper.showMessage(
+        context: this.context, title: "Message", contents: ["Successful"]);
+  }
 
   void refresh() => setState(() {});
 
@@ -74,7 +94,7 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
               padding: EdgeInsets.all(8.0),
               child: TextFormField(
                 maxLines: 7,
-                onChanged: (value) => _presenter.onNoteChanged,
+                onChanged: _presenter.onNoteChanged,
                 initialValue: room["note"] ?? "",
                 style: TextStyle(fontSize: 14),
                 decoration:
@@ -145,7 +165,31 @@ class _RoomCheckingFormPresenter {
     view.room["note"] = val;
   }
 
-  void onSubmit() {}
+  void onSubmit() async {
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
+    view.enableLoading();
+    var success = false;
+    RoomRepo.checkRoomStatus(
+            code: view.room["code"],
+            data: {
+              'note': view.room["note"],
+              'is_available': view.room["is_available"],
+              'check_resources': view.room["resources"]
+            },
+            error: view.showError,
+            success: () {
+              success = true;
+              BookingView.needRefresh();
+              RoomListView.needRefresh();
+              view.disableLoading();
+              view.showSuccess();
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.disableLoading()}
+            });
+  }
 
   void onResourceStatusChanged(bool val, dynamic res) {
     res["is_available"] = val;

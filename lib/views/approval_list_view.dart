@@ -31,19 +31,22 @@ class _ApprovalListViewState extends State<ApprovalListView>
   DateTime toDate = DateTime.now();
   _ApprovalListViewPresenter _presenter;
   List<dynamic> bookings;
-  String _status = statuses[0];
+  String status = statuses[0].key;
   String orderBy = orderByValues[0].key;
 
-  static final List<String> statuses = <String>[
-    "All",
-    "Processing",
-    "Approved",
-    "Denied",
-    "Finished",
-    "Aborted"
+  static final List<MapEntry<String, String>> statuses =
+      <MapEntry<String, String>>[
+    MapEntry("", "All"),
+    MapEntry("Processing", "Processing"),
+    MapEntry("Valid", "Valid"),
+    MapEntry("Approved", "Approved"),
+    MapEntry("Denied", "Denied"),
+    MapEntry("Finished", "Finished"),
+    MapEntry("Aborted", "Aborted")
   ];
   static final List<MapEntry<String, String>> orderByValues = [
-    MapEntry("ddate", "Latest date"),
+    MapEntry("dsent_date", " Latest requested date"),
+    MapEntry("abooked_date", "Nearest booked date"),
   ];
 
   void loadRequestData() {
@@ -60,9 +63,9 @@ class _ApprovalListViewState extends State<ApprovalListView>
     });
   }
 
-  void changeStatus(String status) {
+  void changeStatus(String val) {
     setState(() {
-      _status = status;
+      status = val;
     });
   }
 
@@ -140,7 +143,9 @@ class _ApprovalListViewState extends State<ApprovalListView>
   }
 
   void refresh() {
-    setState(() {});
+    setState(() {
+      _presenter.onRefresh();
+    });
   }
 
   void navigateToBookingDetail(int id) {
@@ -152,7 +157,11 @@ class _ApprovalListViewState extends State<ApprovalListView>
           type: BookingDetailView.TYPE_REQUEST_DETAIL,
         ),
       ),
-    );
+    ).then((value) {
+      if (!_keepAlive) {
+        refresh();
+      }
+    });
   }
 
   //widgets
@@ -163,11 +172,11 @@ class _ApprovalListViewState extends State<ApprovalListView>
           labelText: "Status",
           child: AppDropdownButton<String>(
             onChanged: _presenter.onStatusChanged,
-            value: _status,
+            value: status,
             items: statuses
                 .map((val) => DropdownMenuItem<String>(
-                      value: val,
-                      child: Text(val),
+                      value: val.key,
+                      child: Text(val.value),
                     ))
                 .toList(),
           )),
@@ -208,7 +217,7 @@ class _ApprovalListViewState extends State<ApprovalListView>
           onRowTap: _presenter.onRowTap,
           fromDate: fromDate,
           toDate: toDate,
-          status: _status,
+          status: status,
         )
       ]);
 
@@ -244,7 +253,8 @@ class _ApprovalListViewState extends State<ApprovalListView>
         style: TextStyle(fontWeight: FontWeight.normal),
       ),
     );
-    return SimpleInfo(labelText: "Date range", marginBetween: 0, child: btn);
+    return SimpleInfo(
+        labelText: "Requested date range", marginBetween: 0, child: btn);
   }
 
   bool _keepAlive = true;
@@ -264,6 +274,7 @@ class _ApprovalListViewPresenter {
   }
 
   Future<void> onRefresh() {
+    view.loadRequestData();
     return _getRequests();
   }
 
@@ -286,13 +297,16 @@ class _ApprovalListViewPresenter {
         fields: "info,room",
         fromDateStr: IntlHelper.format(view.fromDate),
         toDateStr: IntlHelper.format(view.toDate),
+        status: view.status,
         sorts: view.orderBy,
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (data) {
           success = true;
           view.refreshApprovalListData(data);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() {
+      if (!success) view.setShowingViewState();
+    });
   }
 
   void onDateRangePressed() async {

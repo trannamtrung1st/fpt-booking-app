@@ -7,7 +7,7 @@ class IntlHelper {
     return dateStr;
   }
 
-  static DateTime parseDateTime(String s, {String formatStr = "dd/MM/yyyy HH:mm:ss"}){
+  static DateTime parseDateTime(String s, {String formatStr = "dd/MM/yyyy HH:mm"}){
     return DateFormat(formatStr).parse(s);
   }
 

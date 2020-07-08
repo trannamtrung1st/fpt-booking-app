@@ -15,7 +15,8 @@ class RoomApi {
     String toTime,
     int numOfPeople,
     bool empty,
-    bool isAvailable,
+    int isAvailable,
+    bool loadAll = true,
     String roomTypeCode,
   }) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/rooms', {
@@ -29,15 +30,16 @@ class RoomApi {
       'is_available': isAvailable?.toString(),
       'num_of_people': numOfPeople?.toString(),
       'room_type': roomTypeCode,
+      'load_all': loadAll?.toString()
     });
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
     return response;
   }
 
   static Future<http.Response> getDetail(
-      {@required String code, bool hanging}) async {
+      {@required String code, bool hanging, String fields}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code',
-        {'hanging': hanging?.toString()});
+        {'hanging': hanging?.toString(), 'fields': fields});
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
     return response;
   }
@@ -46,6 +48,15 @@ class RoomApi {
       {@required String code, dynamic model}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code/hanging');
     var response = await http.put(uri,
+        headers: HttpHelper.commonHeaders(hasBody: true),
+        body: jsonEncode(model));
+    return response;
+  }
+
+  static Future<http.Response> checkRoomStatus(
+      {@required String code, dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code/status');
+    var response = await http.patch(uri,
         headers: HttpHelper.commonHeaders(hasBody: true),
         body: jsonEncode(model));
     return response;

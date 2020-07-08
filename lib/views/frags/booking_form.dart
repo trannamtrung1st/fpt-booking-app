@@ -184,7 +184,7 @@ class _BookingFormState extends State<BookingForm> {
 
   void showSuccessThenNavigateToCalendarView() async {
     await DialogHelper.showMessage(
-        context: this.context, title: "Message", contents: ["Successfully"]);
+        context: this.context, title: "Message", contents: ["Successful"]);
     navigateToCalendarView();
   }
 

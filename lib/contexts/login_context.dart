@@ -7,7 +7,7 @@ class LoginContext extends ChangeNotifier {
   static String accessToken;
   Map<String, dynamic> tokenData;
   int _state = NOT_LOGGED_IN;
-  String role;
+  List<dynamic> roles;
 
   bool isLoggedIn() => _state == LOGGED_IN;
 
@@ -16,7 +16,7 @@ class LoginContext extends ChangeNotifier {
   void loggedIn(Map<String, dynamic> tokenData) {
     LoginContext.accessToken = tokenData["access_token"] as String;
     this.tokenData = tokenData;
-    this.role = tokenData["roles"][0] as String;
+    this.roles = tokenData["roles"] as List<dynamic>;
     _state = LOGGED_IN;
     notifyListeners();
   }
@@ -24,16 +24,16 @@ class LoginContext extends ChangeNotifier {
   void signOut() {
     LoginContext.accessToken = null;
     this.tokenData = null;
-    this.role = null;
+    this.roles = null;
     _state = NOT_LOGGED_IN;
     notifyListeners();
   }
 
   bool isManager() {
-    return role == Constants.ROLE_MANAGER;
+    return roles.contains(Constants.ROLE_MANAGER);
   }
 
   bool isRoomChecker() {
-    return role == Constants.ROLE_ROOM_CHECKER;
+    return roles.contains(Constants.ROLE_ROOM_CHECKER);
   }
 }

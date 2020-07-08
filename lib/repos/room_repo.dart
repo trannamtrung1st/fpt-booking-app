@@ -24,7 +24,7 @@ class RoomRepo {
         numOfPeople: numOfPeople,
         roomTypeCode: roomTypeCode,
         empty: true,
-        isAvailable: true,
+        isAvailable: 1,
         toTime: toTime);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
@@ -73,9 +73,13 @@ class RoomRepo {
       {@required String code,
       Function(dynamic) success,
       bool hanging = true,
+      bool checkerValid = false,
       Function(List<String> mess) invalid,
       Function error}) async {
-    var response = await RoomApi.getDetail(code: code, hanging: hanging);
+    var response = await RoomApi.getDetail(
+        code: code,
+        hanging: hanging,
+        fields: checkerValid ? 'checker_valid' : null);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
@@ -101,6 +105,31 @@ class RoomRepo {
       Function error}) async {
     var response = await RoomApi.changeHangingStatus(
         code: code, model: {"hanging": false});
+    if (response.isSuccess()) {
+      print("Success");
+      if (success != null) success();
+      return;
+    } else if (response.statusCode == 400) {
+      print("Invalid");
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
+
+  static Future<void> checkRoomStatus(
+      {@required String code,
+      @required dynamic data,
+      Function() success,
+      Function(List<String> mess) invalid,
+      Function error}) async {
+    var response = await RoomApi.checkRoomStatus(code: code, model: data);
     if (response.isSuccess()) {
       print("Success");
       if (success != null) success();

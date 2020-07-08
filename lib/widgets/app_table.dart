@@ -56,7 +56,13 @@ class AppTable extends StatelessWidget {
         content,
         style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
       );
-    else
+    else if (content is Map<String, Object>) {
+      if (content.containsKey("display") && content.containsKey("iso"))
+        child = Text(
+          content["display"],
+          style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
+        );
+    } else
       child = content;
     return GestureDetector(
       onTap: onTap,

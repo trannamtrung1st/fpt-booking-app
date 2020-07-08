@@ -380,6 +380,8 @@ class _BookingViewPresenter {
         success: (data) {
           success = true;
           view.refreshRoomData(data);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() {
+      if (!success) view.setShowingViewState();
+    });
   }
 }

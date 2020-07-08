@@ -73,8 +73,7 @@ class _CalendarViewState extends State<CalendarView>
   }
 
   //isShowingView
-  void setShowingViewState() =>
-      setState(() {
+  void setShowingViewState() => setState(() {
         _state = SHOWING_VIEW;
       });
 
@@ -108,11 +107,10 @@ class _CalendarViewState extends State<CalendarView>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            BookingDetailView(
-              id: id,
-              type: BookingDetailView.TYPE_CALENDAR_DETAIL,
-            ),
+        builder: (context) => BookingDetailView(
+          id: id,
+          type: BookingDetailView.TYPE_CALENDAR_DETAIL,
+        ),
       ),
     ).then((value) {
       if (!_keepAlive) {
@@ -214,12 +212,15 @@ class _CalendarViewPresenter {
     return BookingRepo.get(
         fields: "info,room",
         dateStr: IntlHelper.format(date),
+        sorts: 'abooked_date',
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (data) {
           success = true;
           view.refreshCalendarData(data);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() {
+      if (!success) view.setShowingViewState();
+    });
   }
 
   void onRowTap(dynamic data) {

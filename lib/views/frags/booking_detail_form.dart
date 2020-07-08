@@ -49,6 +49,7 @@ class BookingDetailForm extends StatelessWidget {
         labelText: 'Status',
         child: ViewHelper.getTextByBookingStatus(status: data["status"]),
       ),
+      _getRequestedTimeStr(),
       _getTimeStr(),
       SimpleInfo(
         labelText: 'Number of people',
@@ -108,11 +109,16 @@ class BookingDetailForm extends StatelessWidget {
 
   Widget _getTimeStr() {
     return SimpleInfo(
-        labelText: 'Status',
+        labelText: 'Booked time',
         child: Text(data["booked_date"]["display"] +
             ", " +
             data["from_time"] +
             " - " +
             data["to_time"]));
+  }
+
+  Widget _getRequestedTimeStr() {
+    return SimpleInfo(
+        labelText: 'Created time', child: Text(data["sent_date"]["display"]));
   }
 }

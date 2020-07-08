@@ -154,7 +154,9 @@ class _LoginViewPresenter {
             },
             invalid: view.showInvalidMessages,
             error: _loginError)
-        .whenComplete(() => {if (!success) view.setShowingViewState()});
+        .whenComplete(() {
+      if (!success) view.setShowingViewState();
+    });
   }
 
   Future<void> _loginError({Object err}) async {

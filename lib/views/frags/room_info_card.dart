@@ -34,8 +34,10 @@ class RoomInfoCard extends StatelessWidget {
     ];
     if (showStatus)
       iconWidgets.add(Text(
-        "GOOD",
-        style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+        room["is_available"] == true ? "GOOD" : "OFF",
+        style: TextStyle(
+            color: room["is_available"] == true ? Colors.green : Colors.grey,
+            fontWeight: FontWeight.bold),
       ));
 
     var columnWidgets = <Widget>[

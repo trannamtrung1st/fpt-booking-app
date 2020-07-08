@@ -52,12 +52,13 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
       }
     var dateStr =
         IntlHelper.format(fromDate) + " - " + IntlHelper.format(toDate);
+    var finalStatus = status.isEmpty ? "All" : status;
     return Container(
       margin: EdgeInsets.only(top: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("\"$status\" request on $dateStr"),
+          Text("\"$finalStatus\" request on $dateStr"),
           Container(
             margin: EdgeInsets.only(top: 7),
             child: AppTable(

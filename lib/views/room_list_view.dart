@@ -31,7 +31,10 @@ class _RoomListViewState extends State<RoomListView>
   String searchValue = '';
 
   void refresh() {
-    setState(() {});
+    setState(() {
+      this.rooms = null;
+      _presenter.onRefresh();
+    });
   }
 
   void navigateToRoomDetail(String code) {
@@ -43,7 +46,10 @@ class _RoomListViewState extends State<RoomListView>
           type: RoomDetailView.TYPE_ROOM_INFO,
         ),
       ),
-    );
+    ).then((value) {
+      if (!_keepAlive)
+        refresh();
+    });
   }
 
   @override
@@ -236,6 +242,8 @@ class _RoomListViewPresenter {
         success: (data) {
           success = true;
           view.refreshRoomData(data);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() {
+      if (!success) view.setShowingViewState();
+    });
   }
 }

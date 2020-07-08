@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
@@ -15,6 +16,7 @@ import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:provider/provider.dart';
 
 class BookingDetailView extends StatefulWidget {
   final int id;
@@ -38,6 +40,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   final int type;
   dynamic data;
   bool _dataUpdated = false;
+  LoginContext loginContext;
 
   _BookingDetailViewState({@required this.id, this.type});
 
@@ -47,6 +50,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     setState(() {
       _dataUpdated = true;
     });
+  }
+
+  void showSuccess() async {
+    await DialogHelper.showMessage(
+        context: this.context, title: "Message", contents: ["Successful"]);
   }
 
   void showEmptyRoomNotAllowedMessage() {
@@ -76,6 +84,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   @override
   void initState() {
     super.initState();
+    loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _BookingDetailViewPresenter(view: this);
     _presenter.handleInitState(context);
   }
@@ -106,12 +115,17 @@ class _BookingDetailViewState extends State<BookingDetailView> {
 
   Widget _getShowingViewBody() {
     var widgets = <Widget>[];
+    bool processAllowed = false;
     switch (type) {
       case BookingDetailView.TYPE_CALENDAR_DETAIL:
         widgets.add(_calendarDetail());
         break;
       case BookingDetailView.TYPE_REQUEST_DETAIL:
-        widgets.addAll(<Widget>[_requestDetail(), _approvalForm()]);
+        processAllowed = (data["status"] == "Processing" &&
+                data["manager_type"] == "Department") ||
+            (data["status"] == "Valid" && data["manager_type"] == "Area");
+        widgets.add(_requestDetail(processAllowed));
+        widgets.add(_approvalForm(processAllowed));
         break;
     }
     var body = AppScroll(
@@ -194,51 +208,54 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     throw Exception("Invalid type");
   }
 
-  Widget _approvalForm() {
+  Widget _approvalForm(bool processAllowed) {
+    var widgets = <Widget>[
+      Text(
+        "APPROVAL SECTION",
+        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+      SimpleInfo(
+        labelText: 'Message',
+        child: Container(
+          decoration:
+              BoxDecoration(border: Border.all(color: "#CCCCCC".toColor())),
+          padding: EdgeInsets.all(8.0),
+          //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
+          child: TextFormField(
+            enabled: processAllowed,
+            maxLines: 7,
+            onChanged: _presenter.onManagerMessageChanged,
+            initialValue: data["manager_message"] ?? "",
+            style: TextStyle(fontSize: 14),
+            decoration:
+                InputDecoration.collapsed(hintText: "Enter your message here"),
+          ),
+        ),
+      ),
+    ];
+    if (processAllowed)
+      widgets.add(Row(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          AppButton(
+            child: Text("DENY"),
+            type: "danger",
+            onPressed: _presenter.onDenyPressed,
+          ),
+          Spacer(),
+          AppButton(
+            child: Text("APPROVE"),
+            type: "success",
+            onPressed: _presenter.onApprovePressed,
+          ),
+        ],
+      ));
     return AppCard(
       margin: EdgeInsets.only(top: 15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            "APPROVAL SECTION",
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          SimpleInfo(
-            labelText: 'Message',
-            child: Container(
-              decoration:
-                  BoxDecoration(border: Border.all(color: "#CCCCCC".toColor())),
-              padding: EdgeInsets.all(8.0),
-              //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
-              child: TextFormField(
-                maxLines: 7,
-                onChanged: _presenter.onManagerMessageChanged,
-                initialValue: data["manager_message"] ?? "",
-                style: TextStyle(fontSize: 14),
-                decoration: InputDecoration.collapsed(
-                    hintText: "Enter your message here"),
-              ),
-            ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              AppButton(
-                child: Text("DENY"),
-                type: "danger",
-                onPressed: _presenter.onDenyPressed,
-              ),
-              Spacer(),
-              AppButton(
-                child: Text("APPROVE"),
-                type: "success",
-                onPressed: _presenter.onApprovePressed,
-              ),
-            ],
-          )
-        ],
+        children: widgets,
       ),
     );
   }
@@ -251,26 +268,30 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     var startTime = IntlHelper.parseDateTime(data["start_time"]["display"]);
     var finishTime = IntlHelper.parseDateTime(data["finish_time"]["display"]);
     var allowFeedbackTime = finishTime.add(Duration(hours: 4));
-    if (data["status"] == 'Approved' &&
-        now.compareTo(finishTime) >= 0 &&
-        now.compareTo(allowFeedbackTime) < 0)
-      ops.add(
-        AppButton(
-          type: "success",
-          child: Text('FEEDBACK'),
-          onPressed: _presenter.onFeedbackPressed,
-        ),
-      );
-    if (data["status"] == 'Processing' ||
-        data["status"] == 'Valid' && now.compareTo(startTime) < 0)
-      ops.insert(
-        0,
-        AppButton(
-          type: "danger",
-          child: Text('ABORT'),
-          onPressed: _presenter.onAbortPressed,
-        ),
-      );
+    if (loginContext.tokenData["user_id"] == data["book_member_id"]) {
+      if (data["status"] == 'Approved' &&
+          now.compareTo(finishTime) >= 0 &&
+          now.compareTo(allowFeedbackTime) < 0)
+        ops.add(
+          AppButton(
+            type: "success",
+            child: Text('FEEDBACK'),
+            onPressed: _presenter.onFeedbackPressed,
+          ),
+        );
+      if ((data["status"] == 'Processing' ||
+              data["status"] == 'Valid' ||
+              data["status"] == 'Approved') &&
+          now.compareTo(startTime) < 0)
+        ops.insert(
+          0,
+          AppButton(
+            type: "danger",
+            child: Text('ABORT'),
+            onPressed: _presenter.onAbortPressed,
+          ),
+        );
+    }
     var feedbackEnabled = ops.length > 1;
     return BookingDetailForm(
       data: data,
@@ -305,25 +326,27 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     );
   }
 
-  Widget _requestDetail() {
+  Widget _requestDetail(bool processAllowed) {
     return BookingDetailForm(
       feedbackWidget: SimpleInfo(
         labelText: "Feedback",
         child: Text(data["feedback"] ?? ""),
       ),
       data: data,
-      changeRoomBtn: GestureDetector(
-        onTap: _presenter.onChangeRoomPressed,
-        child: Container(
-          margin: EdgeInsets.only(left: 10),
-          child: Text(
-            "change",
-            style: TextStyle(
-                decoration: TextDecoration.underline, color: Colors.grey),
-          ),
-        ),
-      ),
-      onRemoveService: _presenter.onRemoveService,
+      changeRoomBtn: !processAllowed
+          ? null
+          : GestureDetector(
+              onTap: _presenter.onChangeRoomPressed,
+              child: Container(
+                margin: EdgeInsets.only(left: 10),
+                child: Text(
+                  "change",
+                  style: TextStyle(
+                      decoration: TextDecoration.underline, color: Colors.grey),
+                ),
+              ),
+            ),
+      onRemoveService: !processAllowed ? null : _presenter.onRemoveService,
       operations: !_dataUpdated
           ? null
           : <Widget>[
@@ -333,7 +356,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
                   Spacer(),
                   AppButton(
                     child: (Text("UPDATE")),
-                    onPressed: _presenter.onManagerUpdateRequestPressed,
+                    onPressed: _presenter.onUpdateBookingPressed,
                     type: "success",
                   )
                 ],
@@ -345,8 +368,11 @@ class _BookingDetailViewState extends State<BookingDetailView> {
 
 class _BookingDetailViewPresenter {
   _BookingDetailViewState view;
+  LoginContext _loginContext;
 
-  _BookingDetailViewPresenter({this.view});
+  _BookingDetailViewPresenter({this.view}) {
+    _loginContext = view.loginContext;
+  }
 
   void handleInitState(BuildContext context) {
     _getBookingDetail(view.id);
@@ -356,17 +382,65 @@ class _BookingDetailViewPresenter {
     return _getBookingDetail(view.id);
   }
 
-  void onManagerUpdateRequestPressed() {}
-
   void onRemoveService(dynamic data) {
     var services = view.data["attached_services"] as List<dynamic>;
     services.removeWhere((element) => element["code"] == data["code"]);
+    if (!view.data.containsKey("removed_service_ids"))
+      view.data["removed_service_ids"] = <int>[];
+    var rmServices = view.data["removed_service_ids"];
+    rmServices.add(data["id"]);
     view.updateData();
   }
 
-  void onDenyPressed() {}
+  void onDenyPressed() async {
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
+    view.setUpdateDataState();
+    var success = false;
+    BookingRepo.changeApprovalStatusOfBooking(
+            id: view.id,
+            model: {
+              "is_approved": false,
+              "manager_message": view.data["manager_message"]
+            },
+            error: view.showError,
+            success: () {
+              success = true;
+              BookingView.needRefresh();
+              CalendarView.needRefresh();
+              ApprovalListView.needRefresh();
+              _getBookingDetail(view.id);
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.setShowingViewState()}
+            });
+  }
 
-  void onApprovePressed() {}
+  void onApprovePressed() async {
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
+    view.setUpdateDataState();
+    var success = false;
+    BookingRepo.changeApprovalStatusOfBooking(
+            id: view.id,
+            model: {
+              "is_approved": true,
+              "manager_message": view.data["manager_message"]
+            },
+            error: view.showError,
+            success: () {
+              success = true;
+              BookingView.needRefresh();
+              CalendarView.needRefresh();
+              ApprovalListView.needRefresh();
+              _getBookingDetail(view.id);
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.setShowingViewState()}
+            });
+  }
 
   void onManagerMessageChanged(String value) {
     view.data["manager_message"] = value;
@@ -382,6 +456,32 @@ class _BookingDetailViewPresenter {
 
   void onChangeRoomCancelPressed(String text) {
     view.closeRoomDialog();
+  }
+
+  void onUpdateBookingPressed() async {
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
+    view.setUpdateDataState();
+    var success = false;
+    BookingRepo.updateBooking(
+            id: view.id,
+            model: {
+              'room_code': view.data["room"]["code"],
+              'removed_service_ids': view.data["removed_service_ids"]
+            },
+            error: view.showError,
+            success: () {
+              success = true;
+              BookingView.needRefresh();
+              CalendarView.needRefresh();
+              ApprovalListView.needRefresh();
+              _getBookingDetail(view.id);
+              view.showSuccess();
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.setShowingViewState()}
+            });
   }
 
   void onFeedbackPressed() async {
@@ -448,6 +548,10 @@ class _BookingDetailViewPresenter {
   Future<void> _getBookingDetail(int id) {
     var success = false;
     return BookingRepo.getDetail(
+        fields: _loginContext.isManager() &&
+                view.type == BookingDetailView.TYPE_REQUEST_DETAIL
+            ? "manager_type"
+            : null,
         id: id,
         dateFormat: "dd/MM/yyyy",
         error: view.showError,
@@ -455,6 +559,8 @@ class _BookingDetailViewPresenter {
         success: (val) {
           success = true;
           view.loadBookingData(val);
-        }).whenComplete(() => {if (!success) view.setShowingViewState()});
+        }).whenComplete(() {
+      if (!success) view.setShowingViewState();
+    });
   }
 }
