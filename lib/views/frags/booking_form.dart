@@ -73,6 +73,10 @@ class _BookingFormState extends State<BookingForm> {
 
   _BookingFormPresenter _presenter;
 
+  Future<bool> showConfirm() {
+    return DialogHelper.showConfirm(context: context);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -286,7 +290,9 @@ class _BookingFormPresenter {
     view.refresh();
   }
 
-  void onSubmit() {
+  void onSubmit() async {
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
     view.enableLoading();
     var success = false;
     BookingRepo.createBooking(

@@ -5,7 +5,9 @@ import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
-import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/views/approval_list_view.dart';
+import 'package:fptbooking_app/views/booking_view.dart';
+import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/dialogs/change_room_dialog.dart';
 import 'package:fptbooking_app/views/frags/booking_detail_form.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
@@ -30,6 +32,7 @@ class BookingDetailView extends StatefulWidget {
 class _BookingDetailViewState extends State<BookingDetailView> {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
+  static const int UPDATE_DATA = 3;
   int _state = LOADING_DATA;
   int id;
   final int type;
@@ -49,6 +52,10 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   void showEmptyRoomNotAllowedMessage() {
     DialogHelper.showMessage(
         context: context, contents: ["Booking request must have room"]);
+  }
+
+  Future<bool> showConfirm() {
+    return DialogHelper.showConfirm(context: context);
   }
 
   void showChangeRoomDialog() {
@@ -79,6 +86,9 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
+    if (isUpdateData()) {
+      return _buildUpdateDataWidget(context);
+    }
     return _buildShowingViewWidget(context);
   }
 
@@ -94,8 +104,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         _state = SHOWING_VIEW;
       });
 
-  Widget _buildShowingViewWidget(BuildContext context) {
-    if (data == null) return _mainContent(body: Container());
+  Widget _getShowingViewBody() {
     var widgets = <Widget>[];
     switch (type) {
       case BookingDetailView.TYPE_CALENDAR_DETAIL:
@@ -105,14 +114,23 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         widgets.addAll(<Widget>[_requestDetail(), _approvalForm()]);
         break;
     }
-    return _mainContent(
-        body: AppScroll(
+    var body = AppScroll(
       onRefresh: _presenter.onRefresh,
       padding: EdgeInsets.all(15),
       child: Column(
         children: widgets,
       ),
-    ));
+    );
+    return body;
+  }
+
+  Widget _buildShowingViewWidget(BuildContext context) {
+    if (data == null) return _mainContent(body: Container());
+    var body = _getShowingViewBody();
+    return LoadingModal(
+      child: _mainContent(body: body),
+      isLoading: false,
+    );
   }
 
   //isLoadingData
@@ -130,15 +148,23 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     ));
   }
 
+  //isUpdateData
+  bool isUpdateData() => _state == UPDATE_DATA;
+
+  void setUpdateDataState() => setState(() {
+        _state = UPDATE_DATA;
+      });
+
+  Widget _buildUpdateDataWidget(BuildContext context) {
+    var body = _getShowingViewBody();
+    return LoadingModal(
+      child: _mainContent(body: body),
+      isLoading: true,
+    );
+  }
+
   void showInvalidMessages(List<String> mess) {
-    DialogHelper.showMessage(
-        context: context,
-        title: "Sorry",
-        contents: mess,
-        onOk: () {
-          navigateBack();
-          return true;
-        });
+    DialogHelper.showMessage(context: context, title: "Sorry", contents: mess);
   }
 
   void navigateBack() {
@@ -146,12 +172,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   }
 
   void showError() {
-    DialogHelper.showUnknownError(
-        context: this.context,
-        onOk: () {
-          navigateBack();
-          return true;
-        });
+    DialogHelper.showUnknownError(context: this.context);
   }
 
   //widgets
@@ -237,7 +258,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         AppButton(
           type: "success",
           child: Text('FEEDBACK'),
-          onPressed: () {},
+          onPressed: _presenter.onFeedbackPressed,
         ),
       );
     if (data["status"] == 'Processing' ||
@@ -247,9 +268,10 @@ class _BookingDetailViewState extends State<BookingDetailView> {
         AppButton(
           type: "danger",
           child: Text('ABORT'),
-          onPressed: () {},
+          onPressed: _presenter.onAbortPressed,
         ),
       );
+    var feedbackEnabled = ops.length > 1;
     return BookingDetailForm(
       data: data,
       feedbackWidget: SimpleInfo(
@@ -260,6 +282,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
           padding: EdgeInsets.all(8.0),
           //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
           child: TextFormField(
+            enabled: feedbackEnabled,
             maxLines: 7,
             onChanged: _presenter.onFeedbackChanged,
             initialValue: data["feedback"] ?? "",
@@ -359,6 +382,57 @@ class _BookingDetailViewPresenter {
 
   void onChangeRoomCancelPressed(String text) {
     view.closeRoomDialog();
+  }
+
+  void onFeedbackPressed() async {
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
+    view.setUpdateDataState();
+    var success = false;
+    BookingRepo.feedbackBooking(
+            id: view.id,
+            model: {"feedback": view.data["feedback"]},
+            error: view.showError,
+            success: () {
+              success = true;
+              BookingView.needRefresh();
+              CalendarView.needRefresh();
+              ApprovalListView.needRefresh();
+              _getBookingDetail(view.id);
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.setShowingViewState()}
+            });
+  }
+
+  void onAbortPressed() async {
+    var mess = <String>[];
+    if (view.data["feedback"] == null || view.data["feedback"].isEmpty)
+      mess.add("You must provide a reason in feedback");
+    if (mess.length > 0) {
+      view.showInvalidMessages(mess);
+      return;
+    }
+    var confirmed = await view.showConfirm();
+    if (!confirmed) return;
+    view.setUpdateDataState();
+    var success = false;
+    BookingRepo.abortBooking(
+            id: view.id,
+            model: {"feedback": view.data["feedback"]},
+            error: view.showError,
+            success: () {
+              success = true;
+              BookingView.needRefresh();
+              CalendarView.needRefresh();
+              ApprovalListView.needRefresh();
+              _getBookingDetail(view.id);
+            },
+            invalid: view.showInvalidMessages)
+        .whenComplete(() => {
+              if (!success) {view.setShowingViewState()}
+            });
   }
 
   void onChangeRoomUpdatePressed(String text) {

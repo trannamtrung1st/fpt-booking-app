@@ -102,6 +102,47 @@ class DialogHelper {
     );
   }
 
+  static Future<bool> showConfirm({
+    @required BuildContext context,
+    List<String> contents,
+    String title = "Confirm",
+    bool barrierDismissible = false,
+    String yesBtnText = "Yes",
+    String noBtnText = "No",
+    bool Function() onYes,
+    bool Function() onNo,
+  }) async {
+    contents = contents ?? ["Are you sure?"];
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: barrierDismissible, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: ListBody(children: contents.map((e) => Text(e)).toList()),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(noBtnText),
+              onPressed: () {
+                if (onNo != null && !onNo()) return;
+                Navigator.of(context).pop(false);
+              },
+            ),
+            FlatButton(
+              child: Text(yesBtnText),
+              onPressed: () {
+                if (onYes != null && !onYes()) return;
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static Future<void> showUnknownError(
       {@required BuildContext context, bool Function() onOk}) {
     return showMessage(

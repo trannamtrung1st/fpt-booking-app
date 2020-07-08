@@ -14,11 +14,16 @@ class ViewHelper {
   static Widget getTextByBookingStatus({@required String status}) {
     Color color = Colors.grey;
     switch (status) {
+      case "Valid":
       case "Approved":
         color = Colors.green;
         break;
       case "Denied":
+      case "Aborted":
         color = Colors.red;
+        break;
+      case "Finished":
+        color = Colors.blue;
         break;
     }
     return Text(status, style: TextStyle(color: color));

@@ -114,4 +114,82 @@ class BookingRepo {
     print(response.body);
     if (error != null) error();
   }
+
+  static Future<void> feedbackBooking(
+      {@required int id,
+        dynamic model,
+        Function() success,
+        Function(List<String> mess) invalid,
+        Function error}) async {
+    var response = await BookingApi.feedbackBooking(
+        id: id, model: model);
+    if (response.isSuccess()) {
+      print("Success");
+      if (success != null) success();
+      return;
+    } else if (response.statusCode == 400) {
+      print("Invalid");
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
+
+  static Future<void> abortBooking(
+      {@required int id,
+        dynamic model,
+        Function() success,
+        Function(List<String> mess) invalid,
+        Function error}) async {
+    var response = await BookingApi.abortBooking(
+        id: id, model: model);
+    if (response.isSuccess()) {
+      print("Success");
+      if (success != null) success();
+      return;
+    } else if (response.statusCode == 400) {
+      print("Invalid");
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
+
+  static Future<void> changeApprovalStatusOfBooking(
+      {@required int id,
+        dynamic model,
+        Function() success,
+        Function(List<String> mess) invalid,
+        Function error}) async {
+    var response = await BookingApi.changeApprovalStatusOfBooking(
+        id: id, model: model);
+    if (response.isSuccess()) {
+      print("Success");
+      if (success != null) success();
+      return;
+    } else if (response.statusCode == 400) {
+      print("Invalid");
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
 }

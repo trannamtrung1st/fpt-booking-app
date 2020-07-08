@@ -40,7 +40,11 @@ class _CalendarViewState extends State<CalendarView>
   }
 
   void refresh() {
-    setState(() {});
+    setState(() {
+      _state = LOADING_DATA;
+      _bookings = null;
+      _presenter.onRefresh();
+    });
   }
 
   @override
@@ -69,7 +73,8 @@ class _CalendarViewState extends State<CalendarView>
   }
 
   //isShowingView
-  void setShowingViewState() => setState(() {
+  void setShowingViewState() =>
+      setState(() {
         _state = SHOWING_VIEW;
       });
 
@@ -103,12 +108,17 @@ class _CalendarViewState extends State<CalendarView>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BookingDetailView(
-          id: id,
-          type: BookingDetailView.TYPE_CALENDAR_DETAIL,
-        ),
+        builder: (context) =>
+            BookingDetailView(
+              id: id,
+              type: BookingDetailView.TYPE_CALENDAR_DETAIL,
+            ),
       ),
-    );
+    ).then((value) {
+      if (!_keepAlive) {
+        refresh();
+      }
+    });
   }
 
   //widgets

@@ -6,6 +6,33 @@ import 'package:fptbooking_app/helpers/http_helper.dart';
 import 'package:http/http.dart' as http;
 
 class BookingApi {
+  static Future<http.Response> feedbackBooking(
+      {@required int id, dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/$id/feedback');
+    var response = await http.post(uri,
+        headers: HttpHelper.commonHeaders(hasBody: true),
+        body: jsonEncode(model));
+    return response;
+  }
+
+  static Future<http.Response> abortBooking(
+      {@required int id, dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/$id/cancel');
+    var response = await http.post(uri,
+        headers: HttpHelper.commonHeaders(hasBody: true),
+        body: jsonEncode(model));
+    return response;
+  }
+
+  static Future<http.Response> changeApprovalStatusOfBooking(
+      {@required int id, dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/$id/approval');
+    var response = await http.post(uri,
+        headers: HttpHelper.commonHeaders(hasBody: true),
+        body: jsonEncode(model));
+    return response;
+  }
+
   static Future<http.Response> createBooking({@required dynamic model}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings');
     var response = await http.post(uri,

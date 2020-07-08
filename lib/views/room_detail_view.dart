@@ -171,10 +171,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
 
   void showError() {
     DialogHelper.showUnknownError(
-        context: this.context,
-        onOk: () {
-          return true;
-        });
+        context: this.context);
   }
 
   //widgets
