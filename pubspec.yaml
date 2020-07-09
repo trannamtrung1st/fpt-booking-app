@@ -46,6 +46,7 @@ dev_dependencies:
     sdk: flutter
 
   flutter_launcher_icons: ^0.7.5
+  # flutter pub pub run flutter_launcher_icons:main
 
 flutter_icons:
   image_path: "icon/fpt.jpg"

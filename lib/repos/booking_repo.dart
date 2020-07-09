@@ -5,16 +5,25 @@ import 'package:fptbooking_app/apis/booking_api.dart';
 import 'package:fptbooking_app/helpers/http_helper.dart';
 
 class BookingRepo {
-  static Future<void> get(
+  static Future<void> getOwner(
       {String fields = "info",
       String dateStr,
+      String groupBy,
+      String search,
+      String status,
       String sorts,
       String dateFormat = "dd/MM/yyyy",
       Function(List<dynamic>) success,
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await BookingApi.get(
-        fields: fields, dateFormat: dateFormat, dateStr: dateStr, sorts: sorts);
+        fields: fields,
+        groupBy: groupBy,
+        status: status,
+        dateFormat: dateFormat,
+        search: search,
+        dateStr: dateStr,
+        sorts: sorts);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);

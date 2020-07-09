@@ -8,7 +8,6 @@ import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/repos/room_type_repo.dart';
 import 'package:fptbooking_app/repos/user_repo.dart';
-import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/login_view.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:provider/provider.dart';

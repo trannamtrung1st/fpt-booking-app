@@ -47,8 +47,7 @@ class _RoomListViewState extends State<RoomListView>
         ),
       ),
     ).then((value) {
-      if (!_keepAlive)
-        refresh();
+      if (!_keepAlive) refresh();
     });
   }
 
@@ -140,7 +139,7 @@ class _RoomListViewState extends State<RoomListView>
     var widgets = <Widget>[
       SimpleInfo(
         labelText: "Search rooms",
-        marginBottom: 14,
+        containerMargin: EdgeInsets.only(bottom: 14),
         child: Row(
           children: <Widget>[
             Expanded(

@@ -53,11 +53,17 @@ class BookingApi {
   static Future<http.Response> get(
       {String fields,
       String dateStr,
+      String search,
       String sorts,
+      String status,
+      String groupBy,
       String dateFormat,
       bool loadAll = true}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings', {
       'fields': fields,
+      'group_by': groupBy,
+      'search': search,
+      'status': status,
       'date': dateStr,
       'sorts': sorts,
       'date_format': dateFormat,

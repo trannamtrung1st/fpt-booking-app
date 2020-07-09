@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
+import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/views/frags/approval_request_table.dart';
 import 'package:fptbooking_app/widgets/app_dropdown_button.dart';
@@ -31,19 +32,9 @@ class _ApprovalListViewState extends State<ApprovalListView>
   DateTime toDate = DateTime.now();
   _ApprovalListViewPresenter _presenter;
   List<dynamic> bookings;
-  String status = statuses[0].key;
+  String status = MemoryStorage.statuses[0].key;
   String orderBy = orderByValues[0].key;
 
-  static final List<MapEntry<String, String>> statuses =
-      <MapEntry<String, String>>[
-    MapEntry("", "All"),
-    MapEntry("Processing", "Processing"),
-    MapEntry("Valid", "Valid"),
-    MapEntry("Approved", "Approved"),
-    MapEntry("Denied", "Denied"),
-    MapEntry("Finished", "Finished"),
-    MapEntry("Aborted", "Aborted")
-  ];
   static final List<MapEntry<String, String>> orderByValues = [
     MapEntry("dsent_date", " Latest requested date"),
     MapEntry("abooked_date", "Nearest booked date"),
@@ -173,7 +164,7 @@ class _ApprovalListViewState extends State<ApprovalListView>
           child: AppDropdownButton<String>(
             onChanged: _presenter.onStatusChanged,
             value: status,
-            items: statuses
+            items: MemoryStorage.statuses
                 .map((val) => DropdownMenuItem<String>(
                       value: val.key,
                       child: Text(val.value),

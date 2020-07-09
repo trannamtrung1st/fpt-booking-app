@@ -116,7 +116,7 @@ class _CalendarViewState extends State<CalendarView>
       MaterialPageRoute(
         builder: (context) => BookingDetailView(
           id: id,
-          type: BookingDetailView.TYPE_CALENDAR_DETAIL,
+          type: BookingDetailView.TYPE_BOOKING_DETAIL,
         ),
       ),
     ).then((value) {
@@ -217,7 +217,7 @@ class _CalendarViewPresenter {
 
   Future<void> _getBookings(DateTime date) {
     var success = false;
-    return BookingRepo.get(
+    return BookingRepo.getOwner(
         fields: "info,room",
         dateStr: IntlHelper.format(date),
         sorts: 'abooked_date',

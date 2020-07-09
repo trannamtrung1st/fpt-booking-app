@@ -40,6 +40,10 @@ class BookingDetailForm extends StatelessWidget {
         textAlign: TextAlign.center,
       ),
       SimpleInfo(
+        labelText: 'Code',
+        child: Text(data["code"]),
+      ),
+      SimpleInfo(
         labelText: 'Room',
         child: Row(
           children: roomCodeWidgets,
@@ -72,7 +76,9 @@ class BookingDetailForm extends StatelessWidget {
       ),
       SimpleInfo(
         labelText: 'Note',
-        child: Text(data["note"] ?? ""),
+        child: Text(
+            (data["note"]?.isEmpty == true ? "Nothing" : data["note"]) ??
+                "Nothing"),
       ),
     ];
     if (managerMessage != null) widgets.add(managerMessage);

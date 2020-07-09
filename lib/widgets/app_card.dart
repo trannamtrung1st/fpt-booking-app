@@ -4,8 +4,14 @@ class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets margin;
   final Function onTap;
+  final Color color;
 
-  AppCard({this.child, this.onTap, this.margin = EdgeInsets.zero, Key key})
+  AppCard(
+      {this.child,
+      this.onTap,
+      this.color,
+      this.margin = EdgeInsets.zero,
+      Key key})
       : super(key: key);
 
   @override
@@ -16,7 +22,7 @@ class AppCard extends StatelessWidget {
       margin: this.margin,
       child: Card(
           margin: EdgeInsets.all(0),
-          color: Colors.white,
+          color: color ?? Colors.white,
           child: _btnOrContainer()),
     );
   }

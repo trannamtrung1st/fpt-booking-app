@@ -199,7 +199,6 @@ class _BookingViewState extends State<BookingView>
       SimpleInfo(
         labelText: "Time filter",
         marginBetween: 0,
-        marginBottom: 7,
         child: Row(
           children: <Widget>[
             _timeButton(
@@ -211,7 +210,7 @@ class _BookingViewState extends State<BookingView>
       ),
       SimpleInfo(
         labelText: "Number of people",
-        marginBottom: 14,
+        containerMargin: EdgeInsets.only(bottom: 14),
         child: TextFormField(
           autofocus: false,
           keyboardType: TextInputType.number,
@@ -265,7 +264,7 @@ class _BookingViewState extends State<BookingView>
   Widget _roomTypeSelect() {
     return SimpleInfo(
         labelText: "Room type",
-        marginBottom: 14,
+        containerMargin: EdgeInsets.only(bottom: 14),
         child: SmartSelect<dynamic>.single(
           builder: (context, state, showChoices) => MaterialButton(
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

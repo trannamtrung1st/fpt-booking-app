@@ -10,4 +10,15 @@ class MemoryStorage {
   }
 
   static Map<String, dynamic> roomTypesMap;
+
+  static final List<MapEntry<String, String>> statuses =
+      <MapEntry<String, String>>[
+    MapEntry("", "All"),
+    MapEntry("Processing", "Processing"),
+    MapEntry("Valid", "Valid"),
+    MapEntry("Approved", "Approved"),
+    MapEntry("Denied", "Denied"),
+    MapEntry("Finished", "Finished"),
+    MapEntry("Aborted", "Aborted")
+  ];
 }

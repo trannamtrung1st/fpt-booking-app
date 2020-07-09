@@ -20,6 +20,7 @@ import 'package:provider/provider.dart';
 
 class BookingDetailView extends StatefulWidget {
   final int id;
+  static const TYPE_BOOKING_DETAIL = 0;
   static const TYPE_CALENDAR_DETAIL = 1;
   static const TYPE_REQUEST_DETAIL = 2;
   final int type;
@@ -117,8 +118,9 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     var widgets = <Widget>[];
     bool processAllowed = false;
     switch (type) {
+      case BookingDetailView.TYPE_BOOKING_DETAIL:
       case BookingDetailView.TYPE_CALENDAR_DETAIL:
-        widgets.add(_calendarDetail());
+        widgets.add(_bookingDetail());
         break;
       case BookingDetailView.TYPE_REQUEST_DETAIL:
         processAllowed = (data["status"] == "Processing" &&
@@ -202,6 +204,8 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     switch (type) {
       case BookingDetailView.TYPE_CALENDAR_DETAIL:
         return "Calendar detail";
+      case BookingDetailView.TYPE_BOOKING_DETAIL:
+        return "Booking detail";
       case BookingDetailView.TYPE_REQUEST_DETAIL:
         return "Request detail";
     }
@@ -260,7 +264,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     );
   }
 
-  Widget _calendarDetail() {
+  Widget _bookingDetail() {
     var ops = <Widget>[
       Spacer(),
     ];
@@ -315,7 +319,10 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       ),
       managerMessage: SimpleInfo(
         labelText: 'Manager message',
-        child: Text(data["manager_message"] ?? ""),
+        child: Text((data["manager_message"]?.isEmpty == true
+                ? "Nothing"
+                : data["manager_message"]) ??
+            "Nothing"),
       ),
       operations: <Widget>[
         Divider(),

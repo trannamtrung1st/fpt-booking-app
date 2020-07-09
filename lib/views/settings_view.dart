@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/repos/user_repo.dart';
+import 'package:fptbooking_app/views/booking_list_view.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,15 @@ class _SettingsViewState extends State<SettingsView>
   int _state = SHOWING_VIEW;
 
   _SettingsViewPresenter _presenter;
+
+  void navigateToBookingListView() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookingListView(),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -91,6 +101,13 @@ class _SettingsViewState extends State<SettingsView>
           ])),
       AppCard(
           margin: EdgeInsets.only(bottom: 7),
+          onTap: _presenter.onMyBookingsPressed,
+          child: Row(children: <Widget>[
+            Icon(Icons.collections_bookmark),
+            Text("  My bookings")
+          ])),
+      AppCard(
+          margin: EdgeInsets.only(bottom: 7),
           onTap: _presenter.onLogOutPressed,
           child: Row(
               children: <Widget>[Icon(Icons.exit_to_app), Text("  Logout")]))
@@ -123,6 +140,10 @@ class _SettingsViewPresenter {
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void onMyBookingsPressed() {
+    view.navigateToBookingListView();
+  }
 
   void onLogOutPressed() async {
     await _googleSignIn.signOut();
