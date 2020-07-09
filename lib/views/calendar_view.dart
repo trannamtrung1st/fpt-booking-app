@@ -13,12 +13,15 @@ import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarView extends StatefulWidget {
-  CalendarView({key}) : super(key: key);
+  final DateTime initDate;
+
+  CalendarView({this.initDate, key}) : super(key: key);
 
   static void Function() needRefresh = () {};
 
   @override
-  _CalendarViewState createState() => _CalendarViewState();
+  _CalendarViewState createState() =>
+      _CalendarViewState(initDate: this.initDate);
 }
 
 class _CalendarViewState extends State<CalendarView>
@@ -27,9 +30,13 @@ class _CalendarViewState extends State<CalendarView>
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
 
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate;
   _CalendarViewPresenter _presenter;
   List<dynamic> _bookings;
+
+  _CalendarViewState({DateTime initDate}) {
+    selectedDate = initDate ?? DateTime.now();
+  }
 
   void changeSelectedDate(DateTime dateTime) {
     setState(() {
@@ -129,6 +136,7 @@ class _CalendarViewState extends State<CalendarView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Calendar(
+                initDate: selectedDate,
                 initFormat: CalendarFormat.week,
                 onDaySelected: _presenter.onDaySelected),
             Container(

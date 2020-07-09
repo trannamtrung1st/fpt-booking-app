@@ -82,7 +82,9 @@ class _BookingViewState extends State<BookingView>
           },
         ),
       ),
-    ).then((value) => {if (value != null) MainNav.navigate(value)});
+    ).then((widget) {
+      if (widget != null) MainNav.navigate(widget: widget);
+    });
   }
 
   @override

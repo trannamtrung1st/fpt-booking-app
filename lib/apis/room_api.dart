@@ -45,8 +45,8 @@ class RoomApi {
   }
 
   static Future<http.Response> changeHangingStatus(
-      {@required String code, dynamic model}) async {
-    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/$code/hanging');
+      {@required dynamic model}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/rooms/hanging');
     var response = await http.put(uri,
         headers: HttpHelper.commonHeaders(hasBody: true),
         body: jsonEncode(model));

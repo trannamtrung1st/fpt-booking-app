@@ -50,7 +50,7 @@ class MainNav extends StatefulWidget {
 
   static List<Widget> pages;
 
-  static void Function(Type pageType) navigate;
+  static void Function({Widget widget, Type type}) navigate;
 
   @override
   _MainNavState createState() => _MainNavState();
@@ -68,6 +68,7 @@ class _MainNavState extends State<MainNav> {
 //  static const int TAB_ROOM = 3;
 //  static const int TAB_SETTINGS = 4;
   int _state = TAB_CALENDAR;
+  Widget replacementWidget;
 
   void changeTab(int tab) {
     setState(() {
@@ -79,12 +80,25 @@ class _MainNavState extends State<MainNav> {
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
     loginContext = Provider.of<LoginContext>(context, listen: false);
+    var tabs = loginContext.isManager() ? managerTabs : normalTabs;
     MainNav.pages = loginContext.isManager() ? managerPages : normalPages;
-    MainNav.navigate = (Type t) {
+    if (loginContext.isViewOnlyUser()) {
+      //not allowed booking
+      for (var i = 0; i < tabs.length; i++) {
+        if (MainNav.pages[i].runtimeType == BookingView) {
+          MainNav.pages.removeAt(i);
+          tabs.removeAt(i);
+          i = tabs.length;
+        }
+      }
+    }
+    MainNav.navigate = ({Widget widget, Type type}) {
+      type = type ?? widget.runtimeType;
       for (var i = 0; i < MainNav.pages.length; i++) {
         var rt = MainNav.pages[i].runtimeType;
-        if (rt == t) {
-          _presenter.onItemTapped(i);
+        if (rt == type) {
+          _presenter.onPageNavigation(i, widget);
+          i = MainNav.pages.length;
         }
       }
     };
@@ -93,20 +107,35 @@ class _MainNavState extends State<MainNav> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: "#F5F5F5".toColor(),
-        body: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: pageController,
-          children: MainNav.pages,
-          onPageChanged: _presenter.onPageChanged,
-        ),
+        body: _getPageView(),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          items: loginContext.isManager() ? managerTabs : normalTabs,
+          items: tabs,
           currentIndex: _state,
           selectedItemColor: Colors.orange,
           onTap: _presenter.onItemTapped,
         ),
       ),
+    );
+  }
+
+  Widget _getPageView() {
+    var pages = MainNav.pages.toList();
+    if (replacementWidget != null) {
+      var tempWidget = this.replacementWidget;
+      this.replacementWidget = null;
+      for (var i = 0; i < pages.length; i++) {
+        if (pages[i].runtimeType == tempWidget.runtimeType) {
+          pages[i] = tempWidget;
+          i = pages.length;
+        }
+      }
+    }
+    return PageView(
+      physics: NeverScrollableScrollPhysics(),
+      controller: pageController,
+      children: pages,
+      onPageChanged: _presenter.onPageChanged,
     );
   }
 }
@@ -117,6 +146,11 @@ class _MainNavPresenter {
   _MainNavPresenter({this.view});
 
   void onItemTapped(int index) {
+    view.pageController.jumpToPage(index);
+  }
+
+  void onPageNavigation(int index, Widget rWidget) {
+    view.replacementWidget = rWidget;
     view.pageController.jumpToPage(index);
   }
 

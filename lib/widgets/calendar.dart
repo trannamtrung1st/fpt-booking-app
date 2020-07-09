@@ -6,20 +6,27 @@ import 'package:table_calendar/table_calendar.dart';
 class Calendar extends StatefulWidget {
   final CalendarFormat initFormat;
   final Function(DateTime selected, List<dynamic> list) onDaySelected;
+  final DateTime initDate;
 
-  Calendar({this.initFormat = CalendarFormat.month, this.onDaySelected});
+  Calendar(
+      {this.initDate,
+      this.initFormat = CalendarFormat.month,
+      this.onDaySelected});
 
   @override
-  _CalendarState createState() =>
-      _CalendarState(calendarFormat: initFormat, onDaySelected: onDaySelected);
+  _CalendarState createState() => _CalendarState(
+      calendarFormat: initFormat,
+      onDaySelected: onDaySelected,
+      initDate: this.initDate);
 }
 
 class _CalendarState extends State<Calendar> {
   CalendarController _calendarController;
   CalendarFormat calendarFormat;
   Function(DateTime selected, List<dynamic> list) onDaySelected;
+  final DateTime initDate;
 
-  _CalendarState({this.calendarFormat, this.onDaySelected});
+  _CalendarState({this.calendarFormat, this.onDaySelected, this.initDate});
 
   @override
   void initState() {
@@ -39,6 +46,7 @@ class _CalendarState extends State<Calendar> {
     return TableCalendar(
       calendarController: _calendarController,
       initialCalendarFormat: calendarFormat,
+      initialSelectedDay: initDate,
       onDaySelected: onDaySelected,
       calendarStyle: CalendarStyle(
           selectedColor: Colors.orange, todayColor: "#CCCCCC".toColor()),

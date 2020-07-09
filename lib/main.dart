@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/noti_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
+import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/repos/room_type_repo.dart';
 import 'package:fptbooking_app/repos/user_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
@@ -119,6 +120,7 @@ class _AppState extends State<App> {
         this.loginContext = loginContext;
         _presenter = _AppPresenter(view: this);
         if (loginContext.isLoggedIn()) {
+          _presenter.releaseHangingRoom();
           return _buildLoggedInWidget(context);
         }
         if (_isPreProcessing()) {
@@ -163,6 +165,10 @@ class _AppPresenter {
 
   _AppPresenter({this.view}) {
     _loginContext = view.loginContext;
+  }
+
+  void releaseHangingRoom() {
+    RoomRepo.releaseHangingRoom(userId: _loginContext.tokenData["user_id"]);
   }
 
   void handlePreProcessing(BuildContext context) {

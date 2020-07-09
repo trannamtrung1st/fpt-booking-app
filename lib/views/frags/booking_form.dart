@@ -179,7 +179,9 @@ class _BookingFormState extends State<BookingForm> {
   }
 
   void navigateToCalendarView() {
-    Navigator.of(context).pop(CalendarView);
+    Navigator.of(context).pop(CalendarView(
+      initDate: bookedDate,
+    ));
   }
 
   void showSuccessThenNavigateToCalendarView() async {

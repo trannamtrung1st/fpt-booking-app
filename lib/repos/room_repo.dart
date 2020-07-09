@@ -104,7 +104,32 @@ class RoomRepo {
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await RoomApi.changeHangingStatus(
-        code: code, model: {"hanging": false});
+        model: {"hanging": false, 'code': code});
+    if (response.isSuccess()) {
+      print("Success");
+      if (success != null) success();
+      return;
+    } else if (response.statusCode == 400) {
+      print("Invalid");
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
+
+  static Future<void> releaseHangingRoom(
+      {@required String userId,
+      Function() success,
+      Function(List<String> mess) invalid,
+      Function error}) async {
+    var response = await RoomApi.changeHangingStatus(
+        model: {"release_hanging_user_id": userId});
     if (response.isSuccess()) {
       print("Success");
       if (success != null) success();

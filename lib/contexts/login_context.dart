@@ -33,6 +33,10 @@ class LoginContext extends ChangeNotifier {
     return roles.contains(Constants.ROLE_MANAGER);
   }
 
+  bool isViewOnlyUser() {
+    return tokenData["is_view_only_user"] == true;
+  }
+
   bool isRoomChecker() {
     return roles.contains(Constants.ROLE_ROOM_CHECKER);
   }
