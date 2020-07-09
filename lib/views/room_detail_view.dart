@@ -3,6 +3,7 @@ import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
+import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/frags/booking_form.dart';
 import 'package:fptbooking_app/views/frags/role_checking_form.dart';
 import 'package:fptbooking_app/views/frags/room_info_card.dart';
@@ -252,12 +253,18 @@ class _RoomDetailViewPresenter {
   }
 
   void onBackPressed() {
-    RoomRepo.cancelHangingRoom(
-      code: view.code,
+    if (view.data != null) {
+      view.setProcessDataState();
+      RoomRepo.cancelHangingRoom(
+        code: view.code,
 //        error: view.showError,
 //        invalid: view.showInvalidMessages
-    );
-    view.navigateBack();
+      ).whenComplete(() {
+        BookingView.needRefresh();
+        view.navigateBack();
+      });
+    } else
+      view.setLoadingDataState();
   }
 
   Future<void> _getRoomDetail(String code, {bool hanging}) {

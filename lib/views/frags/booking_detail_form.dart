@@ -7,7 +7,7 @@ import 'package:fptbooking_app/widgets/tag.dart';
 import 'package:fptbooking_app/widgets/tags_container.dart';
 
 class BookingDetailForm extends StatelessWidget {
-  static const int FEEDBACK_IDX = 9;
+  static const int FEEDBACK_IDX = 10;
   final dynamic data;
   final Widget feedbackWidget;
   final Widget managerMessage;

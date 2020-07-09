@@ -202,7 +202,7 @@ class _CalendarViewPresenter {
   _CalendarViewPresenter({this.view});
 
   void handleInitState(BuildContext context) {
-    _getBookings(DateTime.now());
+    _getBookings(view.selectedDate);
   }
 
   Future<void> onRefresh() {

@@ -63,7 +63,7 @@ class _BookingViewState extends State<BookingView>
       });
 
   void refresh() {
-    setState(() {});
+    _presenter.onRefresh();
   }
 
   void navigateToRoomDetail(String code, DateTime date, String fromTime,
@@ -83,7 +83,9 @@ class _BookingViewState extends State<BookingView>
         ),
       ),
     ).then((widget) {
-      if (widget != null) MainNav.navigate(widget: widget);
+      if (widget != null)
+        MainNav.navigate(widget: widget);
+      else if (!_keepAlive) refresh();
     });
   }
 
