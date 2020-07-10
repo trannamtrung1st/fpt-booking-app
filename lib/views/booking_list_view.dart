@@ -140,7 +140,7 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
     ];
     if (groups != null) widgets.add(_getBookingsCard());
     return Scaffold(
-        appBar: ViewHelper.getDefaultAppBar(title: "Booking history"),
+        appBar: ViewHelper.getStackAppBar(title: "Booking history"),
         body: LoadingModal(
             isLoading: loading,
             child: AppScroll(
@@ -219,7 +219,7 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
     for (dynamic group in groups) {
       var date = group[0]["group_by_date_key"];
       cardWidgets.add(AppCard(
-        color: Colors.orange[50],
+        color: Colors.orangeAccent,
         margin: EdgeInsets.only(top: 10),
         child: Text(
           date,

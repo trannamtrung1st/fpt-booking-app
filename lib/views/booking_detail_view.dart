@@ -201,7 +201,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-            appBar: ViewHelper.getDefaultAppBar(title: _getAppBarTitle()),
+            appBar: ViewHelper.getStackAppBar(title: _getAppBarTitle()),
             body: body));
   }
 

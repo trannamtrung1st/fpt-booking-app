@@ -60,9 +60,7 @@ void main() async {
 Widget _materialApp() {
   return MaterialApp(
     title: 'FPT Booking', // used by the OS task switcher
-    home: SafeArea(
-      child: App(),
-    ),
+    home: App(),
     theme: ThemeData(
       //for scroll-overflowed color
       accentColor: Colors.orange,

@@ -184,7 +184,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   //widgets
   Widget _mainContent({@required Widget body}) {
     return Scaffold(
-        appBar: ViewHelper.getDefaultAppBar(title: _getAppBarTitle()),
+        appBar: ViewHelper.getStackAppBar(title: _getAppBarTitle()),
         body: body);
   }
 

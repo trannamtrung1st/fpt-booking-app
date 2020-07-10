@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
@@ -43,7 +44,11 @@ class _LoginViewState extends State<LoginView> {
   Widget _buildShowingViewWidget(BuildContext context) {
     return LoadingModal(
       isLoading: false,
-      child: _loginView(),
+      child: new OrientationBuilder(
+        builder: (context, orientation) => orientation == Orientation.portrait
+            ? _loginViewVertical()
+            : _loginViewHorizontal(),
+      ),
     );
   }
 
@@ -57,7 +62,11 @@ class _LoginViewState extends State<LoginView> {
   Widget _buildInFirebaseLoginProcess(BuildContext context) {
     return LoadingModal(
       isLoading: true,
-      child: _loginView(),
+      child: new OrientationBuilder(
+        builder: (context, orientation) => orientation == Orientation.portrait
+            ? _loginViewVertical()
+            : _loginViewHorizontal(),
+      ),
     );
   }
 
@@ -104,21 +113,138 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _loginView() {
+  Widget _loginViewVertical() {
     return Material(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            child: Image.asset("assets/fpt-logo.png"),
-          ),
-          Text('Instant booking for your need',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          Container(
-            margin: EdgeInsets.only(top: 20),
-            child: _signInButton(),
-          )
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                fit: BoxFit.fill,
+//                colorFilter: new ColorFilter.mode(
+//                    Colors.white.withOpacity(0.5), BlendMode.dstATop),
+                image: new ExactAssetImage("assets/app-bg-0.jpg"))),
+        height: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                // Stroked text as border.
+                Text(
+                  "FPT BOOKING",
+                  style: TextStyle(
+                    letterSpacing: 5,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    shadows: <Shadow>[
+                      Shadow(blurRadius: 20, color: Colors.blue),
+                      Shadow(blurRadius: 20, color: Colors.blue)
+                    ],
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = 3
+                      ..color = Colors.blue,
+                  ),
+                ),
+                // Solid text as fill.
+                Text(
+                  'FPT BOOKING',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 5,
+                    fontSize: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+                height: 300,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        fit: BoxFit.fitWidth,
+                        colorFilter: new ColorFilter.mode(
+                            Colors.white.withOpacity(0.75), BlendMode.dstATop),
+                        image: new ExactAssetImage("assets/login-bg.jpg"))),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Center(
+                      child: Image.asset("assets/fpt-logo.png"),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 20),
+                      child: _signInButton(),
+                    )
+                  ],
+                ))
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _loginViewHorizontal() {
+    return Material(
+      child: Container(
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                fit: BoxFit.fitWidth,
+                colorFilter: new ColorFilter.mode(
+                    Colors.white.withOpacity(0.75), BlendMode.dstATop),
+                image: new ExactAssetImage("assets/login-bg.jpg"))),
+        height: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                // Stroked text as border.
+                Text(
+                  "FPT BOOKING",
+                  style: TextStyle(
+                    letterSpacing: 5,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    shadows: <Shadow>[
+                      Shadow(blurRadius: 20, color: Colors.blue),
+                      Shadow(blurRadius: 20, color: Colors.blue)
+                    ],
+                    foreground: Paint()
+                      ..style = PaintingStyle.stroke
+                      ..strokeWidth = 3
+                      ..color = Colors.blue,
+                  ),
+                ),
+                // Solid text as fill.
+                Text(
+                  'FPT BOOKING',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 5,
+                    fontSize: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Center(
+                  child: Image.asset("assets/fpt-logo.png"),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: 20),
+                  child: _signInButton(),
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

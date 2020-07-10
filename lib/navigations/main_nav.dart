@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
+import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/views/approval_list_view.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
@@ -29,13 +30,27 @@ final List<BottomNavigationBarItem> normalTabs = <BottomNavigationBarItem>[
 ];
 final List<BottomNavigationBarItem> managerTabs =
     normalTabs.toList(growable: true);
-final List<Widget> normalPages = <Widget>[
-  CalendarView(),
-  BookingView(),
-  RoomListView(),
-  SettingsView()
+final List<Screen> normalPages = <Screen>[
+  Screen(
+      widget: CalendarView(),
+      title: "Calendar",
+      icon: Icon(Icons.perm_contact_calendar)),
+  Screen(
+      widget: BookingView(),
+      title: "Booking",
+      icon: Icon(Icons.playlist_add_check)),
+  Screen(widget: RoomListView(), title: "Room list", icon: Icon(Icons.home)),
+  Screen(widget: SettingsView(), title: "Settings", icon: Icon(Icons.settings)),
 ];
-final List<Widget> managerPages = normalPages.toList(growable: true);
+final List<Screen> managerPages = normalPages.toList(growable: true);
+
+class Screen {
+  final Widget widget;
+  final String title;
+  final Icon icon;
+
+  Screen({this.widget, this.title, this.icon});
+}
 
 class MainNav extends StatefulWidget {
   static void init() {
@@ -46,10 +61,13 @@ class MainNav extends StatefulWidget {
           icon: Icon(Icons.check),
           title: Text('Approval'),
         ));
-    managerPages.insert(1, ApprovalListView());
+    managerPages.insert(
+        1,
+        Screen(
+            widget: ApprovalListView(),
+            title: "Approval",
+            icon: Icon(Icons.check)));
   }
-
-  static List<Widget> pages;
 
   static void Function({dynamic refreshParam, Type type}) navigate;
 
@@ -62,6 +80,8 @@ class _MainNavState extends State<MainNav> {
   PageContext pageContext;
   _MainNavPresenter _presenter;
   PageController pageController = PageController(keepPage: true);
+  List<Screen> pages;
+  List<BottomNavigationBarItem> tabs;
 
   static const int TAB_CALENDAR = 0;
 
@@ -83,41 +103,45 @@ class _MainNavState extends State<MainNav> {
     super.initState();
     loginContext = Provider.of<LoginContext>(context, listen: false);
     pageContext = Provider.of<PageContext>(context, listen: false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print("build ${this.runtimeType}");
-    var tabs = loginContext.isManager() ? managerTabs : normalTabs;
-    MainNav.pages = loginContext.isManager() ? managerPages : normalPages;
+    tabs = loginContext.isManager() ? managerTabs : normalTabs;
+    pages = loginContext.isManager() ? managerPages : normalPages;
     if (loginContext.isViewOnlyUser()) {
       //not allowed booking
       for (var i = 0; i < tabs.length; i++) {
-        if (MainNav.pages[i].runtimeType == BookingView) {
-          MainNav.pages.removeAt(i);
+        if (pages[i].runtimeType == BookingView) {
+          pages.removeAt(i);
           tabs.removeAt(i);
           i = tabs.length;
         }
       }
     }
     MainNav.navigate = ({dynamic refreshParam, Type type}) {
-      for (var i = 0; i < MainNav.pages.length; i++) {
-        var rt = MainNav.pages[i].runtimeType;
+      for (var i = 0; i < pages.length; i++) {
+        var rt = pages[i].runtimeType;
         if (rt == type) {
           _presenter.onPageNavigation(i, refreshParam);
-          i = MainNav.pages.length;
+          i = pages.length;
         }
       }
     };
     _presenter = _MainNavPresenter(view: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print("build ${this.runtimeType}");
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        appBar: ViewHelper.getPageAppBar(
+          title: pages[_state].title,
+          icon: pages[_state].icon,
+        ),
         backgroundColor: "#F5F5F5".toColor(),
         body: PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: pageController,
-          children: MainNav.pages,
+          children: pages.map((e) => e.widget).toList(),
 //          onPageChanged: ,
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -139,13 +163,13 @@ class _MainNavPresenter {
 
   void onItemTapped(int index) {
     view.pageController.jumpToPage(index);
-    view.pageContext.refreshIfNeeded(MainNav.pages[index].runtimeType);
+    view.pageContext.refreshIfNeeded(view.pages[index].runtimeType);
     view.changeTab(index);
   }
 
   void onPageNavigation(int index, dynamic refreshParam) {
     view.pageController.jumpToPage(index);
-    view.pageContext.refreshIfNeeded(MainNav.pages[index].runtimeType,
+    view.pageContext.refreshIfNeeded(view.pages[index].runtimeType,
         refreshParam: refreshParam);
     view.changeTab(index);
   }
