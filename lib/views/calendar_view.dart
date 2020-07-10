@@ -129,7 +129,13 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
 
   //widgets
   Widget _mainView({bool loading = false}) {
-    var widgets = <Widget>[_currentSelectedDateInfo(), _scheduleTable()];
+    var widgets = <Widget>[
+      Container(
+        margin: EdgeInsets.all(15),
+        child: _currentSelectedDateInfo(),
+      ),
+      _scheduleTable()
+    ];
     if (_bookings != null && _bookings.length == 0)
       widgets.add(Container(
         width: double.infinity,
@@ -152,12 +158,9 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
                 initDate: selectedDate,
                 initFormat: CalendarFormat.week,
                 onDaySelected: _presenter.onDaySelected),
-            Container(
-              margin: EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widgets,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: widgets,
             ),
           ],
         ),
@@ -174,36 +177,33 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
 
   Widget _scheduleTable() {
     var rows = <AppTableRow>[
-      AppTableRow(data: <dynamic>["Time", "Room", "Type", "Status"]),
+      AppTableRow(data: <dynamic>["Time", "Room", "Subject", "Status", "Type"]),
     ];
     if (_bookings != null)
       for (dynamic o in _bookings) {
         var time = o["from_time"] + " - " + o["to_time"];
         var room = o["room"]["code"];
-        var type = o["type"] as String;
+        var type = (o["type"] as String);
+        var sub = type == "Booking" ? "" : o["code"];
         var status = o["status"] ?? "";
         var statusText = ViewHelper.getTextByBookingStatus(status: status);
         rows.add(AppTableRow(
-            data: <dynamic>[time, room, type, statusText],
+            data: <dynamic>[time, room, sub, statusText, type],
             onTap: type == "Booking" ? () => _presenter.onRowTap(o) : null));
       }
     return Container(
       margin: EdgeInsets.only(top: 10),
       child: AppTable(
         data: rows,
+        width: MediaQuery.of(context).size.width * 1.3,
         columnWidths: {
-          0: FractionColumnWidth(0.3),
-          1: FractionColumnWidth(0.2),
+          0: FractionColumnWidth(0.25),
+          1: FractionColumnWidth(0.13),
+          2: FractionColumnWidth(0.17),
         },
       ),
     );
   }
-
-  bool _keepAlive = true;
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => _keepAlive;
 }
 
 class _CalendarViewPresenter {
@@ -212,25 +212,23 @@ class _CalendarViewPresenter {
   _CalendarViewPresenter({this.view});
 
   void handleInitState(BuildContext context) {
-    _getBookings(view.selectedDate);
+    _getCalendar(view.selectedDate);
   }
 
   Future<void> onRefresh() {
-    return _getBookings(view.selectedDate);
+    return _getCalendar(view.selectedDate);
   }
 
   void onDaySelected(DateTime selected, List<dynamic> list) {
     print(selected);
     view.changeSelectedDate(selected);
-    _getBookings(selected);
+    _getCalendar(selected);
   }
 
-  Future<void> _getBookings(DateTime date) {
+  Future<void> _getCalendar(DateTime date) {
     var success = false;
-    return BookingRepo.getOwner(
-        fields: "info,room",
+    return BookingRepo.getCalendar(
         dateStr: IntlHelper.format(date),
-        sorts: 'abooked_date',
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (data) {

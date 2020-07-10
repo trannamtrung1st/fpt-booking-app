@@ -50,7 +50,21 @@ class BookingApi {
     return response;
   }
 
-  static Future<http.Response> get(
+  static Future<http.Response> getCalendar(
+      {String fields,
+      String dateStr,
+      String dateFormat,
+      bool loadAll = true}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/calendar', {
+      'fields': fields,
+      'date': dateStr,
+      'date_format': dateFormat,
+    });
+    var response = await http.get(uri, headers: HttpHelper.commonHeaders());
+    return response;
+  }
+
+  static Future<http.Response> getOwner(
       {String fields,
       String dateStr,
       String search,

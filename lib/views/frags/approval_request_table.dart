@@ -37,7 +37,13 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
     var rows = <AppTableRow>[
-      AppTableRow(data: <dynamic>["Sent date", "Booked person", "Status"]),
+      AppTableRow(data: <dynamic>[
+        "Sent date",
+        "Booked person",
+        "Status",
+        "Booked date",
+        "Room"
+      ]),
     ];
     if (bookings != null)
       for (dynamic o in bookings) {
@@ -46,8 +52,10 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
             (o["book_member"]["email"] as String).replaceAll("@fpt.edu.vn", "");
         var status = o["status"] ?? "";
         var statusText = ViewHelper.getTextByBookingStatus(status: status);
+        var bookedDate = o["booked_date"]["display"];
+        var room = o["room"]["code"];
         rows.add(AppTableRow(
-            data: <dynamic>[date, bookedBy, statusText],
+            data: <dynamic>[date, bookedBy, statusText, bookedDate, room],
             onTap: () => this.onRowTap(o)));
       }
     var dateStr =
@@ -58,14 +66,20 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text("\"$finalStatus\" request on $dateStr"),
+          Container(
+            margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
+            child: Text("\"$finalStatus\" request on $dateStr"),
+          ),
           Container(
             margin: EdgeInsets.only(top: 7),
             child: AppTable(
               data: rows,
+              width: MediaQuery.of(context).size.width * 1.5,
               columnWidths: {
-                0: FractionColumnWidth(0.28),
-                1: FractionColumnWidth(0.45),
+                0: FractionColumnWidth(0.18),
+                1: FractionColumnWidth(0.3),
+                2: FractionColumnWidth(0.15),
+                3: FractionColumnWidth(0.2),
               },
             ),
           )

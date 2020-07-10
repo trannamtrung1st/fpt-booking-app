@@ -5,6 +5,33 @@ import 'package:fptbooking_app/apis/booking_api.dart';
 import 'package:fptbooking_app/helpers/http_helper.dart';
 
 class BookingRepo {
+  static Future<void> getCalendar(
+      {String fields = "info,room",
+      String dateStr,
+      String dateFormat = "dd/MM/yyyy",
+      Function(List<dynamic>) success,
+      Function(List<String> mess) invalid,
+      Function error}) async {
+    var response = await BookingApi.getCalendar(
+        fields: fields, dateFormat: dateFormat, dateStr: dateStr);
+    if (response.isSuccess()) {
+      print('Response body: ${response.body}');
+      var result = jsonDecode(response.body);
+      if (success != null) success(result["data"]["list"]);
+      return;
+    } else if (response.statusCode == 400) {
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
+
   static Future<void> getOwner(
       {String fields = "info",
       String dateStr,
@@ -16,7 +43,7 @@ class BookingRepo {
       Function(List<dynamic>) success,
       Function(List<String> mess) invalid,
       Function error}) async {
-    var response = await BookingApi.get(
+    var response = await BookingApi.getOwner(
         fields: fields,
         groupBy: groupBy,
         status: status,

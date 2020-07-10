@@ -5,8 +5,10 @@ import 'package:fptbooking_app/helpers/color_helper.dart';
 class AppTable extends StatelessWidget {
   final Map<int, TableColumnWidth> columnWidths;
   final List<AppTableRow> data;
+  final double width;
+  final EdgeInsets padding;
 
-  AppTable({@required this.data, this.columnWidths});
+  AppTable({@required this.data, this.columnWidths, this.width, this.padding});
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +32,18 @@ class AppTable extends StatelessWidget {
               color: i % 2 == 0 ? "#EEEEEE".toColor() : Colors.white)));
     }
 
-    return Table(
-      border: TableBorder.all(style: BorderStyle.none, width: 0),
-      columnWidths: columnWidths,
-      children: rows,
+    return SingleChildScrollView(
+      padding: this.padding ?? EdgeInsets.fromLTRB(15, 0, 15, 0),
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        color: Colors.black,
+        width: this.width ?? MediaQuery.of(context).size.width,
+        child: Table(
+          border: TableBorder.all(style: BorderStyle.none, width: 0),
+          columnWidths: columnWidths,
+          children: rows,
+        ),
+      ),
     );
   }
 

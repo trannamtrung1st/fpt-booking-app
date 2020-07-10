@@ -151,49 +151,57 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
   //widgets
   Widget _mainView({bool loading = false}) {
     var widgets = <Widget>[
-      _dateRange(),
-      SimpleInfo(
-          labelText: "Status",
-          child: AppDropdownButton<String>(
-            onChanged: _presenter.onStatusChanged,
-            value: status,
-            items: MemoryStorage.statuses
-                .map((val) => DropdownMenuItem<String>(
-                      value: val.key,
-                      child: Text(val.value),
-                    ))
-                .toList(),
-          )),
-      SimpleInfo(
-          labelText: "Order by",
-          child: AppDropdownButton<String>(
-            onChanged: _presenter.onOrderByChanged,
-            value: orderBy,
-            items: orderByValues
-                .map((val) => DropdownMenuItem<String>(
-                      value: val.key,
-                      child: Text(val.value),
-                    ))
-                .toList(),
-          )),
-      Row(
-        children: <Widget>[
-          Spacer(),
-          ButtonTheme(
-            minWidth: 0,
-            height: 40,
-            buttonColor: Colors.orange,
-            child: RaisedButton(
-                onPressed: _presenter.onSearchPressed,
-                child: Icon(
-                  Icons.search,
-                  color: Colors.white,
+      Container(
+        margin: EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _dateRange(),
+            SimpleInfo(
+                labelText: "Status",
+                child: AppDropdownButton<String>(
+                  onChanged: _presenter.onStatusChanged,
+                  value: status,
+                  items: MemoryStorage.statuses
+                      .map((val) => DropdownMenuItem<String>(
+                            value: val.key,
+                            child: Text(val.value),
+                          ))
+                      .toList(),
                 )),
-          )
-        ],
-      ),
+            SimpleInfo(
+                labelText: "Order by",
+                child: AppDropdownButton<String>(
+                  onChanged: _presenter.onOrderByChanged,
+                  value: orderBy,
+                  items: orderByValues
+                      .map((val) => DropdownMenuItem<String>(
+                            value: val.key,
+                            child: Text(val.value),
+                          ))
+                      .toList(),
+                )),
+            Row(
+              children: <Widget>[
+                Spacer(),
+                ButtonTheme(
+                  minWidth: 0,
+                  height: 40,
+                  buttonColor: Colors.orange,
+                  child: RaisedButton(
+                      onPressed: _presenter.onSearchPressed,
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.white,
+                      )),
+                )
+              ],
+            )
+          ],
+        ),
+      )
     ];
-    if (bookings != null)
+    if (bookings != null) {
       widgets.addAll([
         Divider(),
         ApprovalRequestTable(
@@ -204,6 +212,16 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
           status: status,
         )
       ]);
+      if (bookings.length == 0)
+        widgets.add(Container(
+          width: double.infinity,
+          margin: EdgeInsets.only(top: 15),
+          child: Text(
+            "You have no request",
+            textAlign: TextAlign.center,
+          ),
+        ));
+    }
 
     return LoadingModal(
       isLoading: loading,
@@ -211,14 +229,7 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
         onRefresh: _presenter.onRefresh,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.all(15),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: widgets),
-            ),
-          ],
+          children: widgets,
         ),
       ),
     );
@@ -232,7 +243,7 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
       height: 0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       padding: EdgeInsets.fromLTRB(0, 7, 7, 7),
-      child: SelectableText(
+      child: Text(
         text,
         style: TextStyle(fontWeight: FontWeight.normal),
       ),
@@ -272,7 +283,7 @@ class _ApprovalListViewPresenter {
   Future<void> _getRequests() {
     var success = false;
     return BookingRepo.getManagedRequest(
-        fields: "info,member",
+        fields: "info,room,member",
         fromDateStr: IntlHelper.format(view.fromDate),
         toDateStr: IntlHelper.format(view.toDate),
         status: view.status,

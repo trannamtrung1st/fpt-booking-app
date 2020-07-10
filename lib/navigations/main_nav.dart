@@ -108,7 +108,7 @@ class _MainNavState extends State<MainNav> {
     if (loginContext.isViewOnlyUser()) {
       //not allowed booking
       for (var i = 0; i < tabs.length; i++) {
-        if (pages[i].runtimeType == BookingView) {
+        if (pages[i].widget.runtimeType == BookingView) {
           pages.removeAt(i);
           tabs.removeAt(i);
           i = tabs.length;
@@ -117,7 +117,7 @@ class _MainNavState extends State<MainNav> {
     }
     MainNav.navigate = ({dynamic refreshParam, Type type}) {
       for (var i = 0; i < pages.length; i++) {
-        var rt = pages[i].runtimeType;
+        var rt = pages[i].widget.runtimeType;
         if (rt == type) {
           _presenter.onPageNavigation(i, refreshParam);
           i = pages.length;
@@ -163,13 +163,13 @@ class _MainNavPresenter {
 
   void onItemTapped(int index) {
     view.pageController.jumpToPage(index);
-    view.pageContext.refreshIfNeeded(view.pages[index].runtimeType);
+    view.pageContext.refreshIfNeeded(view.pages[index].widget.runtimeType);
     view.changeTab(index);
   }
 
   void onPageNavigation(int index, dynamic refreshParam) {
     view.pageController.jumpToPage(index);
-    view.pageContext.refreshIfNeeded(view.pages[index].runtimeType,
+    view.pageContext.refreshIfNeeded(view.pages[index].widget.runtimeType,
         refreshParam: refreshParam);
     view.changeTab(index);
   }
