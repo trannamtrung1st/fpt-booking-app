@@ -11,7 +11,8 @@ class ViewHelper {
     );
   }
 
-  static Widget getTextByBookingStatus({@required String status}) {
+  static Widget getTextByBookingStatus(
+      {@required String status, bool selectable = false}) {
     Color color = Colors.grey;
     switch (status) {
       case "Valid":
@@ -26,6 +27,8 @@ class ViewHelper {
         color = Colors.blue;
         break;
     }
-    return SelectableText(status, style: TextStyle(color: color));
+    return selectable
+        ? SelectableText(status, style: TextStyle(color: color))
+        : Text(status, style: TextStyle(color: color));
   }
 }

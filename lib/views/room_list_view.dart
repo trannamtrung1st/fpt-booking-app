@@ -177,7 +177,8 @@ class _RoomListViewState extends State<RoomListView> with Refreshable {
   Widget _getRoomsCard() {
     var text = Text("All rooms");
     if (searchValue.isNotEmpty)
-      text = Text("Search result for \"$searchValue\"");
+      text = Text((rooms.length > 0 ? "Search" : "No") +
+          " result for \"$searchValue\"");
     var cardWidgets = <Widget>[text];
     var card = AppCard(
       key: roomCardsKey,

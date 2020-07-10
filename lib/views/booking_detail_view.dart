@@ -42,7 +42,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   int id;
   final int type;
   dynamic data;
-  bool _dataUpdated = false;
+  bool dataUpdated = false;
   LoginContext loginContext;
   PageContext pageContext;
 
@@ -52,7 +52,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
 
   void updateData() {
     setState(() {
-      _dataUpdated = true;
+      dataUpdated = true;
     });
   }
 
@@ -111,6 +111,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     setState(() {
       _state = SHOWING_VIEW;
       data = val;
+      dataUpdated = false;
     });
   }
 
@@ -341,7 +342,10 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     return BookingDetailForm(
       feedbackWidget: SimpleInfo(
         labelText: "Feedback",
-        child: SelectableText(data["feedback"] ?? ""),
+        child: SelectableText((data["feedback"]?.isEmpty == true
+                ? "Nothing"
+                : data["feedback"]) ??
+            "Nothing"),
       ),
       data: data,
       changeRoomBtn: !processAllowed
@@ -358,7 +362,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
               ),
             ),
       onRemoveService: !processAllowed ? null : _presenter.onRemoveService,
-      operations: !_dataUpdated
+      operations: !dataUpdated
           ? null
           : <Widget>[
               Divider(),

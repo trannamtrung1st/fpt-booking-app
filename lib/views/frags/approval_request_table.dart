@@ -37,17 +37,17 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
     var rows = <AppTableRow>[
-      AppTableRow(data: <dynamic>["Date", "Time", "Room", "Status"]),
+      AppTableRow(data: <dynamic>["Sent date", "Booked person", "Status"]),
     ];
     if (bookings != null)
       for (dynamic o in bookings) {
-        var date = o["booked_date"];
-        var time = o["from_time"] + " - " + o["to_time"];
-        var room = o["room"]["code"];
+        var date = o["sent_date"]["display"].split(' ')[0];
+        var bookedBy =
+            (o["book_member"]["email"] as String).replaceAll("@fpt.edu.vn", "");
         var status = o["status"] ?? "";
         var statusText = ViewHelper.getTextByBookingStatus(status: status);
         rows.add(AppTableRow(
-            data: <dynamic>[date, time, room, statusText],
+            data: <dynamic>[date, bookedBy, statusText],
             onTap: () => this.onRowTap(o)));
       }
     var dateStr =
@@ -65,8 +65,7 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
               data: rows,
               columnWidths: {
                 0: FractionColumnWidth(0.28),
-                1: FractionColumnWidth(0.28),
-                2: FractionColumnWidth(0.17),
+                1: FractionColumnWidth(0.45),
               },
             ),
           )

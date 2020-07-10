@@ -272,7 +272,7 @@ class _ApprovalListViewPresenter {
   Future<void> _getRequests() {
     var success = false;
     return BookingRepo.getManagedRequest(
-        fields: "info,room",
+        fields: "info,member",
         fromDateStr: IntlHelper.format(view.fromDate),
         toDateStr: IntlHelper.format(view.toDate),
         status: view.status,

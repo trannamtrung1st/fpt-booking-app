@@ -16,14 +16,18 @@ class AppTable extends StatelessWidget {
     var headerRow = data[0];
     for (dynamic o in headerRow.data)
       headers.add(_headerCell(content: o, onTap: headerRow.onTap));
-    rows.add(TableRow(children: headers));
+    rows.add(TableRow(
+        children: headers, decoration: BoxDecoration(color: Colors.orange)));
 
     for (int i = 1; i < data.length; i++) {
       var rowData = data[i];
       var cells = <Widget>[];
       for (dynamic o in rowData.data)
         cells.add(_tableCell(content: o, rowIdx: i, onTap: rowData.onTap));
-      rows.add(TableRow(children: cells));
+      rows.add(TableRow(
+          children: cells,
+          decoration: BoxDecoration(
+              color: i % 2 == 0 ? "#EEEEEE".toColor() : Colors.white)));
     }
 
     return Table(
@@ -44,21 +48,20 @@ class AppTable extends StatelessWidget {
       child = content;
     return GestureDetector(
         onTap: onTap,
-        child: Container(
-            color: Colors.orange, padding: EdgeInsets.all(7), child: child));
+        child: Container(padding: EdgeInsets.all(7), child: child));
   }
 
   Widget _tableCell(
       {@required dynamic content, @required int rowIdx, Function onTap}) {
     Widget child;
     if (content is String)
-      child = SelectableText(
+      child = Text(
         content,
         style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
       );
     else if (content is Map<String, Object>) {
       if (content.containsKey("display") && content.containsKey("iso"))
-        child = SelectableText(
+        child = Text(
           content["display"],
           style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
         );
@@ -66,10 +69,8 @@ class AppTable extends StatelessWidget {
       child = content;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-          color: rowIdx % 2 == 0 ? "#EEEEEE".toColor() : Colors.white,
-          padding: EdgeInsets.fromLTRB(7, 10, 7, 10),
-          child: child),
+      child:
+          Container(padding: EdgeInsets.fromLTRB(7, 10, 7, 10), child: child),
     );
   }
 }

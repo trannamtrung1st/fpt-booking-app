@@ -1,5 +1,5 @@
 abstract class Refreshable {
-  bool needRefresh;
+  bool needRefresh = false;
 
   void refresh<T>({T refreshParam});
 }

@@ -227,9 +227,11 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     var services = data["resources"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
-      var tags =
-          services.map((e) => Tag(child: SelectableText(e["name"]))).toList();
-      widget = TagsContainer(tags: tags);
+      var tags = services.where((e) => e["is_available"]);
+      if (tags.isNotEmpty) {
+        tags = tags.map((e) => Tag(child: SelectableText(e["name"]))).toList();
+        widget = TagsContainer(tags: tags);
+      }
     }
     return SimpleInfo(
       labelText: 'Resources',

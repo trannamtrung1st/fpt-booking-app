@@ -34,6 +34,7 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
   _BookingListViewPresenter _presenter;
   List<dynamic> groups;
   final GlobalKey bookingCardsKey = GlobalKey(debugLabel: "_bookingCardsKey");
+  String lastSearched = '';
   String searchValue = '';
   String status = MemoryStorage.statuses[0].key;
   PageContext pageContext;
@@ -99,19 +100,23 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
   void loadBookingData() {
     setState(() {
       _state = LOADING_DATA;
+      lastSearched = searchValue;
       groups = null;
     });
   }
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return _mainView();
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(), child: _mainView());
   }
 
   //isLoadingData
   bool isLoadingData() => _state == LOADING_DATA;
 
   Widget _buildLoadingDataWidget(BuildContext context) {
-    return _mainView(loading: true);
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: _mainView(loading: true));
   }
 
   void showInvalidMessages(List<String> mess) {
@@ -197,10 +202,11 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
   }
 
   Widget _getBookingsCard() {
-    var searchStr =
-        searchValue.isNotEmpty ? "for search \"$searchValue\", " : "";
+    var searchStr = lastSearched.isNotEmpty ? "for \"$lastSearched\", " : "";
     var sStr = status.isEmpty ? "All" : status;
-    var text = Text("Bookings " + searchStr + "status \"$sStr\"");
+    var text = groups.length > 0
+        ? Text("Bookings " + searchStr + "status \"$sStr\"")
+        : Text("You have no bookings " + searchStr + "status \"$sStr\"");
     var cardWidgets = <Widget>[text];
     var card = AppCard(
       key: bookingCardsKey,

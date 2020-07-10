@@ -129,6 +129,17 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
 
   //widgets
   Widget _mainView({bool loading = false}) {
+    var widgets = <Widget>[_currentSelectedDateInfo(), _scheduleTable()];
+    if (_bookings != null && _bookings.length == 0)
+      widgets.add(Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(top: 15),
+        child: Text(
+          "You have nothing on this day",
+          textAlign: TextAlign.center,
+        ),
+      ));
+
     return LoadingModal(
       isLoading: loading,
       child: AppScroll(
@@ -145,10 +156,7 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
               margin: EdgeInsets.all(15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _currentSelectedDateInfo(),
-                  _scheduleTable()
-                ],
+                children: widgets,
               ),
             ),
           ],

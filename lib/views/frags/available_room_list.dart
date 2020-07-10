@@ -55,7 +55,8 @@ class _AvailableRoomListState extends State<AvailableRoomList> {
     print("build ${this.runtimeType}");
     var dateStr = IntlHelper.format(selectedDate);
     var cardWidgets = <Widget>[
-      Text("Available rooms on $dateStr from $fromTime - $toTime")
+      Text((rooms.length > 0 ? "Available" : "No") +
+          " rooms on $dateStr from $fromTime - $toTime")
     ];
     var card = AppCard(
       child: Column(
