@@ -27,19 +27,19 @@ class BookingInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
+          SelectableText(
             booking["code"],
             style: TextStyle(color: Colors.blue),
           ),
           SimpleInfo(
             labelText: "Room:",
             containerMargin: EdgeInsets.only(top: 7, bottom: 7),
-            child: Text(booking["room"]["code"]),
+            child: SelectableText(booking["room"]["code"]),
             isHorizontal: true,
           ),
           SimpleInfo(
             labelText: "Booked date:",
-            child: Text(booking["booked_date"]["display"]),
+            child: SelectableText(booking["booked_date"]["display"]),
             isHorizontal: true,
           ),
           SimpleInfo(

@@ -146,7 +146,7 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
         IntlHelper.format(DateTime.now(), formatStr: "dd/MM/yyyy, hh:mm");
     return SimpleInfo(
       labelText: "Current time",
-      child: Text(timeStr),
+      child: SelectableText(timeStr),
     );
   }
 }

@@ -227,7 +227,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
           padding: EdgeInsets.all(8.0),
           //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
           child: TextFormField(
-            enabled: processAllowed,
+            readOnly: !processAllowed,
             maxLines: 7,
             onChanged: _presenter.onManagerMessageChanged,
             initialValue: data["manager_message"] ?? "",
@@ -307,7 +307,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
           padding: EdgeInsets.all(8.0),
           //Bugs when using Vietnamese language, related: https://github.com/flutter/flutter/issues/53086
           child: TextFormField(
-            enabled: feedbackEnabled,
+            readOnly: !feedbackEnabled,
             maxLines: 7,
             onChanged: _presenter.onFeedbackChanged,
             initialValue: data["feedback"] ?? "",
@@ -319,7 +319,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       ),
       managerMessage: SimpleInfo(
         labelText: 'Manager message',
-        child: Text((data["manager_message"]?.isEmpty == true
+        child: SelectableText((data["manager_message"]?.isEmpty == true
                 ? "Nothing"
                 : data["manager_message"]) ??
             "Nothing"),
@@ -337,7 +337,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     return BookingDetailForm(
       feedbackWidget: SimpleInfo(
         labelText: "Feedback",
-        child: Text(data["feedback"] ?? ""),
+        child: SelectableText(data["feedback"] ?? ""),
       ),
       data: data,
       changeRoomBtn: !processAllowed

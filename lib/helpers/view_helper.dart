@@ -26,6 +26,6 @@ class ViewHelper {
         color = Colors.blue;
         break;
     }
-    return Text(status, style: TextStyle(color: color));
+    return SelectableText(status, style: TextStyle(color: color));
   }
 }

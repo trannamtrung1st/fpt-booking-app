@@ -201,17 +201,17 @@ class _RoomDetailViewState extends State<RoomDetailView> {
       children: <Widget>[
         SimpleInfo(
           labelText: "Description",
-          child: Text(data["description"] ?? "Nothing"),
+          child: SelectableText(data["description"] ?? "Nothing"),
         ),
         SimpleInfo(
           labelText: "Location",
-          child: Text(location),
+          child: SelectableText(location),
         ),
         SimpleInfo(
           isHorizontal: true,
           marginBetween: 0,
           labelText: "Area: ",
-          child: Text(
+          child: SelectableText(
             data["area"]["name"],
             style: TextStyle(color: Colors.blue),
           ),
@@ -225,7 +225,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     var services = data["resources"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
-      var tags = services.map((e) => Tag(child: Text(e["name"]))).toList();
+      var tags = services.map((e) => Tag(child: SelectableText(e["name"]))).toList();
       widget = TagsContainer(tags: tags);
     }
     return SimpleInfo(

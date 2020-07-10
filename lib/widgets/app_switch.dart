@@ -19,7 +19,7 @@ class AppSwitch extends StatelessWidget {
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               onChanged: onChanged),
         ),
-        Text(
+        SelectableText(
           text,
           style: TextStyle(color: value ? Colors.black : Colors.grey),
         )

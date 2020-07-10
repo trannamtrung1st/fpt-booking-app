@@ -27,7 +27,7 @@ class BookingDetailForm extends StatelessWidget {
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
     var roomCodeWidgets = <Widget>[
-      Text(
+      SelectableText(
         data["room"]["code"],
         style: TextStyle(color: Colors.blue),
       )
@@ -41,7 +41,7 @@ class BookingDetailForm extends StatelessWidget {
       ),
       SimpleInfo(
         labelText: 'Code',
-        child: Text(data["code"]),
+        child: SelectableText(data["code"]),
       ),
       SimpleInfo(
         labelText: 'Room',
@@ -57,26 +57,26 @@ class BookingDetailForm extends StatelessWidget {
       _getTimeStr(),
       SimpleInfo(
         labelText: 'Number of people',
-        child: Text(data["num_of_people"].toString()),
+        child: SelectableText(data["num_of_people"].toString()),
       ),
       _getAttachedServicesTags(),
       SimpleInfo(
         labelText: 'Booking person',
-        child: Text(
+        child: SelectableText(
           data["book_member"]["email"],
           style: TextStyle(color: Colors.blue),
         ),
       ),
       SimpleInfo(
         labelText: 'Using person(s)',
-        child: Text(
+        child: SelectableText(
           (data["using_emails"] as List<dynamic>).join('\n'),
           style: TextStyle(color: Colors.blue),
         ),
       ),
       SimpleInfo(
         labelText: 'Note',
-        child: Text(
+        child: SelectableText(
             (data["note"]?.isEmpty == true ? "Nothing" : data["note"]) ??
                 "Nothing"),
       ),
@@ -100,7 +100,7 @@ class BookingDetailForm extends StatelessWidget {
     if (services != null) {
       var tags = services
           .map((e) => Tag(
-                child: Text(e["name"]),
+                child: SelectableText(e["name"]),
                 onRemove:
                     onRemoveService != null ? () => onRemoveService(e) : null,
               ))
@@ -116,7 +116,7 @@ class BookingDetailForm extends StatelessWidget {
   Widget _getTimeStr() {
     return SimpleInfo(
         labelText: 'Booked time',
-        child: Text(data["booked_date"]["display"] +
+        child: SelectableText(data["booked_date"]["display"] +
             ", " +
             data["from_time"] +
             " - " +
@@ -125,6 +125,7 @@ class BookingDetailForm extends StatelessWidget {
 
   Widget _getRequestedTimeStr() {
     return SimpleInfo(
-        labelText: 'Created time', child: Text(data["sent_date"]["display"]));
+        labelText: 'Created time',
+        child: SelectableText(data["sent_date"]["display"]));
   }
 }

@@ -52,13 +52,13 @@ class AppTable extends StatelessWidget {
       {@required dynamic content, @required int rowIdx, Function onTap}) {
     Widget child;
     if (content is String)
-      child = Text(
+      child = SelectableText(
         content,
         style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
       );
     else if (content is Map<String, Object>) {
       if (content.containsKey("display") && content.containsKey("iso"))
-        child = Text(
+        child = SelectableText(
           content["display"],
           style: TextStyle(color: onTap != null ? Colors.blue : Colors.black),
         );

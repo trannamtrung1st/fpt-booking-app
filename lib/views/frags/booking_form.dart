@@ -139,7 +139,7 @@ class _BookingFormState extends State<BookingForm> {
           _getTimeInfo(),
           SimpleInfo(
             labelText: "Number of people",
-            child: Text(numOfPeople.toString()),
+            child: SelectableText(numOfPeople.toString()),
           ),
           _getAttachedServicesTags(),
           _getUsingPersonTag(),
@@ -196,7 +196,7 @@ class _BookingFormState extends State<BookingForm> {
         IntlHelper.format(bookedDate) + ", " + fromTime + " - " + toTime;
     return SimpleInfo(
       labelText: "Time",
-      child: Text(timeStr),
+      child: SelectableText(timeStr),
     );
   }
 
@@ -206,7 +206,7 @@ class _BookingFormState extends State<BookingForm> {
     if (services != null) {
       var tags = services
           .map((e) => Tag(
-                child: Text(e["name"]),
+                child: SelectableText(e["name"]),
                 onRemove: () => _presenter.onRemoveService(e),
               ))
           .toList(growable: true);
@@ -225,7 +225,7 @@ class _BookingFormState extends State<BookingForm> {
     if (person != null) {
       var tags = person
           .map((e) => Tag(
-                child: Text(e as String),
+                child: SelectableText(e as String),
                 onRemove: () => _presenter.onRemovePerson(e),
               ))
           .toList(growable: true);

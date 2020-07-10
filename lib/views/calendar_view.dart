@@ -158,7 +158,7 @@ class _CalendarViewState extends State<CalendarView>
   Widget _currentSelectedDateInfo() {
     Widget text = selectedDate == null
         ? Text("Not selected")
-        : Text(IntlHelper.format(selectedDate));
+        : SelectableText(IntlHelper.format(selectedDate));
     return SimpleInfo(labelText: "Selected date", child: text);
   }
 

@@ -36,7 +36,7 @@ class ChangeRoomDialog extends StatelessWidget {
               ),
               SimpleInfo(
                 labelText: "Current room",
-                child: Text(currentRoom["code"]),
+                child: SelectableText(currentRoom["code"]),
               ),
               SimpleInfo(
                 labelText: "Change to",

@@ -239,7 +239,7 @@ class _ApprovalListViewState extends State<ApprovalListView>
       height: 0,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       padding: EdgeInsets.fromLTRB(0, 7, 7, 7),
-      child: Text(
+      child: SelectableText(
         text,
         style: TextStyle(fontWeight: FontWeight.normal),
       ),

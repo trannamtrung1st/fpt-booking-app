@@ -53,17 +53,15 @@ class RoomInfoCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              RichText(
-                text: TextSpan(
-                  text: room["code"],
-                  style: TextStyle(fontSize: 17, color: Colors.black),
-                  children: <TextSpan>[
-                    TextSpan(
-                        text: "   " + room["room_type"]["name"],
-                        style: TextStyle(color: Colors.orange, fontSize: 14)),
-                  ],
-                ),
-              ),
+              SelectableText.rich(TextSpan(
+                text: room["code"],
+                style: TextStyle(fontSize: 17, color: Colors.black),
+                children: <TextSpan>[
+                  TextSpan(
+                      text: "   " + room["room_type"]["name"],
+                      style: TextStyle(color: Colors.orange, fontSize: 14)),
+                ],
+              )),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
@@ -72,7 +70,7 @@ class RoomInfoCard extends StatelessWidget {
                     color: Colors.grey,
                     size: 22,
                   ),
-                  Text(
+                  SelectableText(
                     " " + room["area_size"].toString() + " m2",
                     style: TextStyle(color: Colors.grey),
                   )
@@ -86,7 +84,7 @@ class RoomInfoCard extends StatelessWidget {
                     color: Colors.grey,
                     size: 22,
                   ),
-                  Text(
+                  SelectableText(
                     " At most " + room["people_capacity"].toString(),
                     style: TextStyle(color: Colors.grey),
                   )

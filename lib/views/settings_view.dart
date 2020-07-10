@@ -83,7 +83,7 @@ class _SettingsViewState extends State<SettingsView>
                     ),
               margin: EdgeInsets.only(bottom: 10),
             ),
-            Text(loginContext.tokenData["email"] ?? "Anonymous")
+            SelectableText(loginContext.tokenData["email"] ?? "Anonymous")
           ],
         ),
       ),
