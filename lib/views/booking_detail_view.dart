@@ -8,6 +8,7 @@ import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/views/approval_list_view.dart';
+import 'package:fptbooking_app/views/booking_list_view.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/dialogs/change_room_dialog.dart';
@@ -44,7 +45,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   bool _dataUpdated = false;
   LoginContext loginContext;
   PageContext pageContext;
-  
+
   _BookingDetailViewState({@required this.id, this.type});
 
   _BookingDetailViewPresenter _presenter;
@@ -508,6 +509,7 @@ class _BookingDetailViewPresenter {
               view.pageContext.markAsNeedRefresh(BookingView);
               view.pageContext.markAsNeedRefresh(CalendarView);
               view.pageContext.markAsNeedRefresh(ApprovalListView);
+              view.pageContext.markAsNeedRefresh(BookingListView);
               _getBookingDetail(view.id);
             },
             invalid: view.showInvalidMessages)
@@ -537,6 +539,7 @@ class _BookingDetailViewPresenter {
               view.pageContext.markAsNeedRefresh(BookingView);
               view.pageContext.markAsNeedRefresh(CalendarView);
               view.pageContext.markAsNeedRefresh(ApprovalListView);
+              view.pageContext.markAsNeedRefresh(BookingListView);
               _getBookingDetail(view.id);
             },
             invalid: view.showInvalidMessages)

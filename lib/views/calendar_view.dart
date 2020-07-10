@@ -34,6 +34,7 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
   _CalendarViewPresenter _presenter;
   List<dynamic> _bookings;
   PageContext pageContext;
+  CalendarController _calendarController = CalendarController();
 
   _CalendarViewState({DateTime initDate}) {
     selectedDate = initDate ?? DateTime.now();
@@ -47,9 +48,14 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
     });
   }
 
-  void refresh() {
+  void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
     setState(() {
+      if (refreshParam != null) {
+        selectedDate = refreshParam as DateTime;
+        _calendarController.setSelectedDay(selectedDate,
+            isProgrammatic: true, runCallback: false, animate: false);
+      }
       _state = LOADING_DATA;
       _bookings = null;
       _presenter.onRefresh();
@@ -131,6 +137,7 @@ class _CalendarViewState extends State<CalendarView> with Refreshable {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Calendar(
+                calendarController: this._calendarController,
                 initDate: selectedDate,
                 initFormat: CalendarFormat.week,
                 onDaySelected: _presenter.onDaySelected),

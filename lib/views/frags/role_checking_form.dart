@@ -67,7 +67,7 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
         context: this.context, title: "Message", contents: ["Successful"]);
   }
 
-  void refresh() => setState(() {});
+  void refresh<T>({T refreshParam}) => setState(() {});
 
   Widget _buildShowingViewWidget(BuildContext context) {
     return AppCard(

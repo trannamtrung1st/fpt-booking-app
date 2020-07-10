@@ -16,11 +16,11 @@ class PageContext extends ChangeNotifier {
     }
   }
 
-  void refreshIfNeeded(Type t) {
+  void refreshIfNeeded(Type t, {dynamic refreshParam}) {
     if (_refreshableMap.containsKey(t)) {
       var r = _refreshableMap[t];
       if (r.needRefresh) {
-        r.refresh();
+        r.refresh(refreshParam: refreshParam);
       }
     }
   }

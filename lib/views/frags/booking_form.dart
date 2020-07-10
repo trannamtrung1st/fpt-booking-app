@@ -7,6 +7,7 @@ import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/approval_list_view.dart';
+import 'package:fptbooking_app/views/booking_list_view.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/widgets/app_button.dart';
@@ -119,7 +120,7 @@ class _BookingFormState extends State<BookingForm> {
         _state = SHOWING_VIEW;
       });
 
-  void refresh() => setState(() {});
+  void refresh<T>({T refreshParam}) => setState(() {});
 
   Future<String> promptEmail() {
     return DialogHelper.prompt(
@@ -182,9 +183,7 @@ class _BookingFormState extends State<BookingForm> {
   }
 
   void navigateToCalendarView() {
-    Navigator.of(context).pop(CalendarView(
-      initDate: bookedDate,
-    ));
+    Navigator.of(context).pop(bookedDate);
   }
 
   void showSuccessThenNavigateToCalendarView() async {
@@ -306,6 +305,7 @@ class _BookingFormPresenter {
             success: (id) {
               success = true;
               view.pageContext.markAsNeedRefresh(BookingView);
+//              view.pageContext.markAsNeedRefresh(BookingListView);
               view.pageContext.markAsNeedRefresh(CalendarView);
               view.pageContext.markAsNeedRefresh(ApprovalListView);
               view.showSuccessThenNavigateToCalendarView();

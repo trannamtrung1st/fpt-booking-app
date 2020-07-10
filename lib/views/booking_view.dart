@@ -8,6 +8,7 @@ import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
+import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/frags/available_room_list.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_scroll.dart';
@@ -63,7 +64,7 @@ class _BookingViewState extends State<BookingView> with Refreshable {
         _roomType = value;
       });
 
-  void refresh() {
+  void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
     _presenter.onRefresh();
   }
@@ -84,9 +85,9 @@ class _BookingViewState extends State<BookingView> with Refreshable {
           },
         ),
       ),
-    ).then((widget) {
-      if (widget != null)
-        MainNav.navigate(widget: widget);
+    ).then((bookedDate) {
+      if (bookedDate != null)
+        MainNav.navigate(refreshParam: bookedDate, type: CalendarView);
       else {
         _presenter.onCancelBooking(code);
       }

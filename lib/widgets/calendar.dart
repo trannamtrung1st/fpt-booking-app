@@ -7,36 +7,44 @@ class Calendar extends StatefulWidget {
   final CalendarFormat initFormat;
   final Function(DateTime selected, List<dynamic> list) onDaySelected;
   final DateTime initDate;
+  final CalendarController calendarController;
 
   Calendar(
       {this.initDate,
+      this.calendarController,
       this.initFormat = CalendarFormat.month,
       this.onDaySelected});
 
   @override
   _CalendarState createState() => _CalendarState(
       calendarFormat: initFormat,
+      calendarController: this.calendarController,
       onDaySelected: onDaySelected,
       initDate: this.initDate);
 }
 
 class _CalendarState extends State<Calendar> {
-  CalendarController _calendarController;
+  CalendarController calendarController;
   CalendarFormat calendarFormat;
   Function(DateTime selected, List<dynamic> list) onDaySelected;
   final DateTime initDate;
 
-  _CalendarState({this.calendarFormat, this.onDaySelected, this.initDate});
+  _CalendarState(
+      {this.calendarFormat,
+      this.onDaySelected,
+      this.initDate,
+      CalendarController calendarController}) {
+    this.calendarController = calendarController ?? CalendarController();
+  }
 
   @override
   void initState() {
     super.initState();
-    _calendarController = CalendarController();
   }
 
   @override
   void dispose() {
-    _calendarController.dispose();
+    calendarController.dispose();
     super.dispose();
   }
 
@@ -44,7 +52,7 @@ class _CalendarState extends State<Calendar> {
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
     return TableCalendar(
-      calendarController: _calendarController,
+      calendarController: calendarController,
       initialCalendarFormat: calendarFormat,
       initialSelectedDay: initDate,
       onDaySelected: onDaySelected,

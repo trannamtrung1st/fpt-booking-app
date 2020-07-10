@@ -127,7 +127,7 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
     DialogHelper.showUnknownError(context: this.context);
   }
 
-  void refresh() {
+  void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
     _presenter.onRefresh();
   }

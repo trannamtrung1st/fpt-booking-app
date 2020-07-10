@@ -31,7 +31,7 @@ class _RoomListViewState extends State<RoomListView> with Refreshable {
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
   String searchValue = '';
 
-  void refresh() {
+  void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
     setState(() {
       this.rooms = null;

@@ -38,7 +38,7 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
   String status = MemoryStorage.statuses[0].key;
   PageContext pageContext;
 
-  void refresh() {
+  void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
     setState(() {
       this.groups = null;

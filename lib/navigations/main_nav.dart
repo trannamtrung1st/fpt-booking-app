@@ -51,7 +51,7 @@ class MainNav extends StatefulWidget {
 
   static List<Widget> pages;
 
-  static void Function({Widget widget, Type type}) navigate;
+  static void Function({dynamic refreshParam, Type type}) navigate;
 
   @override
   _MainNavState createState() => _MainNavState();
@@ -70,7 +70,6 @@ class _MainNavState extends State<MainNav> {
 //  static const int TAB_ROOM = 3;
 //  static const int TAB_SETTINGS = 4;
   int _state = TAB_CALENDAR;
-  Widget replacementWidget;
 
   void changeTab(int tab) {
     setState(() {
@@ -101,12 +100,11 @@ class _MainNavState extends State<MainNav> {
         }
       }
     }
-    MainNav.navigate = ({Widget widget, Type type}) {
-      type = type ?? widget.runtimeType;
+    MainNav.navigate = ({dynamic refreshParam, Type type}) {
       for (var i = 0; i < MainNav.pages.length; i++) {
         var rt = MainNav.pages[i].runtimeType;
         if (rt == type) {
-          _presenter.onPageNavigation(i, widget);
+          _presenter.onPageNavigation(i, refreshParam);
           i = MainNav.pages.length;
         }
       }
@@ -116,7 +114,12 @@ class _MainNavState extends State<MainNav> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: "#F5F5F5".toColor(),
-        body: _getPageView(),
+        body: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: pageController,
+          children: MainNav.pages,
+//          onPageChanged: ,
+        ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           items: tabs,
@@ -125,26 +128,6 @@ class _MainNavState extends State<MainNav> {
           onTap: _presenter.onItemTapped,
         ),
       ),
-    );
-  }
-
-  Widget _getPageView() {
-    var pages = MainNav.pages.toList();
-    if (replacementWidget != null) {
-      var tempWidget = this.replacementWidget;
-      this.replacementWidget = null;
-      for (var i = 0; i < pages.length; i++) {
-        if (pages[i].runtimeType == tempWidget.runtimeType) {
-          pages[i] = tempWidget;
-          i = pages.length;
-        }
-      }
-    }
-    return PageView(
-      physics: NeverScrollableScrollPhysics(),
-      controller: pageController,
-      children: pages,
-      onPageChanged: _presenter.onPageChanged,
     );
   }
 }
@@ -156,15 +139,14 @@ class _MainNavPresenter {
 
   void onItemTapped(int index) {
     view.pageController.jumpToPage(index);
+    view.pageContext.refreshIfNeeded(MainNav.pages[index].runtimeType);
+    view.changeTab(index);
   }
 
-  void onPageNavigation(int index, Widget rWidget) {
-    view.replacementWidget = rWidget;
+  void onPageNavigation(int index, dynamic refreshParam) {
     view.pageController.jumpToPage(index);
-  }
-
-  void onPageChanged(int tab) {
-    view.pageContext.refreshIfNeeded(MainNav.pages[tab].runtimeType);
-    view.changeTab(tab);
+    view.pageContext.refreshIfNeeded(MainNav.pages[index].runtimeType,
+        refreshParam: refreshParam);
+    view.changeTab(index);
   }
 }
