@@ -69,8 +69,8 @@ class _BookingViewState extends State<BookingView> with Refreshable {
   }
 
   void navigateToRoomDetail(String code, DateTime date, String fromTime,
-      String toTime, int numOfPeople) {
-    Navigator.push(
+      String toTime, int numOfPeople) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => RoomDetailView(
@@ -87,7 +87,9 @@ class _BookingViewState extends State<BookingView> with Refreshable {
     ).then((widget) {
       if (widget != null)
         MainNav.navigate(widget: widget);
-      else if (this.needRefresh) refresh();
+      else {
+        _presenter.onCancelBooking(code);
+      }
     });
   }
 
@@ -142,6 +144,10 @@ class _BookingViewState extends State<BookingView> with Refreshable {
   }
 
   //isLoadingData
+  void setLoadingDataState() => setState(() {
+        _state = LOADING_DATA;
+      });
+
   bool isLoadingData() => _state == LOADING_DATA;
 
   Widget _buildLoadingDataWidget(BuildContext context) {
@@ -298,6 +304,17 @@ class _BookingViewPresenter {
 
   Future<void> onRefresh() {
     return onSearchPressed();
+  }
+
+  void onCancelBooking(String code) {
+    view.setLoadingDataState();
+    RoomRepo.cancelHangingRoom(
+      code: code,
+//        error: view.showError,
+//        invalid: view.showInvalidMessages
+    ).whenComplete(() {
+      view.refresh();
+    });
   }
 
   void handleAfterSearch(BuildContext context) {

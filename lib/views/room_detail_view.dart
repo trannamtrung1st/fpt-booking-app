@@ -184,8 +184,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   //widgets
   Widget _mainContent({@required Widget body}) {
     return Scaffold(
-        appBar: ViewHelper.getDefaultAppBar(
-            title: _getAppBarTitle(), onPressed: _presenter.onBackPressed),
+        appBar: ViewHelper.getDefaultAppBar(title: _getAppBarTitle()),
         body: body);
   }
 
@@ -228,7 +227,8 @@ class _RoomDetailViewState extends State<RoomDetailView> {
     var services = data["resources"] as List<dynamic>;
     Widget widget = Text("Nothing");
     if (services != null) {
-      var tags = services.map((e) => Tag(child: SelectableText(e["name"]))).toList();
+      var tags =
+          services.map((e) => Tag(child: SelectableText(e["name"]))).toList();
       widget = TagsContainer(tags: tags);
     }
     return SimpleInfo(
@@ -253,21 +253,6 @@ class _RoomDetailViewPresenter {
 
   Future<void> onRefresh() {
     return _getRoomDetail(view.code, hanging: false);
-  }
-
-  void onBackPressed() {
-    if (view.data != null) {
-      view.setProcessDataState();
-      RoomRepo.cancelHangingRoom(
-        code: view.code,
-//        error: view.showError,
-//        invalid: view.showInvalidMessages
-      ).whenComplete(() {
-        view.pageContext.markAsNeedRefresh(BookingView);
-        view.navigateBack();
-      });
-    } else
-      view.setLoadingDataState();
   }
 
   Future<void> _getRoomDetail(String code, {bool hanging}) {
