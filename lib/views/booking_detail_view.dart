@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
@@ -42,7 +43,8 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   dynamic data;
   bool _dataUpdated = false;
   LoginContext loginContext;
-
+  PageContext pageContext;
+  
   _BookingDetailViewState({@required this.id, this.type});
 
   _BookingDetailViewPresenter _presenter;
@@ -86,6 +88,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   void initState() {
     super.initState();
     loginContext = Provider.of<LoginContext>(context, listen: false);
+    pageContext = Provider.of<PageContext>(context, listen: false);
     _presenter = _BookingDetailViewPresenter(view: this);
     _presenter.handleInitState(context);
   }
@@ -413,9 +416,9 @@ class _BookingDetailViewPresenter {
             error: view.showError,
             success: () {
               success = true;
-              BookingView.needRefresh();
-              CalendarView.needRefresh();
-              ApprovalListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(CalendarView);
+              view.pageContext.markAsNeedRefresh(ApprovalListView);
               _getBookingDetail(view.id);
             },
             invalid: view.showInvalidMessages)
@@ -438,9 +441,9 @@ class _BookingDetailViewPresenter {
             error: view.showError,
             success: () {
               success = true;
-              BookingView.needRefresh();
-              CalendarView.needRefresh();
-              ApprovalListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(CalendarView);
+              view.pageContext.markAsNeedRefresh(ApprovalListView);
               _getBookingDetail(view.id);
             },
             invalid: view.showInvalidMessages)
@@ -479,9 +482,9 @@ class _BookingDetailViewPresenter {
             error: view.showError,
             success: () {
               success = true;
-              BookingView.needRefresh();
-              CalendarView.needRefresh();
-              ApprovalListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(CalendarView);
+              view.pageContext.markAsNeedRefresh(ApprovalListView);
               _getBookingDetail(view.id);
               view.showSuccess();
             },
@@ -502,9 +505,9 @@ class _BookingDetailViewPresenter {
             error: view.showError,
             success: () {
               success = true;
-              BookingView.needRefresh();
-              CalendarView.needRefresh();
-              ApprovalListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(CalendarView);
+              view.pageContext.markAsNeedRefresh(ApprovalListView);
               _getBookingDetail(view.id);
             },
             invalid: view.showInvalidMessages)
@@ -531,9 +534,9 @@ class _BookingDetailViewPresenter {
             error: view.showError,
             success: () {
               success = true;
-              BookingView.needRefresh();
-              CalendarView.needRefresh();
-              ApprovalListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(CalendarView);
+              view.pageContext.markAsNeedRefresh(ApprovalListView);
               _getBookingDetail(view.id);
             },
             invalid: view.showInvalidMessages)

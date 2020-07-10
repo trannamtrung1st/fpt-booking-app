@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fptbooking_app/app/refreshable.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
@@ -12,18 +14,16 @@ import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:provider/provider.dart';
 
 class ApprovalListView extends StatefulWidget {
   ApprovalListView({key}) : super(key: key);
-
-  static void Function() needRefresh = () {};
 
   @override
   _ApprovalListViewState createState() => _ApprovalListViewState();
 }
 
-class _ApprovalListViewState extends State<ApprovalListView>
-    with AutomaticKeepAliveClientMixin {
+class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
@@ -34,6 +34,7 @@ class _ApprovalListViewState extends State<ApprovalListView>
   List<dynamic> bookings;
   String status = MemoryStorage.statuses[0].key;
   String orderBy = orderByValues[0].key;
+  PageContext pageContext;
 
   static final List<MapEntry<String, String>> orderByValues = [
     MapEntry("dsent_date", " Latest requested date"),
@@ -80,22 +81,15 @@ class _ApprovalListViewState extends State<ApprovalListView>
   @override
   void initState() {
     super.initState();
+    pageContext = Provider.of<PageContext>(context, listen: false);
+    pageContext.setRefreshable(ApprovalListView, this);
     _presenter = _ApprovalListViewPresenter(view: this);
     _presenter.handleInitState(context);
-    ApprovalListView.needRefresh = () {
-      _keepAlive = false;
-      this.updateKeepAlive();
-    };
   }
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
-    super.build(context);
-    if (!_keepAlive) {
-      _keepAlive = true;
-      updateKeepAlive();
-    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -134,9 +128,8 @@ class _ApprovalListViewState extends State<ApprovalListView>
   }
 
   void refresh() {
-    setState(() {
-      _presenter.onRefresh();
-    });
+    this.needRefresh = false;
+    _presenter.onRefresh();
   }
 
   void navigateToBookingDetail(int id) {
@@ -149,7 +142,7 @@ class _ApprovalListViewState extends State<ApprovalListView>
         ),
       ),
     ).then((value) {
-      if (!_keepAlive) {
+      if (this.needRefresh) {
         refresh();
       }
     });
@@ -247,12 +240,6 @@ class _ApprovalListViewState extends State<ApprovalListView>
     return SimpleInfo(
         labelText: "Requested date range", marginBetween: 0, child: btn);
   }
-
-  bool _keepAlive = true;
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => _keepAlive;
 }
 
 class _ApprovalListViewPresenter {

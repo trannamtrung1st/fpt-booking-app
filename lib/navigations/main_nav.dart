@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/views/approval_list_view.dart';
 import 'package:fptbooking_app/views/booking_view.dart';
@@ -58,6 +59,7 @@ class MainNav extends StatefulWidget {
 
 class _MainNavState extends State<MainNav> {
   LoginContext loginContext;
+  PageContext pageContext;
   _MainNavPresenter _presenter;
   PageController pageController = PageController(keepPage: true);
 
@@ -77,9 +79,16 @@ class _MainNavState extends State<MainNav> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loginContext = Provider.of<LoginContext>(context, listen: false);
+    pageContext = Provider.of<PageContext>(context, listen: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
-    loginContext = Provider.of<LoginContext>(context, listen: false);
     var tabs = loginContext.isManager() ? managerTabs : normalTabs;
     MainNav.pages = loginContext.isManager() ? managerPages : normalPages;
     if (loginContext.isViewOnlyUser()) {
@@ -155,6 +164,7 @@ class _MainNavPresenter {
   }
 
   void onPageChanged(int tab) {
+    view.pageContext.refreshIfNeeded(MainNav.pages[tab].runtimeType);
     view.changeTab(tab);
   }
 }

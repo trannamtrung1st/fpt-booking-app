@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fptbooking_app/app/refreshable.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
@@ -10,6 +12,7 @@ import 'package:fptbooking_app/widgets/app_table.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarView extends StatefulWidget {
@@ -17,15 +20,12 @@ class CalendarView extends StatefulWidget {
 
   CalendarView({this.initDate, key}) : super(key: key);
 
-  static void Function() needRefresh = () {};
-
   @override
   _CalendarViewState createState() =>
       _CalendarViewState(initDate: this.initDate);
 }
 
-class _CalendarViewState extends State<CalendarView>
-    with AutomaticKeepAliveClientMixin {
+class _CalendarViewState extends State<CalendarView> with Refreshable {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
@@ -33,6 +33,7 @@ class _CalendarViewState extends State<CalendarView>
   DateTime selectedDate;
   _CalendarViewPresenter _presenter;
   List<dynamic> _bookings;
+  PageContext pageContext;
 
   _CalendarViewState({DateTime initDate}) {
     selectedDate = initDate ?? DateTime.now();
@@ -47,6 +48,7 @@ class _CalendarViewState extends State<CalendarView>
   }
 
   void refresh() {
+    this.needRefresh = false;
     setState(() {
       _state = LOADING_DATA;
       _bookings = null;
@@ -58,21 +60,14 @@ class _CalendarViewState extends State<CalendarView>
   void initState() {
     super.initState();
     _presenter = _CalendarViewPresenter(view: this);
+    pageContext = Provider.of<PageContext>(context, listen: false);
+    pageContext.setRefreshable(CalendarView, this);
     _presenter.handleInitState(context);
-    CalendarView.needRefresh = () {
-      _keepAlive = false;
-      this.updateKeepAlive();
-    };
   }
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
-    super.build(context);
-    if (!_keepAlive) {
-      _keepAlive = true;
-      updateKeepAlive();
-    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -120,7 +115,7 @@ class _CalendarViewState extends State<CalendarView>
         ),
       ),
     ).then((value) {
-      if (!_keepAlive) {
+      if (this.needRefresh) {
         refresh();
       }
     });

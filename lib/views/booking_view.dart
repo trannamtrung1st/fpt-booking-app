@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fptbooking_app/app/refreshable.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
@@ -12,20 +14,18 @@ import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:provider/provider.dart';
 import 'package:smart_select/smart_select.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BookingView extends StatefulWidget {
   BookingView({key}) : super(key: key);
 
-  static void Function() needRefresh = () {};
-
   @override
   _BookingViewState createState() => _BookingViewState();
 }
 
-class _BookingViewState extends State<BookingView>
-    with AutomaticKeepAliveClientMixin {
+class _BookingViewState extends State<BookingView> with Refreshable {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   static const int AFTER_SEARCH = 3;
@@ -39,6 +39,7 @@ class _BookingViewState extends State<BookingView>
   _BookingViewPresenter _presenter;
   List<dynamic> rooms;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
+  PageContext pageContext;
 
   void changeSelectedDate(DateTime date) {
     setState(() {
@@ -63,6 +64,7 @@ class _BookingViewState extends State<BookingView>
       });
 
   void refresh() {
+    this.needRefresh = false;
     _presenter.onRefresh();
   }
 
@@ -85,30 +87,22 @@ class _BookingViewState extends State<BookingView>
     ).then((widget) {
       if (widget != null)
         MainNav.navigate(widget: widget);
-      else if (!_keepAlive) refresh();
+      else if (this.needRefresh) refresh();
     });
   }
 
   @override
   void initState() {
     super.initState();
+    pageContext = Provider.of<PageContext>(context, listen: false);
+    pageContext.setRefreshable(BookingView, this);
     _presenter = _BookingViewPresenter(view: this);
     _presenter.handleInitState(context);
-    BookingView.needRefresh = () {
-      _keepAlive = false;
-      this.updateKeepAlive();
-    };
-//    this.updateKeepAlive();
   }
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
-    super.build(context);
-    if (!_keepAlive) {
-      _keepAlive = true;
-      updateKeepAlive();
-    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -293,12 +287,6 @@ class _BookingViewState extends State<BookingView>
           modalType: SmartSelectModalType.bottomSheet,
         ));
   }
-
-  bool _keepAlive = true;
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => _keepAlive;
 }
 
 class _BookingViewPresenter {

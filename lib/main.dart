@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/noti_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
@@ -49,6 +50,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => LoginContext()),
+        ChangeNotifierProvider(create: (context) => PageContext()),
       ],
       child: _materialApp(),
     ),

@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fptbooking_app/app/refreshable.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
@@ -15,18 +17,16 @@ import 'package:fptbooking_app/widgets/app_dropdown_button.dart';
 import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:provider/provider.dart';
 
 class BookingListView extends StatefulWidget {
   BookingListView({key}) : super(key: key);
-
-  static void Function() needRefresh = () {};
 
   @override
   _BookingListViewState createState() => _BookingListViewState();
 }
 
-class _BookingListViewState extends State<BookingListView>
-    with AutomaticKeepAliveClientMixin {
+class _BookingListViewState extends State<BookingListView> with Refreshable {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
@@ -36,8 +36,10 @@ class _BookingListViewState extends State<BookingListView>
   final GlobalKey bookingCardsKey = GlobalKey(debugLabel: "_bookingCardsKey");
   String searchValue = '';
   String status = MemoryStorage.statuses[0].key;
+  PageContext pageContext;
 
   void refresh() {
+    this.needRefresh = false;
     setState(() {
       this.groups = null;
       _presenter.onRefresh();
@@ -60,29 +62,22 @@ class _BookingListViewState extends State<BookingListView>
         ),
       ),
     ).then((value) {
-      if (!_keepAlive) refresh();
+      if (this.needRefresh) refresh();
     });
   }
 
   @override
   void initState() {
     super.initState();
+    pageContext = Provider.of<PageContext>(context, listen: false);
+    pageContext.setRefreshable(BookingListView, this);
     _presenter = _BookingListViewPresenter(view: this);
     _presenter.handleInitState(context);
-    BookingListView.needRefresh = () {
-      _keepAlive = false;
-      this.updateKeepAlive();
-    };
   }
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
-    super.build(context);
-    if (_keepAlive) {
-      _keepAlive = true;
-      this.updateKeepAlive();
-    }
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
@@ -235,12 +230,6 @@ class _BookingListViewState extends State<BookingListView>
     }
     return card;
   }
-
-  bool _keepAlive = true;
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => _keepAlive;
 }
 
 class _BookingListViewPresenter {

@@ -12,14 +12,11 @@ import 'package:provider/provider.dart';
 class SettingsView extends StatefulWidget {
   SettingsView({key}) : super(key: key);
 
-  static void Function() needRefresh = () {};
-
   @override
   _SettingsViewState createState() => _SettingsViewState();
 }
 
-class _SettingsViewState extends State<SettingsView>
-    with AutomaticKeepAliveClientMixin {
+class _SettingsViewState extends State<SettingsView> {
   LoginContext loginContext;
 
   static const int SHOWING_VIEW = 1;
@@ -40,20 +37,11 @@ class _SettingsViewState extends State<SettingsView>
   void initState() {
     // TODO: implement initState
     super.initState();
-    SettingsView.needRefresh = () {
-      _keepAlive = false;
-      this.updateKeepAlive();
-    };
   }
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
-    super.build(context);
-    if (_keepAlive) {
-      _keepAlive = true;
-      updateKeepAlive();
-    }
     loginContext = Provider.of<LoginContext>(context, listen: false);
     _presenter = _SettingsViewPresenter(view: this);
     return _buildShowingViewWidget(context);
@@ -121,12 +109,6 @@ class _SettingsViewState extends State<SettingsView>
   void showError() {
     DialogHelper.showUnknownError(context: this.context);
   }
-
-  bool _keepAlive = true;
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => _keepAlive;
 }
 
 class _SettingsViewPresenter {

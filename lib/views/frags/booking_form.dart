@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
@@ -59,6 +60,7 @@ class _BookingFormState extends State<BookingForm> {
   List<dynamic> _services;
   Map<String, dynamic> _servicesMap;
   LoginContext _loginContext;
+  PageContext pageContext;
   final Function enableLoading;
   final Function disableLoading;
 
@@ -81,6 +83,7 @@ class _BookingFormState extends State<BookingForm> {
   void initState() {
     super.initState();
     _loginContext = Provider.of<LoginContext>(context, listen: false);
+    pageContext = Provider.of<PageContext>(context, listen: false);
     var tokenData = _loginContext.tokenData;
     booking = {
       'booked_date': IntlHelper.format(bookedDate),
@@ -302,9 +305,9 @@ class _BookingFormPresenter {
             error: view.showError,
             success: (id) {
               success = true;
-              BookingView.needRefresh();
-              CalendarView.needRefresh();
-              ApprovalListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(CalendarView);
+              view.pageContext.markAsNeedRefresh(ApprovalListView);
               view.showSuccessThenNavigateToCalendarView();
             },
             invalid: view.showInvalidMessages)

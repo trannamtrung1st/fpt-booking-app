@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
@@ -9,6 +10,7 @@ import 'package:fptbooking_app/widgets/app_button.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
 import 'package:fptbooking_app/widgets/app_switch.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
+import 'package:provider/provider.dart';
 
 class RoomCheckingForm extends StatefulWidget {
   final dynamic room;
@@ -29,6 +31,7 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
   static const int SHOWING_VIEW = 1;
   int _state = SHOWING_VIEW;
   dynamic room;
+  PageContext pageContext;
 
   final Function enableLoading;
   final Function disableLoading;
@@ -44,6 +47,7 @@ class _RoomCheckingFormState extends State<RoomCheckingForm> {
   @override
   void initState() {
     super.initState();
+    pageContext = Provider.of<PageContext>(context, listen: false);
   }
 
   @override
@@ -180,8 +184,8 @@ class _RoomCheckingFormPresenter {
             error: view.showError,
             success: () {
               success = true;
-              BookingView.needRefresh();
-              RoomListView.needRefresh();
+              view.pageContext.markAsNeedRefresh(BookingView);
+              view.pageContext.markAsNeedRefresh(RoomListView);
               view.disableLoading();
               view.showSuccess();
             },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
+import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
@@ -39,6 +40,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   dynamic data;
   dynamic extraData;
   LoginContext loginContext;
+  PageContext pageContext;
 
   int type;
 
@@ -51,6 +53,7 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   void initState() {
     super.initState();
     loginContext = Provider.of<LoginContext>(context, listen: false);
+    pageContext = Provider.of<PageContext>(context, listen: false);
     _presenter = _RoomDetailViewPresenter(view: this);
     _presenter.handleInitState(context);
   }
@@ -260,7 +263,7 @@ class _RoomDetailViewPresenter {
 //        error: view.showError,
 //        invalid: view.showInvalidMessages
       ).whenComplete(() {
-        BookingView.needRefresh();
+        view.pageContext.markAsNeedRefresh(BookingView);
         view.navigateBack();
       });
     } else
