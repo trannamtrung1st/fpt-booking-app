@@ -219,7 +219,7 @@ class _BookingListViewState extends State<BookingListView> with Refreshable {
     for (dynamic group in groups) {
       var date = group[0]["group_by_date_key"];
       cardWidgets.add(AppCard(
-        color: Colors.orangeAccent,
+        color: Colors.orange[50],
         margin: EdgeInsets.only(top: 10),
         child: Text(
           date,
