@@ -41,16 +41,28 @@ class _ApprovalListViewState extends State<ApprovalListView>
   int page = 1;
   final int limit = 20;
   int totalCount;
+  dynamic searchObj;
 
   static final List<MapEntry<String, String>> orderByValues = [
     MapEntry("dsent_date", "Latest requested date"),
     MapEntry("abooked_date", "Nearest booked date"),
   ];
 
+  dynamic getSearchObj(int page) {
+    return <String, dynamic>{
+      'limit': this.limit,
+      'toDate': this.toDate,
+      'page': page,
+      'fromDate': this.fromDate,
+      'status': this.status,
+      'orderBy': this.orderBy,
+    };
+  }
+
   void changePage(int p) {
     setState(() {
       page = p;
-      refresh();
+      _presenter.onSearchPressed(getSearchObj(p));
     });
   }
 
@@ -204,7 +216,10 @@ class _ApprovalListViewState extends State<ApprovalListView>
                   height: 40,
                   buttonColor: Colors.orange,
                   child: RaisedButton(
-                      onPressed: _presenter.onSearchPressed,
+                      onPressed: () {
+                        var searchObj = getSearchObj(1);
+                        _presenter.onSearchPressed(searchObj);
+                      },
                       child: Icon(
                         Icons.search,
                         color: Colors.white,
@@ -293,12 +308,20 @@ class _ApprovalListViewPresenter {
   _ApprovalListViewPresenter({this.view});
 
   void handleInitState(BuildContext context) {
-    _getRequests();
+    view.searchObj = view.getSearchObj(1);
+    _getRequests(view.searchObj);
   }
 
-  Future<void> onRefresh() {
-    view.loadRequestData();
-    return _getRequests();
+  bool _validateSearch(dynamic search) {
+    if (search['fromDate'].difference(search['toDate']).inDays > 31) {
+      view.showInvalidMessages(["Only range in 1 month is allowed"]);
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> onRefresh() async {
+    if (view.searchObj != null) this.onSearchPressed(view.searchObj);
   }
 
   void onPagePressed(int page) {
@@ -309,29 +332,28 @@ class _ApprovalListViewPresenter {
     view.changeStatus(status);
   }
 
-  void onSearchPressed() {
+  void onSearchPressed(dynamic search) {
+    if (!_validateSearch(search)) return;
     view.loadRequestData();
-    _getRequests();
+    _getRequests(search);
   }
 
   void onOrderByChanged(String orderBy) {
     view.changeOrderBy(orderBy);
   }
 
-  Future<void> _getRequests() {
-    if (view.fromDate.difference(view.toDate).inDays > 31) {
-      view.showInvalidMessages(["Only range in 1 month is allowed"]);
-      return null;
-    }
+  Future<void> _getRequests(dynamic search) {
     var success = false;
+    view.searchObj = search;
+    view.page = search['page'];
     return BookingRepo.getManagedRequest(
         fields: "info,room,member",
-        fromDateStr: IntlHelper.format(view.fromDate),
-        toDateStr: IntlHelper.format(view.toDate),
-        status: view.status,
-        page: view.page,
-        limit: view.limit,
-        sorts: view.orderBy,
+        fromDateStr: IntlHelper.format(search['fromDate']),
+        toDateStr: IntlHelper.format(search['toDate']),
+        status: search['status'],
+        page: search['page'],
+        limit: search['limit'],
+        sorts: search['orderBy'],
         error: view.showError,
         invalid: view.showInvalidMessages,
         success: (data, totalCount) {

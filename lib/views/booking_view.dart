@@ -45,6 +45,7 @@ class _BookingViewState extends State<BookingView>
   int limit = 10;
   int totalCount;
   List<dynamic> rooms;
+  dynamic searchObj;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
   PageContext pageContext;
 
@@ -57,7 +58,7 @@ class _BookingViewState extends State<BookingView>
   void changePage(int p) {
     setState(() {
       page = p;
-      refresh();
+      _presenter.onSearchPressed(getSearchObj(p));
     });
   }
 
@@ -107,6 +108,18 @@ class _BookingViewState extends State<BookingView>
     });
   }
 
+  dynamic getSearchObj(int page) {
+    return <String, dynamic>{
+      'fromTime': this._fromTime,
+      'toTime': this._toTime,
+      'page': page,
+      'limit': this.limit,
+      'numOfPeople': this._numOfPeople,
+      'selectedDate': this._selectedDate,
+      'roomType': this._roomType
+    };
+  }
+
   @override
   void initState() {
     super.initState();
@@ -118,6 +131,7 @@ class _BookingViewState extends State<BookingView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     print("build ${this.runtimeType}");
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
@@ -272,7 +286,10 @@ class _BookingViewState extends State<BookingView>
             height: 40,
             buttonColor: Colors.orange,
             child: RaisedButton(
-                onPressed: _presenter.onSearchPressed,
+                onPressed: () {
+                  var searchObj = getSearchObj(1);
+                  _presenter.onSearchPressed(searchObj);
+                },
                 child: Icon(
                   Icons.search,
                   color: Colors.white,
@@ -342,7 +359,8 @@ class _BookingViewPresenter {
   void handleInitState(BuildContext context) {}
 
   Future<void> onRefresh() {
-    return onSearchPressed();
+    if (view.searchObj != null) return onSearchPressed(view.searchObj);
+    return null;
   }
 
   void onPagePressed(int page) {
@@ -395,39 +413,47 @@ class _BookingViewPresenter {
     view.changeRoomType(val);
   }
 
-  Future<void> onSearchPressed() async {
-    if (view._selectedDate == null ||
-        view._fromTime == null ||
-        view._toTime == null ||
-        view._numOfPeople == null) {
+  bool _validateSearch(dynamic search) {
+    if (search['selectedDate'] == null ||
+        search['fromTime'] == null ||
+        search['toTime'] == null ||
+        search['numOfPeople'] == null) {
       view.showInvalidMessages(["Please fill all the required fields"]);
-      return;
+      return false;
     }
     var mess = <String>[];
-    var fromTime = IntlHelper.parseTimeOfDay(view._fromTime);
-    var toTime = IntlHelper.parseTimeOfDay(view._toTime);
+    var fromTime = IntlHelper.parseTimeOfDay(search['fromTime']);
+    var toTime = IntlHelper.parseTimeOfDay(search['toTime']);
     if (IntlHelper.compareTimeOfDay(fromTime, toTime) >= 0)
       mess.add("Time range not valid");
-    if (view._numOfPeople <= 0) mess.add("Number of people must be at least 1");
+    if (search['numOfPeople'] <= 0)
+      mess.add("Number of people must be at least 1");
     if (mess.length > 0) {
       view.showInvalidMessages(mess);
-      return;
+      return false;
     }
-    view.loadRoomData();
-    return _getAvailableRooms();
+    return true;
   }
 
-  Future<void> _getAvailableRooms() {
+  Future<void> onSearchPressed(dynamic search) async {
+    if (!_validateSearch(search)) return null;
+    view.loadRoomData();
+    return _getAvailableRooms(search);
+  }
+
+  Future<void> _getAvailableRooms(dynamic search) {
+    view.searchObj = search;
+    view.page = search['page'];
     var success = false;
     var dateStr = IntlHelper.format(view._selectedDate);
     return RoomRepo.getAvailableRooms(
         dateStr: dateStr,
-        page: view.page,
-        limit: view.limit,
-        fromTime: view._fromTime,
-        toTime: view._toTime,
-        numOfPeople: view._numOfPeople,
-        roomTypeCode: view._roomType["code"],
+        page: search['page'],
+        limit: search['limit'],
+        fromTime: search['fromTime'],
+        toTime: search['toTime'],
+        numOfPeople: search['numOfPeople'],
+        roomTypeCode: search["roomType"]['code'],
         invalid: view.showInvalidMessages,
         error: view.showError,
         success: (data, count) {

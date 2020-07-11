@@ -34,14 +34,23 @@ class _BookingListViewState extends State<BookingListView>
   int page = 1;
   int limit = 10;
   int totalCount;
+  dynamic searchObj;
 
   _BookingListViewPresenter _presenter;
   List<dynamic> groups;
   final GlobalKey bookingCardsKey = GlobalKey(debugLabel: "_bookingCardsKey");
-  String lastSearched = '';
   String searchValue = '';
   String status = MemoryStorage.statuses[0].key;
   PageContext pageContext;
+
+  dynamic getSearchObj(int page) {
+    return <String, dynamic>{
+      'limit': this.limit,
+      'searchValue': this.searchValue,
+      'status': this.status,
+      'page': page,
+    };
+  }
 
   void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
@@ -89,6 +98,7 @@ class _BookingListViewState extends State<BookingListView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     print("build ${this.runtimeType}");
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
@@ -112,7 +122,6 @@ class _BookingListViewState extends State<BookingListView>
   void loadBookingData() {
     setState(() {
       _state = LOADING_DATA;
-      lastSearched = searchValue;
       groups = null;
     });
   }
@@ -201,7 +210,9 @@ class _BookingListViewState extends State<BookingListView>
             height: 40,
             buttonColor: Colors.orange,
             child: RaisedButton(
-                onPressed: _presenter.onSearchPressed,
+                onPressed: () {
+                  _presenter.onSearchPressed(getSearchObj(1));
+                },
                 child: Icon(
                   Icons.search,
                   color: Colors.white,
@@ -214,6 +225,7 @@ class _BookingListViewState extends State<BookingListView>
   }
 
   Widget _getBookingsCard() {
+    var lastSearched = searchObj['searchValue'];
     var searchStr = lastSearched.isNotEmpty ? "for \"$lastSearched\", " : "";
     var sStr = status.isEmpty ? "All" : status;
     var text = groups.length > 0
@@ -275,11 +287,13 @@ class _BookingListViewPresenter {
   _BookingListViewPresenter({this.view});
 
   void handleInitState(BuildContext context) {
-    _getBookingsGroupByDate();
+    view.searchObj = view.getSearchObj(1);
+    _getBookingsGroupByDate(view.searchObj);
   }
 
   Future<void> onRefresh() {
-    return onSearchPressed();
+    if (view.searchObj != null) return onSearchPressed(view.searchObj);
+    return null;
   }
 
   void onPagePressed(int page) {
@@ -296,21 +310,23 @@ class _BookingListViewPresenter {
     view.changeStatus(status);
   }
 
-  Future<void> onSearchPressed() {
+  Future<void> onSearchPressed(dynamic search) {
     view.loadBookingData();
-    return _getBookingsGroupByDate();
+    return _getBookingsGroupByDate(search);
   }
 
-  Future<void> _getBookingsGroupByDate() {
+  Future<void> _getBookingsGroupByDate(dynamic search) {
+    view.searchObj = search;
+    view.page = search['page'];
     var success = false;
     return BookingRepo.getOwner(
         fields: "info,room,member",
         groupBy: 'date',
         sorts: "dsent_date",
-        limit: view.limit,
-        page: view.page,
-        search: view.searchValue,
-        status: view.status,
+        limit: search['limit'],
+        page: search['page'],
+        search: search['searchValue'],
+        status: search['status'],
         invalid: view.showInvalidMessages,
         error: view.showError,
         success: (data, count) {

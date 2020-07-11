@@ -42,7 +42,7 @@ class RoomInfoCard extends StatelessWidget {
 
     var areaText = room.containsKey("area_size") && room["area_size"] != null
         ? (" " + room["area_size"].toString() + " m2")
-        : "Not set";
+        : " Not set";
     var columnWidgets = <Widget>[
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,

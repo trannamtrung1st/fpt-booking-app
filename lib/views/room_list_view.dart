@@ -31,11 +31,20 @@ class _RoomListViewState extends State<RoomListView>
   int limit = 10;
   int totalCount;
   PageContext pageContext;
+  dynamic searchObj;
 
   _RoomListViewPresenter _presenter;
   List<dynamic> rooms;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
   String searchValue = '';
+
+  dynamic getSearchObj(int page) {
+    return <String, dynamic>{
+      'limit': this.limit,
+      'searchValue': this.searchValue,
+      'page': page,
+    };
+  }
 
   void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
@@ -48,7 +57,7 @@ class _RoomListViewState extends State<RoomListView>
   void changePage(int p) {
     setState(() {
       page = p;
-      refresh();
+      _presenter.onSearchPressed(getSearchObj(p));
     });
   }
 
@@ -77,6 +86,7 @@ class _RoomListViewState extends State<RoomListView>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     print("build ${this.runtimeType}");
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
@@ -176,7 +186,9 @@ class _RoomListViewState extends State<RoomListView>
                 height: 40,
                 buttonColor: Colors.orange,
                 child: RaisedButton(
-                    onPressed: _presenter.onSearchPressed,
+                    onPressed: () {
+                      _presenter.onSearchPressed(getSearchObj(1));
+                    },
                     child: Icon(
                       Icons.search,
                       color: Colors.white,
@@ -239,11 +251,13 @@ class _RoomListViewPresenter {
   _RoomListViewPresenter({this.view});
 
   void handleInitState(BuildContext context) {
-    _getRooms();
+    view.searchObj = view.getSearchObj(1);
+    _getRooms(view.searchObj);
   }
 
   Future<void> onRefresh() {
-    return onSearchPressed();
+    if (view.searchObj != null) return onSearchPressed(view.searchObj);
+    return null;
   }
 
   void onPagePressed(int page) {
@@ -256,19 +270,21 @@ class _RoomListViewPresenter {
     view.navigateToRoomDetail(code);
   }
 
-  Future<void> onSearchPressed() {
+  Future<void> onSearchPressed(dynamic search) {
     view.loadRoomData();
-    return _getRooms();
+    return _getRooms(search);
   }
 
-  Future<void> _getRooms() {
+  Future<void> _getRooms(dynamic search) {
+    view.searchObj = search;
+    view.page = search['page'];
     var success = false;
     return RoomRepo.getRooms(
-        search: view.searchValue,
+        search: search['searchValue'],
         invalid: view.showInvalidMessages,
         error: view.showError,
-        page: view.page,
-        limit: view.limit,
+        page: search['page'],
+        limit: search['limit'],
         success: (data, count) {
           success = true;
           view.refreshRoomData(data, count);

@@ -104,9 +104,10 @@ class _MainNavState extends State<MainNav> {
     super.initState();
     loginContext = Provider.of<LoginContext>(context, listen: false);
     pageContext = Provider.of<PageContext>(context, listen: false);
-    tabs = loginContext.isManager() ? managerTabs : normalTabs;
-    pages = loginContext.isManager() ? managerPages : normalPages;
-    _pageWidgets = pages.map((e) => e.widget).toList();
+    tabs =
+        loginContext.isManager() ? managerTabs.toList() : normalTabs.toList();
+    pages =
+        loginContext.isManager() ? managerPages.toList() : normalPages.toList();
     if (loginContext.isViewOnlyUser()) {
       //not allowed booking
       for (var i = 0; i < tabs.length; i++) {
@@ -117,6 +118,7 @@ class _MainNavState extends State<MainNav> {
         }
       }
     }
+    _pageWidgets = pages.map((e) => e.widget).toList();
     MainNav.navigate = ({dynamic refreshParam, Type type}) {
       for (var i = 0; i < pages.length; i++) {
         var rt = pages[i].widget.runtimeType;
