@@ -5,12 +5,14 @@ import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/helpers/paging_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/calendar_view.dart';
 import 'package:fptbooking_app/views/frags/available_room_list.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
+import 'package:fptbooking_app/widgets/app_paging.dart';
 import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/calendar.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
@@ -26,7 +28,8 @@ class BookingView extends StatefulWidget {
   _BookingViewState createState() => _BookingViewState();
 }
 
-class _BookingViewState extends State<BookingView> with Refreshable {
+class _BookingViewState extends State<BookingView>
+    with Refreshable, AutomaticKeepAliveClientMixin {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   static const int AFTER_SEARCH = 3;
@@ -38,6 +41,9 @@ class _BookingViewState extends State<BookingView> with Refreshable {
   int _numOfPeople;
   DateTime _selectedDate = DateTime.now();
   _BookingViewPresenter _presenter;
+  int page = 1;
+  int limit = 10;
+  int totalCount;
   List<dynamic> rooms;
   final GlobalKey roomCardsKey = GlobalKey(debugLabel: "_roomCardsKey");
   PageContext pageContext;
@@ -45,6 +51,13 @@ class _BookingViewState extends State<BookingView> with Refreshable {
   void changeSelectedDate(DateTime date) {
     setState(() {
       _selectedDate = date;
+    });
+  }
+
+  void changePage(int p) {
+    setState(() {
+      page = p;
+      refresh();
     });
   }
 
@@ -116,20 +129,21 @@ class _BookingViewState extends State<BookingView> with Refreshable {
     return _buildShowingViewWidget(context);
   }
 
-  //isAfterSearch
+//isAfterSearch
   bool _isAfterSearch() => _state == AFTER_SEARCH;
 
   void setAfterSearchState() => _state = AFTER_SEARCH;
 
-  //isShowingView
+//isShowingView
   void setShowingViewState() => setState(() {
         _state = SHOWING_VIEW;
       });
 
-  void refreshRoomData(List<dynamic> data) {
+  void refreshRoomData(List<dynamic> data, int count) {
     setState(() {
       _state = AFTER_SEARCH;
       rooms = data;
+      totalCount = count;
     });
   }
 
@@ -144,7 +158,7 @@ class _BookingViewState extends State<BookingView> with Refreshable {
     return _mainView();
   }
 
-  //isLoadingData
+//isLoadingData
   void setLoadingDataState() => setState(() {
         _state = LOADING_DATA;
       });
@@ -163,7 +177,7 @@ class _BookingViewState extends State<BookingView> with Refreshable {
     DialogHelper.showUnknownError(context: this.context);
   }
 
-  //widgets
+//widgets
   Widget _mainView({bool loading = false}) {
     var widgets = <Widget>[
       Calendar(
@@ -177,7 +191,24 @@ class _BookingViewState extends State<BookingView> with Refreshable {
         ),
       ),
     ];
-    if (rooms != null)
+    if (rooms != null) {
+      Widget appPaging;
+      if (rooms.length > 0) {
+        var paging = Paging()
+          ..currentPage = page
+          ..itemsPerPage = limit
+          ..pagesPerLoad = 5;
+        paging.countPage(totalCount);
+        var appPagingWidget = AppPaging(
+          onPagePressed: _presenter.onPagePressed,
+          paging: paging,
+        );
+        appPaging = Container(
+          margin: EdgeInsets.only(top: 15),
+          child: appPagingWidget,
+        );
+      }
+
       widgets.add(AvailableRoomList(
         key: roomCardsKey,
         toTime: _toTime,
@@ -186,7 +217,10 @@ class _BookingViewState extends State<BookingView> with Refreshable {
         onRoomPressed: _presenter.onRoomPressed,
         rooms: rooms,
         selectedDate: _selectedDate,
+        paging: appPaging,
       ));
+    }
+
     return LoadingModal(
       isLoading: loading,
       child: AppScroll(
@@ -294,6 +328,10 @@ class _BookingViewState extends State<BookingView> with Refreshable {
           modalType: SmartSelectModalType.bottomSheet,
         ));
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => !needRefresh;
 }
 
 class _BookingViewPresenter {
@@ -305,6 +343,10 @@ class _BookingViewPresenter {
 
   Future<void> onRefresh() {
     return onSearchPressed();
+  }
+
+  void onPagePressed(int page) {
+    view.changePage(page);
   }
 
   void onCancelBooking(String code) {
@@ -380,15 +422,17 @@ class _BookingViewPresenter {
     var dateStr = IntlHelper.format(view._selectedDate);
     return RoomRepo.getAvailableRooms(
         dateStr: dateStr,
+        page: view.page,
+        limit: view.limit,
         fromTime: view._fromTime,
         toTime: view._toTime,
         numOfPeople: view._numOfPeople,
         roomTypeCode: view._roomType["code"],
         invalid: view.showInvalidMessages,
         error: view.showError,
-        success: (data) {
+        success: (data, count) {
           success = true;
-          view.refreshRoomData(data);
+          view.refreshRoomData(data, count);
         }).whenComplete(() {
       if (!success) view.setShowingViewState();
     });

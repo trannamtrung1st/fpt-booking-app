@@ -37,16 +37,22 @@ class BookingRepo {
       String dateStr,
       String groupBy,
       String search,
+      int page,
+      int limit,
       String status,
       String sorts,
       String dateFormat = "dd/MM/yyyy",
-      Function(List<dynamic>) success,
+      Function(List<dynamic> list, int count) success,
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await BookingApi.getOwner(
         fields: fields,
         groupBy: groupBy,
         status: status,
+        page: page,
+        limit: limit,
+        loadAll: false,
+        countTotal: true,
         dateFormat: dateFormat,
         search: search,
         dateStr: dateStr,
@@ -54,7 +60,8 @@ class BookingRepo {
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
-      if (success != null) success(result["data"]["list"]);
+      if (success != null)
+        success(result["data"]["list"], result["data"]["count"]);
       return;
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
@@ -73,23 +80,30 @@ class BookingRepo {
       {String fields = "info",
       String fromDateStr,
       String toDateStr,
+      int page,
+      int limit,
       String status,
       String sorts,
       String dateFormat = "dd/MM/yyyy",
-      Function(List<dynamic>) success,
+      Function(List<dynamic> list, int totalCount) success,
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await BookingApi.getManagedRequest(
         fields: fields,
+        page: page,
+        limit: limit,
+        loadAll: false,
         status: status,
         dateFormat: dateFormat,
         fromDateStr: fromDateStr,
         toDateStr: toDateStr,
+        countTotal: true,
         sorts: sorts);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
-      if (success != null) success(result["data"]["list"]);
+      if (success != null)
+        success(result["data"]["list"], result["data"]["count"]);
       return;
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);

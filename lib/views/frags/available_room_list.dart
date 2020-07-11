@@ -10,11 +10,13 @@ class AvailableRoomList extends StatefulWidget {
   final String toTime;
   final List<dynamic> rooms;
   final int numOfPeople;
-  Function(dynamic room, DateTime date, String fromTime, String toTime,
+  final Function(dynamic room, DateTime date, String fromTime, String toTime,
       int numOfPeople) onRoomPressed;
+  final Widget paging;
 
   AvailableRoomList(
       {this.selectedDate,
+      this.paging,
       this.fromTime,
       this.toTime,
       this.rooms,
@@ -26,6 +28,7 @@ class AvailableRoomList extends StatefulWidget {
   @override
   _AvailableRoomListState createState() => _AvailableRoomListState(
       fromTime: fromTime,
+      paging: paging,
       toTime: toTime,
       onRoomPressed: onRoomPressed,
       rooms: rooms,
@@ -41,10 +44,12 @@ class _AvailableRoomListState extends State<AvailableRoomList> {
   int numOfPeople;
   Function(dynamic room, DateTime date, String fromTime, String toTime,
       int numOfPeople) onRoomPressed;
+  Widget paging;
 
   _AvailableRoomListState(
       {this.selectedDate,
       this.fromTime,
+      this.paging,
       this.toTime,
       this.numOfPeople,
       this.rooms,
@@ -72,6 +77,7 @@ class _AvailableRoomListState extends State<AvailableRoomList> {
             onRoomPressed(val, selectedDate, fromTime, toTime, numOfPeople),
       ));
     }
+    if (rooms.length > 0) cardWidgets.add(paging);
     return card;
   }
 }

@@ -13,7 +13,9 @@ class RoomRepo {
       @required String toTime,
       @required int numOfPeople,
       @required String roomTypeCode,
-      Function(List<dynamic>) success,
+      int page,
+      int limit,
+      Function(List<dynamic> list, int count) success,
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await RoomApi.get(
@@ -21,6 +23,10 @@ class RoomRepo {
         dateFormat: dateFormat,
         dateStr: dateStr,
         fromTime: fromTime,
+        page: page,
+        limit: limit,
+        loadAll: false,
+        countTotal: true,
         numOfPeople: numOfPeople,
         roomTypeCode: roomTypeCode,
         empty: true,
@@ -29,7 +35,8 @@ class RoomRepo {
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
-      if (success != null) success(result["data"]["list"]);
+      if (success != null)
+        success(result["data"]["list"], result["data"]["count"]);
       return;
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);
@@ -47,14 +54,23 @@ class RoomRepo {
   static Future<void> getRooms(
       {String fields = "info,type",
       @required String search,
-      Function(List<dynamic>) success,
+      int page,
+      int limit,
+      Function(List<dynamic> list, int count) success,
       Function(List<String> mess) invalid,
       Function error}) async {
-    var response = await RoomApi.get(fields: fields, search: search);
+    var response = await RoomApi.get(
+        fields: fields,
+        search: search,
+        loadAll: false,
+        countTotal: true,
+        page: page,
+        limit: limit);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
-      if (success != null) success(result["data"]["list"]);
+      if (success != null)
+        success(result["data"]["list"], result["data"]["count"]);
       return;
     } else if (response.statusCode == 400) {
       var result = jsonDecode(response.body);

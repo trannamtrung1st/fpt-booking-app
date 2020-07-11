@@ -5,11 +5,13 @@ import 'package:fptbooking_app/app/refreshable.dart';
 import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/intl_helper.dart';
+import 'package:fptbooking_app/helpers/paging_helper.dart';
 import 'package:fptbooking_app/repos/booking_repo.dart';
 import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/views/frags/approval_request_table.dart';
 import 'package:fptbooking_app/widgets/app_dropdown_button.dart';
+import 'package:fptbooking_app/widgets/app_paging.dart';
 import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
@@ -23,7 +25,8 @@ class ApprovalListView extends StatefulWidget {
   _ApprovalListViewState createState() => _ApprovalListViewState();
 }
 
-class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
+class _ApprovalListViewState extends State<ApprovalListView>
+    with Refreshable, AutomaticKeepAliveClientMixin {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
@@ -35,11 +38,21 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
   String status = MemoryStorage.statuses[0].key;
   String orderBy = orderByValues[0].key;
   PageContext pageContext;
+  int page = 1;
+  final int limit = 20;
+  int totalCount;
 
   static final List<MapEntry<String, String>> orderByValues = [
-    MapEntry("dsent_date", " Latest requested date"),
+    MapEntry("dsent_date", "Latest requested date"),
     MapEntry("abooked_date", "Nearest booked date"),
   ];
+
+  void changePage(int p) {
+    setState(() {
+      page = p;
+      refresh();
+    });
+  }
 
   void loadRequestData() {
     setState(() {
@@ -89,6 +102,7 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     print("build ${this.runtimeType}");
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
@@ -101,10 +115,11 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
         _state = SHOWING_VIEW;
       });
 
-  void refreshApprovalListData(List<dynamic> data) {
+  void refreshApprovalListData(List<dynamic> data, int count) {
     setState(() {
       _state = SHOWING_VIEW;
       bookings = data;
+      this.totalCount = count;
     });
   }
 
@@ -221,6 +236,21 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
             textAlign: TextAlign.center,
           ),
         ));
+      else {
+        var paging = Paging()
+          ..currentPage = page
+          ..itemsPerPage = limit
+          ..pagesPerLoad = 5;
+        paging.countPage(totalCount);
+        var appPagingWidget = AppPaging(
+          onPagePressed: _presenter.onPagePressed,
+          paging: paging,
+        );
+        widgets.add(Container(
+          margin: EdgeInsets.all(15),
+          child: appPagingWidget,
+        ));
+      }
     }
 
     return LoadingModal(
@@ -251,6 +281,10 @@ class _ApprovalListViewState extends State<ApprovalListView> with Refreshable {
     return SimpleInfo(
         labelText: "Requested date range", marginBetween: 0, child: btn);
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => !needRefresh;
 }
 
 class _ApprovalListViewPresenter {
@@ -267,6 +301,10 @@ class _ApprovalListViewPresenter {
     return _getRequests();
   }
 
+  void onPagePressed(int page) {
+    view.changePage(page);
+  }
+
   void onStatusChanged(String status) {
     view.changeStatus(status);
   }
@@ -281,18 +319,24 @@ class _ApprovalListViewPresenter {
   }
 
   Future<void> _getRequests() {
+    if (view.fromDate.difference(view.toDate).inDays > 31) {
+      view.showInvalidMessages(["Only range in 1 month is allowed"]);
+      return null;
+    }
     var success = false;
     return BookingRepo.getManagedRequest(
         fields: "info,room,member",
         fromDateStr: IntlHelper.format(view.fromDate),
         toDateStr: IntlHelper.format(view.toDate),
         status: view.status,
+        page: view.page,
+        limit: view.limit,
         sorts: view.orderBy,
         error: view.showError,
         invalid: view.showInvalidMessages,
-        success: (data) {
+        success: (data, totalCount) {
           success = true;
-          view.refreshApprovalListData(data);
+          view.refreshApprovalListData(data, totalCount);
         }).whenComplete(() {
       if (!success) view.setShowingViewState();
     });

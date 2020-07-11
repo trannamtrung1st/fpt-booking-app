@@ -4,10 +4,12 @@ import 'package:fptbooking_app/app/refreshable.dart';
 import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/color_helper.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
+import 'package:fptbooking_app/helpers/paging_helper.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/views/frags/room_info_card.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/app_card.dart';
+import 'package:fptbooking_app/widgets/app_paging.dart';
 import 'package:fptbooking_app/widgets/app_scroll.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:fptbooking_app/widgets/simple_info.dart';
@@ -20,10 +22,14 @@ class RoomListView extends StatefulWidget {
   _RoomListViewState createState() => _RoomListViewState();
 }
 
-class _RoomListViewState extends State<RoomListView> with Refreshable {
+class _RoomListViewState extends State<RoomListView>
+    with Refreshable, AutomaticKeepAliveClientMixin {
   static const int SHOWING_VIEW = 1;
   static const int LOADING_DATA = 2;
   int _state = LOADING_DATA;
+  int page = 1;
+  int limit = 10;
+  int totalCount;
   PageContext pageContext;
 
   _RoomListViewPresenter _presenter;
@@ -36,6 +42,13 @@ class _RoomListViewState extends State<RoomListView> with Refreshable {
     setState(() {
       this.rooms = null;
       _presenter.onRefresh();
+    });
+  }
+
+  void changePage(int p) {
+    setState(() {
+      page = p;
+      refresh();
     });
   }
 
@@ -76,10 +89,11 @@ class _RoomListViewState extends State<RoomListView> with Refreshable {
         _state = SHOWING_VIEW;
       });
 
-  void refreshRoomData(List<dynamic> data) {
+  void refreshRoomData(List<dynamic> data, int count) {
     setState(() {
       _state = SHOWING_VIEW;
       rooms = data;
+      totalCount = count;
     });
   }
 
@@ -120,7 +134,9 @@ class _RoomListViewState extends State<RoomListView> with Refreshable {
         ),
       ),
     ];
-    if (rooms != null) widgets.add(_getRoomsCard());
+    if (rooms != null) {
+      widgets.add(_getRoomsCard());
+    }
     return LoadingModal(
         isLoading: loading,
         child: AppScroll(
@@ -194,8 +210,27 @@ class _RoomListViewState extends State<RoomListView> with Refreshable {
         room: o,
       ));
     }
+    if (rooms.length > 0) {
+      var paging = Paging()
+        ..currentPage = page
+        ..itemsPerPage = limit
+        ..pagesPerLoad = 5;
+      paging.countPage(totalCount);
+      var appPagingWidget = AppPaging(
+        onPagePressed: _presenter.onPagePressed,
+        paging: paging,
+      );
+      cardWidgets.add(Container(
+        margin: EdgeInsets.only(top: 15),
+        child: appPagingWidget,
+      ));
+    }
     return card;
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => !needRefresh;
 }
 
 class _RoomListViewPresenter {
@@ -204,11 +239,15 @@ class _RoomListViewPresenter {
   _RoomListViewPresenter({this.view});
 
   void handleInitState(BuildContext context) {
-    _getRooms(null);
+    _getRooms();
   }
 
   Future<void> onRefresh() {
     return onSearchPressed();
+  }
+
+  void onPagePressed(int page) {
+    view.changePage(page);
   }
 
   void onRoomPressed(dynamic data) {
@@ -219,18 +258,20 @@ class _RoomListViewPresenter {
 
   Future<void> onSearchPressed() {
     view.loadRoomData();
-    return _getRooms(view.searchValue);
+    return _getRooms();
   }
 
-  Future<void> _getRooms(String searchVal) {
+  Future<void> _getRooms() {
     var success = false;
     return RoomRepo.getRooms(
-        search: searchVal,
+        search: view.searchValue,
         invalid: view.showInvalidMessages,
         error: view.showError,
-        success: (data) {
+        page: view.page,
+        limit: view.limit,
+        success: (data, count) {
           success = true;
-          view.refreshRoomData(data);
+          view.refreshRoomData(data, count);
         }).whenComplete(() {
       if (!success) view.setShowingViewState();
     });

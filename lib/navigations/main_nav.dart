@@ -81,6 +81,7 @@ class _MainNavState extends State<MainNav> {
   _MainNavPresenter _presenter;
   PageController pageController = PageController(keepPage: true);
   List<Screen> pages;
+  List<Widget> _pageWidgets;
   List<BottomNavigationBarItem> tabs;
 
   static const int TAB_CALENDAR = 0;
@@ -105,6 +106,7 @@ class _MainNavState extends State<MainNav> {
     pageContext = Provider.of<PageContext>(context, listen: false);
     tabs = loginContext.isManager() ? managerTabs : normalTabs;
     pages = loginContext.isManager() ? managerPages : normalPages;
+    _pageWidgets = pages.map((e) => e.widget).toList();
     if (loginContext.isViewOnlyUser()) {
       //not allowed booking
       for (var i = 0; i < tabs.length; i++) {
@@ -141,7 +143,7 @@ class _MainNavState extends State<MainNav> {
         body: PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: pageController,
-          children: pages.map((e) => e.widget).toList(),
+          children: _pageWidgets,
 //          onPageChanged: ,
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -163,14 +165,14 @@ class _MainNavPresenter {
 
   void onItemTapped(int index) {
     view.pageController.jumpToPage(index);
-    view.pageContext.refreshIfNeeded(view.pages[index].widget.runtimeType);
     view.changeTab(index);
+    view.pageContext.refreshIfNeeded(view.pages[index].widget.runtimeType);
   }
 
   void onPageNavigation(int index, dynamic refreshParam) {
     view.pageController.jumpToPage(index);
+    view.changeTab(index);
     view.pageContext.refreshIfNeeded(view.pages[index].widget.runtimeType,
         refreshParam: refreshParam);
-    view.changeTab(index);
   }
 }

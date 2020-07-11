@@ -13,6 +13,7 @@ class PageContext extends ChangeNotifier {
     if (_refreshableMap.containsKey(t)) {
       var r = _refreshableMap[t];
       r.needRefresh = true;
+      r.updateKeepAlive();
     }
   }
 
