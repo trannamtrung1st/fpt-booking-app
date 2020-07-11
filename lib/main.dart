@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/contexts/page_context.dart';
+import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/noti_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
@@ -19,7 +22,7 @@ import 'package:provider/provider.dart';
 Future<dynamic> handleBackgroundFirebaseMessage(Map<String, dynamic> message) {
   if (message.containsKey('data')) {
     // Handle data message
-    final dynamic data = message['data'];
+//    final dynamic data = message['data'];
   }
   if (message.containsKey('notification')) {
     // Handle notification message
@@ -30,18 +33,6 @@ Future<dynamic> handleBackgroundFirebaseMessage(Map<String, dynamic> message) {
 }
 
 void main() async {
-  //prepare
-  var success = false;
-  await RoomTypeRepo.getAll(success: (list) {
-    RoomTypeRepo.saveToMemoryStorage(list);
-    success = true;
-  }).catchError((e) => {print(e)});
-  if (!success) {
-//    SystemNavigator.pop();
-    exit(0);
-    return;
-  }
-
   //static init
   MainNav.init();
 
@@ -75,9 +66,10 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  static const int PREPARE = 0;
   static const int PRE_PROCESSING = 1;
   static const int SHOWING_VIEW = 2;
-  int _state = PRE_PROCESSING;
+  int _state = PREPARE;
   LoginContext loginContext;
   _AppPresenter _presenter;
 
@@ -85,13 +77,28 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     _presenter = _AppPresenter(view: this);
-    NotiHelper.init(_presenter.onDidReceiveLocalNotification,
-        _presenter.onSelectNotification);
+  }
+
+  Future<void> showInvalidMessages(List<String> mess) {
+    return DialogHelper.showMessage(
+        context: context, title: "Sorry", contents: mess);
   }
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
+    if (_isPrepare()) {
+      _presenter.prepareData();
+      return LoadingModal(
+        isLoading: true,
+        child: Material(
+          child: Container(),
+        ),
+      );
+    }
+
+    NotiHelper.init(_presenter.onDidReceiveLocalNotification,
+        _presenter.onSelectNotification);
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
@@ -131,9 +138,17 @@ class _AppState extends State<App> {
     );
   }
 
+  //isPrepare
+  bool _isPrepare() => _state == PREPARE;
+
   //isPreProcessing
   bool _isPreProcessing() => _state == PRE_PROCESSING;
 
+  void setPreProcessingState() => setState(() {
+        _state = PRE_PROCESSING;
+      });
+
+  //isShowingView
   void setShowingViewState() => setState(() {
         _state = SHOWING_VIEW;
       });
@@ -168,6 +183,38 @@ class _AppPresenter {
 
   void releaseHangingRoom() {
     RoomRepo.releaseHangingRoom(userId: _loginContext.tokenData["user_id"]);
+  }
+
+  void prepareData() {
+    //prepare data
+    var finalSuccess = false;
+    var checker = DataConnectionChecker();
+    checker.addresses = [
+      AddressCheckOptions(InternetAddress(Constants.API_AUTH.split(':')[0]),
+          port: int.parse(Constants.API_AUTH.split(':')[1]),
+          timeout: DataConnectionChecker.DEFAULT_TIMEOUT)
+    ];
+    checker.hasConnection.then((success) {
+      if (success == true) {
+        print('<3<3<3');
+        return RoomTypeRepo.getAll(success: (list) {
+          RoomTypeRepo.saveToMemoryStorage(list);
+          finalSuccess = true;
+        }).catchError((e) => {print(e)});
+      } else {
+        print('No internet :( Reason:');
+        print(DataConnectionChecker().lastTryResults);
+      }
+      return null;
+    }).whenComplete(() {
+      if (!finalSuccess) {
+        view.showInvalidMessages(["Internet connection required"]).then(
+            (value) {
+          exit(0);
+        });
+      } else
+        view.setPreProcessingState();
+    });
   }
 
   void handlePreProcessing(BuildContext context) {

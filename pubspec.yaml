@@ -36,6 +36,7 @@ dependencies:
   smart_select: ^3.0.3
   date_range_picker: ^1.0.5
   flutter_local_notifications: ^1.4.4+1
+  data_connection_checker: ^0.3.4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
