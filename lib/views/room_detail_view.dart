@@ -197,7 +197,9 @@ class _RoomDetailViewState extends State<RoomDetailView> {
   }
 
   Widget _detailInfo() {
-    var location = data["block"]["name"] + " - " + data["level"]["name"];
+    var location = data.containsKey("block") && data["block"] != null
+        ? (data["block"]["name"] + " - " + data["level"]["name"])
+        : "Not set";
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

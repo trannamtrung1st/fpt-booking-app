@@ -40,6 +40,9 @@ class RoomInfoCard extends StatelessWidget {
             fontWeight: FontWeight.bold),
       ));
 
+    var areaText = room.containsKey("area_size") && room["area_size"] != null
+        ? (" " + room["area_size"].toString() + " m2")
+        : "Not set";
     var columnWidgets = <Widget>[
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +74,7 @@ class RoomInfoCard extends StatelessWidget {
                     size: 22,
                   ),
                   SelectableText(
-                    " " + room["area_size"].toString() + " m2",
+                    areaText,
                     style: TextStyle(color: Colors.grey),
                   )
                 ],
