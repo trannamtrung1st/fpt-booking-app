@@ -121,7 +121,7 @@ class _LoginViewState extends State<LoginView> {
                 fit: BoxFit.fill,
 //                colorFilter: new ColorFilter.mode(
 //                    Colors.white.withOpacity(0.5), BlendMode.dstATop),
-                image: new ExactAssetImage("assets/app-bg-0.jpg"))),
+                image: new ExactAssetImage("assets/app-bg.jpg"))),
         height: double.infinity,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,13 +129,8 @@ class _LoginViewState extends State<LoginView> {
           children: <Widget>[
             _logo(),
             Container(
-                height: 300,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        fit: BoxFit.fitWidth,
-                        colorFilter: new ColorFilter.mode(
-                            Colors.white.withOpacity(0.75), BlendMode.dstATop),
-                        image: new ExactAssetImage("assets/login-bg.jpg"))),
+                height: 270,
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.3)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -159,7 +154,7 @@ class _LoginViewState extends State<LoginView> {
       child: Container(
         decoration: BoxDecoration(
             image: DecorationImage(
-                fit: BoxFit.fitWidth,
+                fit: BoxFit.fill,
                 colorFilter: new ColorFilter.mode(
                     Colors.white.withOpacity(0.75), BlendMode.dstATop),
                 image: new ExactAssetImage("assets/login-bg.jpg"))),
@@ -188,37 +183,40 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Widget _logo() {
-    return Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        // Stroked text as border.
-        Text(
-          "FPT BOOKING",
-          style: TextStyle(
-            letterSpacing: 5,
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
-            shadows: <Shadow>[
-              Shadow(blurRadius: 20, color: Colors.orange),
-              Shadow(blurRadius: 20, color: Colors.orange)
-            ],
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 3
-              ..color = Colors.orange,
+    return Container(
+      padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
+      child: Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          // Stroked text as border.
+          Text(
+            "FPT BOOKING",
+            style: TextStyle(
+              letterSpacing: 5,
+              fontSize: 40,
+              fontWeight: FontWeight.bold,
+              shadows: <Shadow>[
+                Shadow(blurRadius: 20, color: Colors.orange),
+                Shadow(blurRadius: 20, color: Colors.orange)
+              ],
+              foreground: Paint()
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 3
+                ..color = Colors.orange,
+            ),
           ),
-        ),
-        // Solid text as fill.
-        Text(
-          'FPT BOOKING',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 5,
-            fontSize: 40,
-            color: Colors.white,
+          // Solid text as fill.
+          Text(
+            'FPT BOOKING',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 5,
+              fontSize: 40,
+              color: Colors.white,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

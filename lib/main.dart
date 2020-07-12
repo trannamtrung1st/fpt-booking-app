@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:fptbooking_app/constants.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
 import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
@@ -89,12 +88,7 @@ class _AppState extends State<App> {
     print("build ${this.runtimeType}");
     if (_isPrepare()) {
       _presenter.prepareData();
-      return LoadingModal(
-        isLoading: true,
-        child: Material(
-          child: Container(),
-        ),
-      );
+      return _buildPreProcessingWidget(context);
     }
 
     NotiHelper.init(_presenter.onDidReceiveLocalNotification,
@@ -156,9 +150,7 @@ class _AppState extends State<App> {
   Widget _buildPreProcessingWidget(BuildContext context) {
     return LoadingModal(
       isLoading: true,
-      child: Container(
-        color: Colors.white,
-      ),
+      child: LoginView(),
     );
   }
 
@@ -185,36 +177,42 @@ class _AppPresenter {
     RoomRepo.releaseHangingRoom(userId: _loginContext.tokenData["user_id"]);
   }
 
-  void prepareData() {
+  void prepareData() async {
     //prepare data
     var finalSuccess = false;
-    var checker = DataConnectionChecker();
-    checker.addresses = [
-      AddressCheckOptions(InternetAddress(Constants.API_AUTH.split(':')[0]),
-          port: int.parse(Constants.API_AUTH.split(':')[1]),
-          timeout: DataConnectionChecker.DEFAULT_TIMEOUT)
-    ];
-    checker.hasConnection.then((success) {
-      if (success == true) {
-        print('<3<3<3');
-        return RoomTypeRepo.getAll(success: (list) {
-          RoomTypeRepo.saveToMemoryStorage(list);
-          finalSuccess = true;
-        }).catchError((e) => {print(e)});
-      } else {
-        print('No internet :( Reason:');
-        print(DataConnectionChecker().lastTryResults);
-      }
-      return null;
-    }).whenComplete(() {
-      if (!finalSuccess) {
-        view.showInvalidMessages(["Internet connection required"]).then(
-            (value) {
-          exit(0);
-        });
-      } else
-        view.setPreProcessingState();
-    });
+    var mess = ["Internet connection required"];
+    await RoomTypeRepo.getAll(success: (list) {
+      RoomTypeRepo.saveToMemoryStorage(list);
+      finalSuccess = true;
+    }).catchError((e) => {print(e)});
+    if (!finalSuccess) {
+      var checker = DataConnectionChecker();
+//      checker.addresses = [
+//        AddressCheckOptions(InternetAddress(Constants.API_AUTH.split(':')[0]),
+//            port: int.parse(Constants.API_AUTH.split(':')[1]),
+//            timeout: DataConnectionChecker.DEFAULT_TIMEOUT)
+//      ];
+      checker.addresses = checker.addresses.sublist(0, 1);
+      await checker.hasConnection.then((success) {
+        if (success == true) {
+          print('Connection OK');
+          mess = [
+            "System is under maintenance.",
+            "Please comeback later or contact admin for more information."
+          ];
+        } else {
+          print('No internet :( Reason:');
+          print(DataConnectionChecker().lastTryResults);
+        }
+      }).catchError((e) {
+        print(e);
+      });
+      view.showInvalidMessages(mess).then((value) {
+        exit(0);
+      });
+      return;
+    }
+    view.setPreProcessingState();
   }
 
   void handlePreProcessing(BuildContext context) {
