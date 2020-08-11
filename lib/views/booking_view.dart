@@ -64,13 +64,13 @@ class _BookingViewState extends State<BookingView>
 
   void changeFromTime(TimeOfDay time) {
     setState(() {
-      _fromTime = time?.format(context) ?? null;
+      _fromTime = IntlHelper.formatTimeOfDay(time);
     });
   }
 
   void changeToTime(TimeOfDay time) {
     setState(() {
-      _toTime = time?.format(context) ?? null;
+      _toTime = IntlHelper.formatTimeOfDay(time);
     });
   }
 

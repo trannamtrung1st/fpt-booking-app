@@ -7,13 +7,36 @@ class IntlHelper {
     return dateStr;
   }
 
-  static DateTime parseDateTime(String s, {String formatStr = "dd/MM/yyyy HH:mm"}){
+  static DateTime parseDateTime(String s,
+      {String formatStr = "dd/MM/yyyy HH:mm"}) {
     return DateFormat(formatStr).parse(s);
   }
 
   static TimeOfDay parseTimeOfDay(String s) {
-    return TimeOfDay(
-        hour: int.parse(s.split(":")[0]), minute: int.parse(s.split(":")[1]));
+    int hour = int.parse(s.split(':')[0]);
+    int minute = int.parse(s.split(':')[1].split(' ')[0]);
+    if (s.contains('PM')) {
+      if (hour != 12) {
+        hour += 12;
+      }
+    } else if (s.contains('AM')) {
+      if (hour == 12) {
+        hour = 0;
+      }
+    }
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  static String formatTimeOfDay(TimeOfDay timeOfDay) {
+    if (timeOfDay == null) {
+      return null;
+    } else {
+      int hour = timeOfDay.hour;
+      int minute = timeOfDay.minute;
+      return (hour < 10 ? '0' + hour.toString() : hour.toString()) +
+          ':' +
+          (minute < 10 ? '0' + minute.toString() : minute.toString());
+    }
   }
 
   static int compareTimeOfDay(TimeOfDay t1, TimeOfDay t2) {
