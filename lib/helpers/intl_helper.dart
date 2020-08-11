@@ -7,6 +7,18 @@ class IntlHelper {
     return dateStr;
   }
 
+  static Duration parseDuration(String timeStr) {
+    int hours = int.parse(timeStr.split(':')[0]);
+    int minutes = int.parse(timeStr.split(':')[1]);
+    return Duration(hours: hours, minutes: minutes);
+  }
+
+  static TimeOfDay convertDurationToTimeOfDay(Duration dur) {
+    return parseTimeOfDay(dur.inHours.toString() +
+        ":" +
+        (dur.inMinutes - dur.inHours * 60).toString());
+  }
+
   static DateTime parseDateTime(String s,
       {String formatStr = "dd/MM/yyyy HH:mm"}) {
     return DateFormat(formatStr).parse(s);

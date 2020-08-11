@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fptbooking_app/app/refreshable.dart';
@@ -62,15 +63,21 @@ class _BookingViewState extends State<BookingView>
     });
   }
 
-  void changeFromTime(TimeOfDay time) {
+  void changeFromTime(Duration dur) {
     setState(() {
-      _fromTime = IntlHelper.formatTimeOfDay(time);
+      if (dur == null) return _fromTime = null;
+      var timeOfDay = IntlHelper.convertDurationToTimeOfDay(dur);
+      var timeOfDayStr = IntlHelper.formatTimeOfDay(timeOfDay);
+      _fromTime = timeOfDayStr;
     });
   }
 
-  void changeToTime(TimeOfDay time) {
+  void changeToTime(Duration dur) {
     setState(() {
-      _toTime = IntlHelper.formatTimeOfDay(time);
+      if (dur == null) return _toTime = null;
+      var timeOfDay = IntlHelper.convertDurationToTimeOfDay(dur);
+      var timeOfDayStr = IntlHelper.formatTimeOfDay(timeOfDay);
+      _toTime = timeOfDayStr;
     });
   }
 
@@ -81,6 +88,29 @@ class _BookingViewState extends State<BookingView>
   void refresh<T>({T refreshParam}) {
     this.needRefresh = false;
     _presenter.onRefresh();
+  }
+
+  void showTimePicker(
+      String timeStr, Function(Duration dur) onDurationChanged) {
+    DialogHelper.showCustomModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Wrap(
+            children: <Widget>[
+              CupertinoTimerPicker(
+                mode: CupertinoTimerPickerMode.hm,
+                minuteInterval: 1,
+                initialTimerDuration: timeStr == null
+                    ? Duration(hours: 7)
+                    : IntlHelper.parseDuration(timeStr),
+                onTimerDurationChanged: onDurationChanged,
+              )
+            ],
+          );
+        },
+        isDismissible: true,
+        enableDrag: false,
+        isScrollControlled: true);
   }
 
   void navigateToRoomDetail(String code, DateTime date, String fromTime,
@@ -398,15 +428,15 @@ class _BookingViewPresenter {
   }
 
   void onFromTimePressed() {
-    showTimePicker(
-            initialTime: TimeOfDay(hour: 07, minute: 00), context: view.context)
-        .then((time) => view.changeFromTime(time));
+    view.showTimePicker(view._fromTime, (dur) {
+      view.changeFromTime(dur);
+    });
   }
 
   void onToTimePressed() {
-    showTimePicker(
-            initialTime: TimeOfDay(hour: 07, minute: 00), context: view.context)
-        .then((time) => view.changeToTime(time));
+    view.showTimePicker(view._toTime, (dur) {
+      view.changeToTime(dur);
+    });
   }
 
   void onRoomTypeChanged(dynamic val) {
