@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:data_connection_checker/data_connection_checker.dart';
@@ -11,7 +12,9 @@ import 'package:fptbooking_app/navigations/main_nav.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/repos/room_type_repo.dart';
 import 'package:fptbooking_app/repos/user_repo.dart';
+import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/views/login_view.dart';
+import 'package:fptbooking_app/views/room_detail_view.dart';
 import 'package:fptbooking_app/widgets/loading_modal.dart';
 import 'package:provider/provider.dart';
 
@@ -19,14 +22,19 @@ import 'package:provider/provider.dart';
 //flutter pub pub run flutter_launcher_icons:main
 
 Future<dynamic> handleBackgroundFirebaseMessage(Map<String, dynamic> message) {
+  String payload;
   if (message.containsKey('data')) {
     // Handle data message
-//    final dynamic data = message['data'];
+    final dynamic data = message['data'];
+    payload = jsonEncode(data);
   }
   if (message.containsKey('notification')) {
     // Handle notification message
     final dynamic notification = message['notification'];
-    NotiHelper.show(title: notification["title"], body: notification["body"]);
+    NotiHelper.show(
+        title: notification["title"],
+        body: notification["body"],
+        payload: payload);
   }
   return null;
 }
@@ -72,6 +80,30 @@ class _AppState extends State<App> {
   LoginContext loginContext;
   _AppPresenter _presenter;
 
+  void navigateToBookingDetail(int id) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BookingDetailView(
+          id: id,
+          type: BookingDetailView.TYPE_BOOKING_DETAIL,
+        ),
+      ),
+    );
+  }
+
+  void navigateToRoomDetail(String code) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RoomDetailView(
+          code: code,
+          type: RoomDetailView.TYPE_ROOM_INFO,
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -81,6 +113,20 @@ class _AppState extends State<App> {
   Future<void> showInvalidMessages(List<String> mess) {
     return DialogHelper.showMessage(
         context: context, title: "Sorry", contents: mess);
+  }
+
+  void _handleGeneralMessage(Map<String, dynamic> message) {
+    String payload;
+    if (message.containsKey('data')) {
+      // Handle data message
+      final dynamic data = message['data'];
+      payload = jsonEncode(data);
+    }
+    final dynamic notification = message['notification'];
+    NotiHelper.show(
+        title: notification["title"],
+        body: notification["body"],
+        payload: payload);
   }
 
   @override
@@ -96,22 +142,22 @@ class _AppState extends State<App> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
-        final dynamic notification = message['notification'];
-        NotiHelper.show(
-            title: notification["title"], body: notification["body"]);
+        _handleGeneralMessage(message);
       },
       onBackgroundMessage: handleBackgroundFirebaseMessage,
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
-        final dynamic notification = message['notification'];
-        NotiHelper.show(
-            title: notification["title"], body: notification["body"]);
+        _handleGeneralMessage(message);
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
-        final dynamic notification = message['notification'];
-        NotiHelper.show(
-            title: notification["title"], body: notification["body"]);
+        String payload;
+        if (message.containsKey('data')) {
+          // Handle data message
+          final dynamic data = message['data'];
+          payload = jsonEncode(data);
+        }
+        _presenter.onSelectNotification(payload);
       },
     );
 
@@ -226,12 +272,22 @@ class _AppPresenter {
 
   Future onDidReceiveLocalNotification(
       int id, String title, String body, String payload) async {
-    print("$id - $title - $body - $payload");
+    onSelectNotification(payload);
   }
 
   Future onSelectNotification(String payload) async {
-    if (payload != null) {
+    print('Notification pressed');
+    if (payload != null && payload.isNotEmpty) {
       print('notification payload: ' + payload);
+      var data = jsonDecode(payload);
+      var ev = data["event"] as String;
+      if (ev.startsWith("Booking")) {
+        var bId = data["id"];
+        view.navigateToBookingDetail(int.parse(bId));
+      } else if (ev.startsWith("Room")) {
+        var rCode = data["code"];
+        view.navigateToRoomDetail(rCode);
+      }
     }
   }
 }
