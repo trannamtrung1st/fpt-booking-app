@@ -62,7 +62,6 @@ class _ApprovalListViewState extends State<ApprovalListView>
   void changePage(int p) {
     setState(() {
       page = p;
-      _presenter.onSearchPressed(getSearchObj(p));
     });
   }
 
@@ -326,6 +325,7 @@ class _ApprovalListViewPresenter {
 
   void onPagePressed(int page) {
     view.changePage(page);
+    onSearchPressed(view.getSearchObj(page));
   }
 
   void onStatusChanged(String status) {

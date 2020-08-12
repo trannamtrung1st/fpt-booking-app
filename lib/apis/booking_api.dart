@@ -54,10 +54,12 @@ class BookingApi {
       {String fields,
       String dateStr,
       String dateFormat,
+      String dateType,
       bool loadAll = true}) async {
     var uri = Uri.http(Constants.API_AUTH, '/api/bookings/calendar', {
       'fields': fields,
       'date': dateStr,
+      'date_type': dateType,
       'date_format': dateFormat,
     });
     var response = await http.get(uri, headers: HttpHelper.commonHeaders());
@@ -67,6 +69,7 @@ class BookingApi {
   static Future<http.Response> getOwner(
       {String fields,
       String dateStr,
+      String dateType,
       String search,
       String sorts,
       String status,
@@ -82,6 +85,7 @@ class BookingApi {
       'search': search,
       'status': status,
       'date': dateStr,
+      'date_type': dateType,
       'page': page?.toString(),
       'limit': limit?.toString(),
       'count_total': countTotal?.toString(),
@@ -97,6 +101,7 @@ class BookingApi {
       {String fields,
       String fromDateStr,
       String toDateStr,
+      String dateType,
       int page,
       int limit,
       String status,
@@ -112,6 +117,38 @@ class BookingApi {
       'limit': limit?.toString(),
       'from_date': fromDateStr,
       'to_date': toDateStr,
+      'date_type': dateType,
+      'sorts': sorts,
+      'date_format': dateFormat,
+      'load_all': loadAll?.toString()
+    });
+    var response = await http.get(uri, headers: HttpHelper.commonHeaders());
+    return response;
+  }
+
+  static Future<http.Response> getRoomBookings(
+      {String fields,
+      String fromDateStr,
+      String toDateStr,
+      String dateType,
+      String roomCode,
+      int page,
+      int limit,
+      String status,
+      String dateFormat,
+      bool countTotal,
+      String sorts,
+      bool loadAll = true}) async {
+    var uri = Uri.http(Constants.API_AUTH, '/api/bookings/room-bookings', {
+      'fields': fields,
+      'status': status,
+      'count_total': countTotal?.toString(),
+      'page': page?.toString(),
+      'room_code': roomCode,
+      'limit': limit?.toString(),
+      'from_date': fromDateStr,
+      'to_date': toDateStr,
+      'date_type': dateType,
       'sorts': sorts,
       'date_format': dateFormat,
       'load_all': loadAll?.toString()

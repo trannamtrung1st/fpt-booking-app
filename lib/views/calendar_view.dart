@@ -202,6 +202,7 @@ class _CalendarViewState extends State<CalendarView>
           0: FractionColumnWidth(0.25),
           1: FractionColumnWidth(0.13),
           2: FractionColumnWidth(0.17),
+          3: FractionColumnWidth(0.25),
         },
       ),
     );

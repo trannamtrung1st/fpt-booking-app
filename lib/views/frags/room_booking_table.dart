@@ -4,58 +4,69 @@ import 'package:fptbooking_app/helpers/view_helper.dart';
 import 'package:fptbooking_app/widgets/app_table.dart';
 import 'package:intl/intl.dart';
 
-class ApprovalRequestTable extends StatefulWidget {
+class RoomBookingTable extends StatefulWidget {
   final List<dynamic> bookings;
   final Function(dynamic val) onRowTap;
   final String status;
   final DateTime fromDate;
   final DateTime toDate;
+  final String roomCode;
 
-  ApprovalRequestTable(
-      {this.bookings, this.onRowTap, this.status, this.fromDate, this.toDate});
+  RoomBookingTable(
+      {this.bookings,
+      this.onRowTap,
+      this.status,
+      this.fromDate,
+      this.toDate,
+      this.roomCode});
 
   @override
-  _ApprovalRequestTableState createState() => _ApprovalRequestTableState(
+  _RoomBookingTableState createState() => _RoomBookingTableState(
       bookings: bookings,
       onRowTap: onRowTap,
       status: status,
+      roomCode: roomCode,
       fromDate: fromDate,
       toDate: toDate);
 }
 
-class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
+class _RoomBookingTableState extends State<RoomBookingTable> {
   List<dynamic> bookings;
   Function(dynamic val) onRowTap;
   final String status;
   final DateTime fromDate;
   final DateTime toDate;
+  final String roomCode;
 
-  _ApprovalRequestTableState(
-      {this.bookings, this.onRowTap, this.status, this.fromDate, this.toDate});
+  _RoomBookingTableState(
+      {this.bookings,
+      this.onRowTap,
+      this.status,
+      this.fromDate,
+      this.toDate,
+      this.roomCode});
 
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
     var rows = <AppTableRow>[
       AppTableRow(data: <dynamic>[
-        "Sent date",
+        "Booked date",
+        "Time",
         "Booked person",
         "Status",
-        "Booked date",
-        "Room"
       ]),
     ];
     if (bookings != null)
       for (dynamic o in bookings) {
-        var date = o["sent_date"]["display"].split(' ')[0];
+        var time = o["from_time"] + ' - ' + o["to_time"];
         var bookedBy =
             (o["book_member"]["email"] as String).replaceAll("@fpt.edu.vn", "");
         var status = o["status"] ?? "";
         var statusText = ViewHelper.getTextByBookingStatus(status: status);
         var bookedDate = o["booked_date"]["display"];
-        var room = o["room"]["code"];
         rows.add(AppTableRow(
-            data: <dynamic>[date, bookedBy, statusText, bookedDate, room],
+            data: <dynamic>[bookedDate, time, bookedBy, statusText],
             onTap: () => this.onRowTap(o)));
       }
     var dateStr =
@@ -67,19 +78,19 @@ class _ApprovalRequestTableState extends State<ApprovalRequestTable> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
-            child: Text("\"$finalStatus\" request on $dateStr"),
+            child: Text("\"$finalStatus\" bookings on $dateStr"),
           ),
           Container(
             margin: EdgeInsets.only(top: 7),
             child: AppTable(
+              padding: EdgeInsets.zero,
               data: rows,
               width: MediaQuery.of(context).size.width * 1.5,
               columnWidths: {
-                0: FractionColumnWidth(0.18),
-                1: FractionColumnWidth(0.3),
-                2: FractionColumnWidth(0.2),
-                3: FractionColumnWidth(0.2),
+                0: FractionColumnWidth(0.2),
+                1: FractionColumnWidth(0.22),
+                2: FractionColumnWidth(0.33),
+                3: FractionColumnWidth(0.25),
               },
             ),
           )

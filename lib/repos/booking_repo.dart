@@ -9,11 +9,15 @@ class BookingRepo {
       {String fields = "info,room",
       String dateStr,
       String dateFormat = "dd/MM/yyyy",
+      String dateType = "booked",
       Function(List<dynamic>) success,
       Function(List<String> mess) invalid,
       Function error}) async {
     var response = await BookingApi.getCalendar(
-        fields: fields, dateFormat: dateFormat, dateStr: dateStr);
+        fields: fields,
+        dateFormat: dateFormat,
+        dateStr: dateStr,
+        dateType: dateType);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
       var result = jsonDecode(response.body);
@@ -35,6 +39,7 @@ class BookingRepo {
   static Future<void> getOwner(
       {String fields = "info",
       String dateStr,
+      String dateType = "booked",
       String groupBy,
       String search,
       int page,
@@ -56,6 +61,7 @@ class BookingRepo {
         dateFormat: dateFormat,
         search: search,
         dateStr: dateStr,
+        dateType: dateType,
         sorts: sorts);
     if (response.isSuccess()) {
       print('Response body: ${response.body}');
@@ -80,6 +86,7 @@ class BookingRepo {
       {String fields = "info",
       String fromDateStr,
       String toDateStr,
+      String dateType = "sent",
       int page,
       int limit,
       String status,
@@ -97,6 +104,53 @@ class BookingRepo {
         dateFormat: dateFormat,
         fromDateStr: fromDateStr,
         toDateStr: toDateStr,
+        dateType: dateType,
+        countTotal: true,
+        sorts: sorts);
+    if (response.isSuccess()) {
+      print('Response body: ${response.body}');
+      var result = jsonDecode(response.body);
+      if (success != null)
+        success(result["data"]["list"], result["data"]["count"]);
+      return;
+    } else if (response.statusCode == 400) {
+      var result = jsonDecode(response.body);
+      print(result);
+      var validationData = result["data"]["results"];
+      var mess = <String>[];
+      for (dynamic o in validationData) mess.add(o["message"] as String);
+      if (invalid != null) invalid(mess);
+      return;
+    }
+    print(response.body);
+    if (error != null) error();
+  }
+
+  static Future<void> getRoomBookings(
+      {String fields = "info",
+      String fromDateStr,
+      String toDateStr,
+      String roomCode,
+      String dateType = "booked",
+      int page,
+      int limit,
+      String status,
+      String sorts,
+      String dateFormat = "dd/MM/yyyy",
+      Function(List<dynamic> list, int totalCount) success,
+      Function(List<String> mess) invalid,
+      Function error}) async {
+    var response = await BookingApi.getRoomBookings(
+        fields: fields,
+        page: page,
+        limit: limit,
+        roomCode: roomCode,
+        loadAll: false,
+        status: status,
+        dateFormat: dateFormat,
+        fromDateStr: fromDateStr,
+        toDateStr: toDateStr,
+        dateType: dateType,
         countTotal: true,
         sorts: sorts);
     if (response.isSuccess()) {
