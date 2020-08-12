@@ -147,7 +147,13 @@ class _AppState extends State<App> {
       onBackgroundMessage: handleBackgroundFirebaseMessage,
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
-        _handleGeneralMessage(message);
+        String payload;
+        if (message.containsKey('data')) {
+          // Handle data message
+          final dynamic data = message['data'];
+          payload = jsonEncode(data);
+        }
+        _presenter.onSelectNotification(payload);
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
