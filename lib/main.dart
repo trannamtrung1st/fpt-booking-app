@@ -79,6 +79,7 @@ class _AppState extends State<App> {
   int _state = PREPARE;
   LoginContext loginContext;
   _AppPresenter _presenter;
+  Function onLaunchDelay;
 
   void navigateToBookingDetail(int id) {
     Navigator.push(
@@ -146,14 +147,16 @@ class _AppState extends State<App> {
       },
       onBackgroundMessage: handleBackgroundFirebaseMessage,
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-        String payload;
-        if (message.containsKey('data')) {
-          // Handle data message
-          final dynamic data = message['data'];
-          payload = jsonEncode(data);
-        }
-        _presenter.onSelectNotification(payload);
+        onLaunchDelay = () {
+          print("onLaunch: $message");
+          String payload;
+          if (message.containsKey('data')) {
+            // Handle data message
+            final dynamic data = message['data'];
+            payload = jsonEncode(data);
+          }
+          _presenter.onSelectNotification(payload);
+        };
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
@@ -173,6 +176,9 @@ class _AppState extends State<App> {
         _presenter = _AppPresenter(view: this);
         if (loginContext.isLoggedIn()) {
           _presenter.releaseHangingRoom();
+          if (onLaunchDelay != null)
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => onLaunchDelay());
           return _buildLoggedInWidget(context);
         }
         if (_isPreProcessing()) {
