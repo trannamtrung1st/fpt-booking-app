@@ -9,9 +9,11 @@ import 'package:fptbooking_app/contexts/page_context.dart';
 import 'package:fptbooking_app/helpers/dialog_helper.dart';
 import 'package:fptbooking_app/helpers/noti_helper.dart';
 import 'package:fptbooking_app/navigations/main_nav.dart';
+import 'package:fptbooking_app/repos/booking_service_repo.dart';
 import 'package:fptbooking_app/repos/room_repo.dart';
 import 'package:fptbooking_app/repos/room_type_repo.dart';
 import 'package:fptbooking_app/repos/user_repo.dart';
+import 'package:fptbooking_app/storages/memory_storage.dart';
 import 'package:fptbooking_app/views/booking_detail_view.dart';
 import 'package:fptbooking_app/views/login_view.dart';
 import 'package:fptbooking_app/views/room_detail_view.dart';
@@ -239,10 +241,16 @@ class _AppPresenter {
     //prepare data
     var finalSuccess = false;
     var mess = ["Internet connection required"];
-    await RoomTypeRepo.getAll(success: (list) {
+    var rtTask = RoomTypeRepo.getAll(success: (list) {
       RoomTypeRepo.saveToMemoryStorage(list);
-      finalSuccess = true;
     }).catchError((e) => {print(e)});
+    var svTask = BookingServiceRepo.getAll(success: (list) {
+      BookingServiceRepo.saveToMemoryStorage(list);
+    }).catchError((e) => {print(e)});
+    await rtTask;
+    await svTask;
+    if (MemoryStorage.roomTypesMap != null &&
+        MemoryStorage.bookingServices != null) finalSuccess = true;
     if (!finalSuccess) {
       var checker = DataConnectionChecker();
 //      checker.addresses = [

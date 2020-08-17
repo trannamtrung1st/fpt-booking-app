@@ -102,8 +102,7 @@ class _BookingFormState extends State<BookingForm> {
       'using_emails': [tokenData["email"]],
       'note': ''
     };
-    _services =
-        MemoryStorage.roomTypesMap[room["room_type_code"]]["services"].toList();
+    _services = MemoryStorage.bookingServices.toList();
     _servicesMap = <String, dynamic>{};
     for (dynamic o in _services) _servicesMap[o["code"]] = o;
   }

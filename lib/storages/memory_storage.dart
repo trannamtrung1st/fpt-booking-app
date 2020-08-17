@@ -9,6 +9,8 @@ class MemoryStorage {
     _data[key] = val;
   }
 
+  static List<dynamic> bookingServices;
+
   static Map<String, dynamic> roomTypesMap;
 
   static final List<MapEntry<String, String>> statuses =
