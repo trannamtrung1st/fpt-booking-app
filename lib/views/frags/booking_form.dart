@@ -86,6 +86,9 @@ class _BookingFormState extends State<BookingForm> {
     _loginContext = Provider.of<LoginContext>(context, listen: false);
     pageContext = Provider.of<PageContext>(context, listen: false);
     var tokenData = _loginContext.tokenData;
+    _services = MemoryStorage.bookingServices.toList();
+    _servicesMap = <String, dynamic>{};
+    for (dynamic o in _services) _servicesMap[o["code"]] = o;
     booking = {
       'booked_date': IntlHelper.format(bookedDate),
       'from_time': fromTime,
@@ -94,6 +97,7 @@ class _BookingFormState extends State<BookingForm> {
       'num_of_people': numOfPeople,
       'attached_services': MemoryStorage.roomTypesMap[room["room_type_code"]]
               ["services"]
+          .map((s) => _servicesMap[s["code"]])
           .toList(),
       'book_member': {
         "user_id": tokenData["user_id"],
@@ -102,9 +106,6 @@ class _BookingFormState extends State<BookingForm> {
       'using_emails': [tokenData["email"]],
       'note': ''
     };
-    _services = MemoryStorage.bookingServices.toList();
-    _servicesMap = <String, dynamic>{};
-    for (dynamic o in _services) _servicesMap[o["code"]] = o;
   }
 
   @override
