@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fptbooking_app/app/refreshable.dart';
+import 'package:fptbooking_app/views/calendar_view.dart';
 
 class PageContext extends ChangeNotifier {
   Map<Type, Refreshable> _refreshableMap = {};
+  Type currentTabWidgetType = CalendarView;
 
   void setRefreshable(Type t, Refreshable r) {
     _refreshableMap[t] = r;

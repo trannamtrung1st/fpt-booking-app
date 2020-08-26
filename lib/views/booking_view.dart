@@ -166,7 +166,7 @@ class _BookingViewState extends State<BookingView>
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
-    if (_isAfterSearch()) {
+    if (_isAfterSearch() && this.runtimeType == pageContext.currentTabWidgetType) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _presenter.handleAfterSearch(context));
     }
@@ -199,10 +199,7 @@ class _BookingViewState extends State<BookingView>
   }
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return LoadingModal(
-      isLoading: false,
-      child: _mainView(),
-    );
+    return _mainView();
   }
 
 //isLoadingData
@@ -213,10 +210,7 @@ class _BookingViewState extends State<BookingView>
   bool isLoadingData() => _state == LOADING_DATA;
 
   Widget _buildLoadingDataWidget(BuildContext context) {
-    return LoadingModal(
-      isLoading: true,
-      child: _mainView(),
-    );
+    return _mainView(loading: true);
   }
 
   void showInvalidMessages(List<String> mess) {
@@ -271,10 +265,13 @@ class _BookingViewState extends State<BookingView>
       ));
     }
 
-    return AppScroll(
-      onRefresh: _presenter.onRefresh,
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+    return LoadingModal(
+      isLoading: loading,
+      child: AppScroll(
+        onRefresh: _presenter.onRefresh,
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+      ),
     );
   }
 
