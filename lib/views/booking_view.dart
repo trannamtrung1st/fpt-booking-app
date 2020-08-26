@@ -166,7 +166,9 @@ class _BookingViewState extends State<BookingView>
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
-    if (_isAfterSearch() && this.runtimeType == pageContext.currentTabWidgetType) {
+    if (_isAfterSearch() && (
+        pageContext.currentTabWidgetType == null ||
+        BookingView == pageContext.currentTabWidgetType)) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _presenter.handleAfterSearch(context));
     }
