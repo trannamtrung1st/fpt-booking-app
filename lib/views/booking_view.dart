@@ -166,9 +166,7 @@ class _BookingViewState extends State<BookingView>
     if (isLoadingData()) {
       return _buildLoadingDataWidget(context);
     }
-    if (_isAfterSearch() && (
-        pageContext.currentTabWidgetType == null ||
-        BookingView == pageContext.currentTabWidgetType)) {
+    if (_isAfterSearch()) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _presenter.handleAfterSearch(context));
     }
@@ -412,7 +410,8 @@ class _BookingViewPresenter {
 
   void handleAfterSearch(BuildContext context) {
     view.setShowingViewState();
-    if (view.rooms != null)
+    if (view.rooms != null && (view.pageContext.currentTabWidgetType == null ||
+        BookingView == view.pageContext.currentTabWidgetType))
       Scrollable.ensureVisible(view.roomCardsKey.currentContext,
           duration: Duration(seconds: 1));
   }
