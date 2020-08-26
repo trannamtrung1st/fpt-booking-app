@@ -199,7 +199,10 @@ class _BookingViewState extends State<BookingView>
   }
 
   Widget _buildShowingViewWidget(BuildContext context) {
-    return _mainView();
+    return LoadingModal(
+      isLoading: false,
+      child: _mainView(),
+    );
   }
 
 //isLoadingData
@@ -210,7 +213,10 @@ class _BookingViewState extends State<BookingView>
   bool isLoadingData() => _state == LOADING_DATA;
 
   Widget _buildLoadingDataWidget(BuildContext context) {
-    return _mainView(loading: true);
+    return LoadingModal(
+      isLoading: true,
+      child: _mainView(),
+    );
   }
 
   void showInvalidMessages(List<String> mess) {
@@ -265,13 +271,10 @@ class _BookingViewState extends State<BookingView>
       ));
     }
 
-    return LoadingModal(
-      isLoading: loading,
-      child: AppScroll(
-        onRefresh: _presenter.onRefresh,
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
-      ),
+    return AppScroll(
+      onRefresh: _presenter.onRefresh,
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
     );
   }
 
@@ -428,12 +431,14 @@ class _BookingViewPresenter {
   }
 
   void onFromTimePressed() {
+    view.changeFromTime(Duration(hours: 7));
     view.showTimePicker(view._fromTime, (dur) {
       view.changeFromTime(dur);
     });
   }
 
   void onToTimePressed() {
+    view.changeToTime(Duration(hours: 7));
     view.showTimePicker(view._toTime, (dur) {
       view.changeToTime(dur);
     });
