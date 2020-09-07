@@ -115,30 +115,20 @@ class _AppState extends State<App> {
     super.initState();
     _presenter = _AppPresenter(view: this);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print("onMessage: $message");
-          _handleGeneralMessage(message);
-        },
-        onBackgroundMessage:
-            Platform.isIOS ? null : handleBackgroundFirebaseMessage,
-        //onBackgroundMessage: null,
+    NotiHelper.init(_presenter.onDidReceiveLocalNotification,
+        _presenter.onSelectNotification);
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        _handleGeneralMessage(message);
+      },
+      onBackgroundMessage:
+          Platform.isIOS ? null : handleBackgroundFirebaseMessage,
+      //onBackgroundMessage: null,
 
-        onLaunch: (Map<String, dynamic> message) async {
-          onLaunchDelay = () {
-            print("onLaunch: $message");
-            String payload;
-            if (message.containsKey('data')) {
-              // Handle data message
-              final dynamic data = message['data'];
-              payload = jsonEncode(data);
-            }
-            _presenter.onSelectNotification(payload);
-          };
-        },
-        onResume: (Map<String, dynamic> message) async {
-          print("onResume: $message");
+      onLaunch: (Map<String, dynamic> message) async {
+        onLaunchDelay = () {
+          print("onLaunch: $message");
           String payload;
           if (message.containsKey('data')) {
             // Handle data message
@@ -146,8 +136,21 @@ class _AppState extends State<App> {
             payload = jsonEncode(data);
           }
           _presenter.onSelectNotification(payload);
-        },
-      );
+        };
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+        String payload;
+        if (message.containsKey('data')) {
+          // Handle data message
+          final dynamic data = message['data'];
+          payload = jsonEncode(data);
+        }
+        _presenter.onSelectNotification(payload);
+      },
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await _firebaseMessaging
           .requestNotificationPermissions(const IosNotificationSettings(
         sound: true,
@@ -190,8 +193,6 @@ class _AppState extends State<App> {
       return _buildPreProcessingWidget(context);
     }
 
-    NotiHelper.init(_presenter.onDidReceiveLocalNotification,
-        _presenter.onSelectNotification);
     // NotiHelper.init(_presenter.onDidReceiveLocalNotification,
     //     _presenter.onSelectNotification);
     // _firebaseMessaging.configure(
