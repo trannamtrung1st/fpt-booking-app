@@ -132,6 +132,16 @@ class _AppState extends State<App> {
         payload: payload);
   }
 
+  void _handleIOSGeneralMessage(Map<String, dynamic> message) {
+    String payload = jsonEncode(message);
+
+    final dynamic notification = message['aps']['alert'];
+    NotiHelper.show(
+        title: notification["title"],
+        body: notification["body"],
+        payload: payload);
+  }
+
   @override
   Widget build(BuildContext context) {
     print("build ${this.runtimeType}");
@@ -145,14 +155,17 @@ class _AppState extends State<App> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
-        _handleGeneralMessage(message);
+        Platform.isIOS
+            ? _handleIOSGeneralMessage(message)
+            : _handleGeneralMessage(message);
       },
-      onBackgroundMessage: handleBackgroundFirebaseMessage,
+      onBackgroundMessage:
+          Platform.isIOS ? null : handleBackgroundFirebaseMessage,
       onLaunch: (Map<String, dynamic> message) async {
         onLaunchDelay = () {
           print("onLaunch: $message");
-          String payload;
-          if (message.containsKey('data')) {
+          String payload = jsonEncode(message);
+          if (Platform.isAndroid && message.containsKey('data')) {
             // Handle data message
             final dynamic data = message['data'];
             payload = jsonEncode(data);
@@ -162,8 +175,8 @@ class _AppState extends State<App> {
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
-        String payload;
-        if (message.containsKey('data')) {
+        String payload = jsonEncode(message);
+        if (Platform.isAndroid && message.containsKey('data')) {
           // Handle data message
           final dynamic data = message['data'];
           payload = jsonEncode(data);
@@ -171,7 +184,11 @@ class _AppState extends State<App> {
         _presenter.onSelectNotification(payload);
       },
     );
-
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(
+              sound: true, badge: true, alert: true, provisional: false));
+    });
     return Consumer<LoginContext>(
       builder: (context, loginContext, child) {
         this.loginContext = loginContext;
@@ -300,13 +317,15 @@ class _AppPresenter {
     if (payload != null && payload.isNotEmpty) {
       print('notification payload: ' + payload);
       var data = jsonDecode(payload);
-      var ev = data["event"] as String;
-      if (ev.startsWith("Booking")) {
-        var bId = data["id"];
-        view.navigateToBookingDetail(int.parse(bId));
-      } else if (ev.startsWith("Room")) {
-        var rCode = data["code"];
-        view.navigateToRoomDetail(rCode);
+      if (data.containsKey("event")) {
+        var ev = data["event"] as String;
+        if (ev.startsWith("Booking")) {
+          var bId = data["id"];
+          view.navigateToBookingDetail(int.parse(bId));
+        } else if (ev.startsWith("Room")) {
+          var rCode = data["code"];
+          view.navigateToRoomDetail(rCode);
+        }
       }
     }
   }

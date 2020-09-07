@@ -410,8 +410,9 @@ class _BookingViewPresenter {
 
   void handleAfterSearch(BuildContext context) {
     view.setShowingViewState();
-    if (view.rooms != null && (view.pageContext.currentTabWidgetType == null ||
-        BookingView == view.pageContext.currentTabWidgetType))
+    if (view.rooms != null &&
+        (view.pageContext.currentTabWidgetType == null ||
+            BookingView == view.pageContext.currentTabWidgetType))
       Scrollable.ensureVisible(view.roomCardsKey.currentContext,
           duration: Duration(seconds: 1));
   }
@@ -429,14 +430,19 @@ class _BookingViewPresenter {
   }
 
   void onFromTimePressed() {
-    view.changeFromTime(Duration(hours: 7));
+    if (view._fromTime == null) {
+      view.changeFromTime(Duration(hours: 7));
+    }
     view.showTimePicker(view._fromTime, (dur) {
       view.changeFromTime(dur);
     });
   }
 
   void onToTimePressed() {
-    view.changeToTime(Duration(hours: 7));
+    if (view._toTime == null) {
+      view.changeToTime(Duration(hours: 7));
+    }
+
     view.showTimePicker(view._toTime, (dur) {
       view.changeToTime(dur);
     });
