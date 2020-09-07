@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:data_connection_checker/data_connection_checker.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fptbooking_app/contexts/login_context.dart';
@@ -42,6 +43,8 @@ Future<dynamic> handleBackgroundFirebaseMessage(Map<String, dynamic> message) {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   //static init
   MainNav.init();
 
@@ -111,6 +114,52 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     _presenter = _AppPresenter(view: this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+          print("onMessage: $message");
+          _handleGeneralMessage(message);
+        },
+        onBackgroundMessage:
+            Platform.isIOS ? null : handleBackgroundFirebaseMessage,
+        //onBackgroundMessage: null,
+
+        onLaunch: (Map<String, dynamic> message) async {
+          onLaunchDelay = () {
+            print("onLaunch: $message");
+            String payload;
+            if (message.containsKey('data')) {
+              // Handle data message
+              final dynamic data = message['data'];
+              payload = jsonEncode(data);
+            }
+            _presenter.onSelectNotification(payload);
+          };
+        },
+        onResume: (Map<String, dynamic> message) async {
+          print("onResume: $message");
+          String payload;
+          if (message.containsKey('data')) {
+            // Handle data message
+            final dynamic data = message['data'];
+            payload = jsonEncode(data);
+          }
+          _presenter.onSelectNotification(payload);
+        },
+      );
+      await _firebaseMessaging
+          .requestNotificationPermissions(const IosNotificationSettings(
+        sound: true,
+        badge: true,
+        alert: true,
+        provisional: true,
+      ));
+      _firebaseMessaging.onIosSettingsRegistered
+          .listen((IosNotificationSettings settings) {
+        print("Settings registered: $settings");
+      });
+    });
   }
 
   Future<void> showInvalidMessages(List<String> mess) {
@@ -124,6 +173,7 @@ class _AppState extends State<App> {
       // Handle data message
       final dynamic data = message['data'];
       payload = jsonEncode(data);
+      print('_handleGeneralMessage: payload - ' + payload);
     }
     final dynamic notification = message['notification'];
     NotiHelper.show(
@@ -142,35 +192,39 @@ class _AppState extends State<App> {
 
     NotiHelper.init(_presenter.onDidReceiveLocalNotification,
         _presenter.onSelectNotification);
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-        _handleGeneralMessage(message);
-      },
-      onBackgroundMessage: handleBackgroundFirebaseMessage,
-      onLaunch: (Map<String, dynamic> message) async {
-        onLaunchDelay = () {
-          print("onLaunch: $message");
-          String payload;
-          if (message.containsKey('data')) {
-            // Handle data message
-            final dynamic data = message['data'];
-            payload = jsonEncode(data);
-          }
-          _presenter.onSelectNotification(payload);
-        };
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-        String payload;
-        if (message.containsKey('data')) {
-          // Handle data message
-          final dynamic data = message['data'];
-          payload = jsonEncode(data);
-        }
-        _presenter.onSelectNotification(payload);
-      },
-    );
+    // NotiHelper.init(_presenter.onDidReceiveLocalNotification,
+    //     _presenter.onSelectNotification);
+    // _firebaseMessaging.configure(
+    //   onMessage: (Map<String, dynamic> message) async {
+    //     print("onMessage: $message");
+    //     _handleGeneralMessage(message);
+    //   },
+    //   onBackgroundMessage: handleBackgroundFirebaseMessage,
+    //   //onBackgroundMessage: null,
+    //
+    //   onLaunch: (Map<String, dynamic> message) async {
+    //     onLaunchDelay = () {
+    //       print("onLaunch: $message");
+    //       String payload;
+    //       if (message.containsKey('data')) {
+    //         // Handle data message
+    //         final dynamic data = message['data'];
+    //         payload = jsonEncode(data);
+    //       }
+    //       _presenter.onSelectNotification(payload);
+    //     };
+    //   },
+    //   onResume: (Map<String, dynamic> message) async {
+    //     print("onResume: $message");
+    //     String payload;
+    //     if (message.containsKey('data')) {
+    //       // Handle data message
+    //       final dynamic data = message['data'];
+    //       payload = jsonEncode(data);
+    //     }
+    //     _presenter.onSelectNotification(payload);
+    //   },
+    // );
 
     return Consumer<LoginContext>(
       builder: (context, loginContext, child) {

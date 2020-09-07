@@ -4,6 +4,7 @@ import 'package:fptbooking_app/app/refreshable.dart';
 
 class PageContext extends ChangeNotifier {
   Map<Type, Refreshable> _refreshableMap = {};
+  Type currentTabWidgetType;
 
   void setRefreshable(Type t, Refreshable r) {
     _refreshableMap[t] = r;

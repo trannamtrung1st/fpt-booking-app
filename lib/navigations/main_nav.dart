@@ -93,6 +93,7 @@ class _MainNavState extends State<MainNav> {
   int _state = TAB_CALENDAR;
 
   void changeTab(int tab) {
+    pageContext.currentTabWidgetType = _pageWidgets[_state].runtimeType;
     setState(() {
       _state = tab;
     });

@@ -232,9 +232,10 @@ class _LoginViewPresenter {
     _loginContext = view.loginContext;
   }
 
-  void _onSignInFinished(FirebaseUser user) async {
+  void _onSignInFinished(User user) async {
     if (user == null) return;
-    IdTokenResult fbTokenResult = await user.getIdToken(refresh: true);
+    //IdTokenResult fbTokenResult = await user.getIdToken(refresh: true);
+    IdTokenResult fbTokenResult = await user.getIdTokenResult(true);
     String fbToken = fbTokenResult.token;
     print(fbToken);
     var success = false;
@@ -288,7 +289,7 @@ class _LoginViewPresenter {
     view.showInvalidMessages(["Only @fpt.edu.vn is allowed"]);
   }
 
-  Future<FirebaseUser> _handleSignIn() async {
+  Future<User> _handleSignIn() async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     if (googleUser == null) {
       view.setShowingViewState();
@@ -297,13 +298,12 @@ class _LoginViewPresenter {
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    final FirebaseUser user =
-        (await _auth.signInWithCredential(credential)).user;
+    final User user = (await _auth.signInWithCredential(credential)).user;
     print("signed in " + user.displayName);
     return user;
   }
