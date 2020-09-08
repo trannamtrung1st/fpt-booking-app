@@ -442,6 +442,7 @@ class _BookingViewPresenter {
     if (view._toTime == null) {
       view.changeToTime(Duration(hours: 7));
     }
+
     view.showTimePicker(view._toTime, (dur) {
       view.changeToTime(dur);
     });
